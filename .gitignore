@@ -1,5 +1,9 @@
-# Go
+# =========================
+# Go build artifacts
+# =========================
 bin/
+build/
+dist/
 *.exe
 *.exe~
 *.dll
@@ -7,31 +11,69 @@ bin/
 *.dylib
 *.test
 *.out
-/vendor/
+coverage.out
 
-# Environment
+# Go workspace
+go.work
+go.work.sum
+
+# =========================
+# Environment variables
+# =========================
 .env
 .env.local
 .env.*.local
 
-# Cursor
-.cursor/temp/       # ignore AI scratch/temp files
-.cursor/cache/      # ignore AI cache
+# Example env files should be committed
+!.env.example
 
-# Migrations
-migrations/*.sql     # ignore raw migration SQL if you prefer, optional
-migrations/tmp/      # temporary migration files
+# =========================
+# Cursor (AI IDE)
+# =========================
+.cursor/*
+!.cursor/rules/
 
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
 # Scripts
-scripts/tmp/         # any temp scripts
-scripts/*.bak        # backup scripts
+# =========================
+scripts/tmp/
+scripts/*.bak
 
-# IDEs / Editor
+# =========================
+# Database
+# =========================
+*.sqlite
+*.sqlite3
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDEs / Editors
+# =========================
 .vscode/
 .idea/
 *.swp
-.DS_Store
+*.swo
 
-# Logs
-*.log
-logs/
+# =========================
+# Test artifacts
+# =========================
+coverage/
+*.coverprofile
