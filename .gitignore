@@ -11,12 +11,22 @@ bin/
 
 # Environment
 .env
+.env.local
+.env.*.local
 
 # Cursor
-.cursor/        # ignore AI scratch files
-.cursor/rules/  # commit this (project rules)
+.cursor/temp/       # ignore AI scratch/temp files
+.cursor/cache/      # ignore AI cache
 
-# IDEs
+# Migrations
+migrations/*.sql     # ignore raw migration SQL if you prefer, optional
+migrations/tmp/      # temporary migration files
+
+# Scripts
+scripts/tmp/         # any temp scripts
+scripts/*.bak        # backup scripts
+
+# IDEs / Editor
 .vscode/
 .idea/
 *.swp
@@ -24,3 +34,4 @@ bin/
 
 # Logs
 *.log
+logs/
