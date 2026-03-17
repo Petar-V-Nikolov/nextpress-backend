@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	userDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/domain"
+	"github.com/google/uuid"
 )
 
 type TokenProvider interface {
@@ -108,7 +109,6 @@ func (s *Service) Refresh(ctx context.Context, refreshToken string) (access, ref
 	return access, refresh, nil
 }
 
-// generateUserID is a placeholder; swap to a real UUID generator when ready.
 func generateUserID() string {
-	return "" // TODO: implement, e.g. github.com/google/uuid
+	return uuid.New().String()
 }
