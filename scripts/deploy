@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Deployment script for Ubuntu server.
+# Each environment (production, staging, dev) can run on a different server.
+# Use one project folder per environment on that server (e.g. /var/www/nextpress-backend-production).
+#
+# Usage (on server, from project root of the environment you are deploying):
+#   ./scripts/deploy              # deploy production (main branch)
+#   ./scripts/deploy production   # same
+#   ./scripts/deploy staging      # deploy staging branch
+#   ./scripts/deploy dev          # deploy dev branch
+
+set -euo pipefail
+
+ENV="${1:-production}"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+case "$ENV" in
+  production) BRANCH="main" ;;
+  staging)    BRANCH="staging" ;;
+  dev)        BRANCH="dev" ;;
+  *)
+    echo -e "\033[31mUnknown environment: $ENV. Use: production, staging, or dev.\033[0m"
+    exit 1
+    ;;
+esac
+
+SERVICE_NAME="nextpress-backend@${ENV}"
+
+green() { echo -e "\033[32m$*\033[0m"; }
+red()   { echo -e "\033[31m$*\033[0m"; }
+yellow(){ echo -e "\033[33m$*\033[0m"; }
+
+cd "$ROOT_DIR"
+
+green "=== Deploying environment '$ENV' (branch '$BRANCH') to $(hostname) ==="
+
+if ! command -v go >/dev/null 2>&1; then
+  red "Go is not installed. Install Go before deploying."
+  exit 1
+fi
+
+if [[ ! -f .env ]]; then
+  red ".env not found. Create it with APP_PORT and DB_* variables."
+  exit 1
+fi
+
+# Default ports per environment (can be overridden by APP_PORT in .env).
+case "$ENV" in
+  production) DEFAULT_PORT=9090 ;;
+  staging)    DEFAULT_PORT=9091 ;;
+  dev)        DEFAULT_PORT=9092 ;;
+  *)          DEFAULT_PORT=9090 ;;
+esac
+
+APP_PORT="${APP_PORT:-$DEFAULT_PORT}"
+
+green "=== Fetching latest code ==="
+git fetch origin
+git checkout "$BRANCH"
+git pull origin "$BRANCH"
+
+green "=== Building server binary ==="
+go env -w CGO_ENABLED=0 >/dev/null 2>&1 || true
+go mod download
+mkdir -p bin
+go build -v -o bin/server ./cmd/api
+
+if systemctl list-units --type=service 2>/dev/null | grep -q "$SERVICE_NAME"; then
+  green "=== Restarting systemd service: $SERVICE_NAME ==="
+  sudo systemctl restart "$SERVICE_NAME"
+  sudo systemctl status "$SERVICE_NAME" --no-pager || true
+else
+  yellow "Systemd service '$SERVICE_NAME' not found."
+  yellow "You can run the server manually for now:"
+  echo ""
+  echo "  APP_PORT=$APP_PORT ./bin/server"
+  echo ""
+fi
+
+green "=== Deployment completed for '$ENV' (branch '$BRANCH') ==="
+

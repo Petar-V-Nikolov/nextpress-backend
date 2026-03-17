@@ -1,13 +1,13 @@
 ## nextpress-backend
 
-nextpress-backend is a **production-ready CMS backend** written in Go, designed as a **modular monolith** with a **global PostgreSQL database instance**, a **clean service layer**, and a future-proof **plugin system** (planned for later phases).
+nextpress-backend is a **production-ready CMS backend** written in Go, designed as a **modular monolith** with a **global PostgreSQL database instance**, a **clean service layer**, and a future-proof **plugin system** (implemented in later phases).
 
-This repository currently contains **Phase 1 – Project Foundation**:
+The current codebase includes the **foundation phase**:
 
 - Strict, opinionated folder structure
 - Application bootstrap with Gin
 - Environment and configuration loading
-- Deployment-oriented scripts and configuration skeletons
+- Deployment-oriented scripts and configuration skeletons (Makefile, systemd, Nginx)
 
 ### High-level architecture
 
@@ -15,13 +15,13 @@ This repository currently contains **Phase 1 – Project Foundation**:
 - **Global DB instance**: A single Postgres connection (via GORM) is initialized once and injected where needed to avoid duplicated connection logic.
 - **Service layer**: Thin HTTP handlers, reusable application services, and clear separation of concerns without over-engineered DDD layers.
 
-### Folder structure (Phase 1)
+### Folder structure
 
 ```text
 .
 ├── cmd/
-│   └── nextpress/
-│       └── main.go          # Application entrypoint
+│   └── api/
+│       └── main.go          # HTTP API entrypoint
 ├── internal/
 │   ├── config/              # Configuration loading and environment helpers
 │   ├── http/                # HTTP server setup (Gin engine, middlewares, routing)
@@ -30,34 +30,37 @@ This repository currently contains **Phase 1 – Project Foundation**:
 │   ├── logging/             # Centralized logger setup
 │   └── shared/              # Shared helpers (errors, responses, etc.)
 ├── deployments/
-│   ├── docker/
-│   │   ├── Dockerfile       # Production Docker image
-│   │   └── docker-compose.local.yml  # Local dev + Postgres
 │   └── configs/
-│       ├── app.local.yaml   # Local development defaults
-│       ├── app.dev.yaml     # Remote dev/staging defaults
-│       └── app.prod.yaml    # Production defaults
+│       ├── app.local.yaml            # Local development defaults
+│       ├── app.dev.yaml              # Remote dev/staging defaults
+│       └── app.prod.yaml             # Production defaults
+├── deploy/
+│   ├── nginx/                        # Nginx configs per environment
+│   └── systemd/                      # Systemd template unit
+├── docs/
+│   └── deployment/                   # Deployment guides (local/dev/staging/production)
 ├── scripts/
-│   ├── run_local.sh         # Local run helper
-│   ├── run_dev.sh           # Dev/staging run helper
-│   └── run_prod.sh          # Production entrypoint (for Docker / systemd)
-└── Makefile                 # Common developer tasks (build, run, test)
+│   ├── run_local.sh                  # Local run helper
+│   └── deploy                        # Ubuntu deploy script (systemd + Nginx)
+└── Makefile                          # Common developer tasks (build, run, test, docker)
 ```
 
 > Later phases will populate `internal/modules` with concrete CMS features (auth, content, media, plugins, etc.).
 
-### Getting started (Phase 1)
+### Getting started
 
 #### Prerequisites
 
 - Go 1.26+
-- Docker & Docker Compose (for local Postgres)
+- PostgreSQL (for DB-backed phases)
 
-#### Local development (with Docker)
+#### Local development
 
 ```bash
-make up-local       # Start Postgres via docker-compose
-make run-local      # Run API locally with hot reload (once added) or plain go run
+cp .env.example .env
+go mod download
+make build
+make run    # or ./scripts/run_local.sh
 ```
 
 #### Configuration
@@ -65,12 +68,21 @@ make run-local      # Run API locally with hot reload (once added) or plain go r
 - `.env` (optional) – for local overrides, loaded via `godotenv`.
 - `deployments/configs/app.<env>.yaml` – environment-specific defaults.
 
-Key environment variables (Phase 1):
+Key environment variables (Phase 1) – see `.env.example`:
 
-- `APP_ENV` – one of `local`, `dev`, `prod` (default: `local`)
-- `APP_HTTP_PORT` – port for the HTTP server (default: `8080`)
+- `APP_NAME` – application name (default: `NextPress`)
+- `APP_ENV` – e.g. `development`, `staging`, `production` (default: `development`)
+- `APP_PORT` – port for the HTTP server (default: `9090`)
 
 Database, JWT, and module-level configuration will be introduced in later phases.
+
+For full deployment instructions (Ubuntu + systemd + Nginx, similar to Xplorer Hub), see:
+
+- `docs/DEPLOYMENT.md`
+- `docs/deployment/production.md`
+- `docs/deployment/staging.md`
+- `docs/deployment/dev.md`
+- `docs/deployment/local.md`
 
 # NextPress Backend
 
