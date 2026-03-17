@@ -29,11 +29,6 @@ The current codebase includes the **foundation phase**:
 │   ├── modules/             # Feature modules (content, auth, media, etc.)
 │   ├── logging/             # Centralized logger setup
 │   └── shared/              # Shared helpers (errors, responses, etc.)
-├── deployments/
-│   └── configs/
-│       ├── app.local.yaml            # Local development defaults
-│       ├── app.dev.yaml              # Remote dev/staging defaults
-│       └── app.prod.yaml             # Production defaults
 ├── deploy/
 │   ├── nginx/                        # Nginx configs per environment
 │   └── systemd/                      # Systemd template unit
