@@ -76,7 +76,7 @@ Key environment variables (Phase 1) – see `.env.example`:
 
 Database, JWT, and module-level configuration will be introduced in later phases.
 
-For full deployment instructions (Ubuntu + systemd + Nginx, similar to Xplorer Hub), see:
+For full deployment instructions (Ubuntu + systemd + Nginx), see:
 
 - `docs/DEPLOYMENT.md`
 - `docs/deployment/production.md`
@@ -115,6 +115,19 @@ internal/modules → domain modules
 
 pkg → reusable utilities
 
-## Development
+## Git workflow
 
-Run server:
+- Long-lived branches:
+  - `dev` – active development and integration testing.
+  - `staging` – pre-production testing.
+  - `main` – production.
+- Promotion flow:
+  - New work is done on feature branches off `dev`, then merged into `dev`.
+  - To promote: merge `dev` into `staging`, push; merge `staging` into `main`, push.
+  - To keep branches in sync: merge `main` back into `staging` and `dev`, push.
+- Server mappings (recommended):
+  - `/var/www/nextpress-backend-dev` → tracks `dev` → service `nextpress-backend@dev`.
+  - `/var/www/nextpress-backend-staging` → tracks `staging` → service `nextpress-backend@staging`.
+  - `/var/www/nextpress-backend-production` → tracks `main` → service `nextpress-backend@production`.
+
+See `docs/DEPLOYMENT.md` for how this ties into the deploy script and systemd units.

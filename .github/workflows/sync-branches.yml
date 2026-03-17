@@ -1,0 +1,39 @@
+# After main is updated (PR staging→main merged), sync dev and staging with main.
+# PR flow stays manual: feature→dev, dev→staging, staging→main.
+# This only fixes "behind main" by merging main back into dev and staging.
+name: Sync branches
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    name: Sync dev and staging with main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into dev
+        run: |
+          git checkout dev
+          git merge origin/main -m "chore: sync dev with main"
+          git push origin dev
+
+      - name: Merge main into staging
+        run: |
+          git checkout staging
+          git merge origin/main -m "chore: sync staging with main"
+          git push origin staging
+
