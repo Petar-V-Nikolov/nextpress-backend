@@ -1,0 +1,5 @@
+app:
+  name: NextPress
+  env: dev
+  port: 8080
+
