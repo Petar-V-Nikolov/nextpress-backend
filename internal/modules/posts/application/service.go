@@ -153,6 +153,40 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 	return s.repo.Delete(ctx, postDomain.PostID(id))
 }
 
+func (s *Service) SetCategories(ctx context.Context, postID string, categoryIDs []string) error {
+	postID = strings.TrimSpace(postID)
+	if postID == "" {
+		return ErrPostNotFound
+	}
+
+	p, err := s.repo.FindByID(ctx, postDomain.PostID(postID))
+	if err != nil {
+		return err
+	}
+	if p == nil {
+		return ErrPostNotFound
+	}
+
+	return s.repo.SetCategories(ctx, postDomain.PostID(postID), categoryIDs)
+}
+
+func (s *Service) SetTags(ctx context.Context, postID string, tagIDs []string) error {
+	postID = strings.TrimSpace(postID)
+	if postID == "" {
+		return ErrPostNotFound
+	}
+
+	p, err := s.repo.FindByID(ctx, postDomain.PostID(postID))
+	if err != nil {
+		return err
+	}
+	if p == nil {
+		return ErrPostNotFound
+	}
+
+	return s.repo.SetTags(ctx, postDomain.PostID(postID), tagIDs)
+}
+
 func normalizeSlug(slug string) string {
 	s := strings.ToLower(strings.TrimSpace(slug))
 	s = strings.ReplaceAll(s, " ", "-")

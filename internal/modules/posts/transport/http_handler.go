@@ -47,6 +47,17 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup, auth gin.HandlerFunc, requ
 		requirePerm("posts:write"),
 		h.delete,
 	)
+
+	posts.PUT("/:id/categories",
+		auth,
+		requirePerm("posts:write"),
+		h.setCategories,
+	)
+	posts.PUT("/:id/tags",
+		auth,
+		requirePerm("posts:write"),
+		h.setTags,
+	)
 }
 
 type createPostRequest struct {
@@ -151,6 +162,52 @@ func (h *Handler) delete(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
 		return
 	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+type setIDsRequest struct {
+	IDs []string `json:"ids" binding:"required"`
+}
+
+func (h *Handler) setCategories(c *gin.Context) {
+	id := c.Param("id")
+
+	var req setIDsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_payload"})
+		return
+	}
+
+	if err := h.svc.SetCategories(c.Request.Context(), id, req.IDs); err != nil {
+		if err == postApp.ErrPostNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func (h *Handler) setTags(c *gin.Context) {
+	id := c.Param("id")
+
+	var req setIDsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_payload"})
+		return
+	}
+
+	if err := h.svc.SetTags(c.Request.Context(), id, req.IDs); err != nil {
+		if err == postApp.ErrPostNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 

@@ -9,5 +9,9 @@ type Repository interface {
 	List(ctx context.Context, includeDeleted bool, limit int, offset int) ([]Post, error)
 	Update(ctx context.Context, post *Post) error
 	Delete(ctx context.Context, id PostID) error
+
+	// Taxonomy assignments
+	SetCategories(ctx context.Context, postID PostID, categoryIDs []string) error
+	SetTags(ctx context.Context, postID PostID, tagIDs []string) error
 }
 

@@ -71,6 +71,8 @@ This document describes the planned phases for nextpress-backend.
   - `POST /v1/posts` (requires `posts:write`)
   - `PUT /v1/posts/:id` (requires `posts:write`)
   - `DELETE /v1/posts/:id` (requires `posts:write`)
+  - `PUT /v1/posts/:id/categories` (requires `posts:write`)
+  - `PUT /v1/posts/:id/tags` (requires `posts:write`)
 - Pages: schema + basic CRUD API exists (RBAC-protected):
   - `GET /v1/pages` (requires `pages:read`)
   - `GET /v1/pages/:id` (requires `pages:read`)

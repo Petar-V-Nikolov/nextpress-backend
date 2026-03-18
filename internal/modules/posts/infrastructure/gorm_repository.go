@@ -6,6 +6,7 @@ import (
 
 	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type gormPost struct {
@@ -100,6 +101,68 @@ func (r *GormRepository) Delete(ctx context.Context, id postDomain.PostID) error
 	return r.db.WithContext(ctx).
 		Where("id = ?", string(id)).
 		Delete(&gormPost{}).Error
+}
+
+type gormPostCategory struct {
+	PostID     string `gorm:"column:post_id;type:uuid;primaryKey"`
+	CategoryID string `gorm:"column:category_id;type:uuid;primaryKey"`
+}
+
+func (gormPostCategory) TableName() string { return "post_categories" }
+
+type gormPostTag struct {
+	PostID string `gorm:"column:post_id;type:uuid;primaryKey"`
+	TagID  string `gorm:"column:tag_id;type:uuid;primaryKey"`
+}
+
+func (gormPostTag) TableName() string { return "post_tags" }
+
+func (r *GormRepository) SetCategories(ctx context.Context, postID postDomain.PostID, categoryIDs []string) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("post_id = ?", string(postID)).Delete(&gormPostCategory{}).Error; err != nil {
+			return err
+		}
+		if len(categoryIDs) == 0 {
+			return nil
+		}
+
+		rows := make([]gormPostCategory, 0, len(categoryIDs))
+		for _, id := range categoryIDs {
+			if id == "" {
+				continue
+			}
+			rows = append(rows, gormPostCategory{PostID: string(postID), CategoryID: id})
+		}
+		if len(rows) == 0 {
+			return nil
+		}
+
+		return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&rows).Error
+	})
+}
+
+func (r *GormRepository) SetTags(ctx context.Context, postID postDomain.PostID, tagIDs []string) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("post_id = ?", string(postID)).Delete(&gormPostTag{}).Error; err != nil {
+			return err
+		}
+		if len(tagIDs) == 0 {
+			return nil
+		}
+
+		rows := make([]gormPostTag, 0, len(tagIDs))
+		for _, id := range tagIDs {
+			if id == "" {
+				continue
+			}
+			rows = append(rows, gormPostTag{PostID: string(postID), TagID: id})
+		}
+		if len(rows) == 0 {
+			return nil
+		}
+
+		return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&rows).Error
+	})
 }
 
 func toDomain(m *gormPost) *postDomain.Post {
