@@ -29,6 +29,9 @@ import (
 	rbacApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/application"
 	rbacInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/infrastructure"
 	rbacTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/transport"
+	taxApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/application"
+	taxInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/infrastructure"
+	taxTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/transport"
 	userInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/infrastructure"
 )
 
@@ -94,6 +97,9 @@ func main() {
 	pagesRepo := pagesInfra.NewGormRepository(db)
 	pagesService := pagesApp.NewService(pagesRepo)
 	pagesHandler := pagesTransport.NewHandler(pagesService)
+	taxRepo := taxInfra.NewGormRepository(db)
+	taxService := taxApp.NewService(taxRepo)
+	taxHandler := taxTransport.NewHandler(taxService)
 
 	// Use Gin as the central HTTP router; we keep the setup centralized in the
 	// server package so that future modules can register routes cleanly.
@@ -111,6 +117,11 @@ func main() {
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 	pagesHandler.RegisterRoutes(
+		v1,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	taxHandler.RegisterRoutes(
 		v1,
 		platformMiddleware.AuthRequired(jwtProvider),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },

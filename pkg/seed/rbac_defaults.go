@@ -12,6 +12,10 @@ const (
 	PermissionPostsWriteID = "00000000-0000-0000-0000-000000000202"
 	PermissionPagesReadID  = "00000000-0000-0000-0000-000000000203"
 	PermissionPagesWriteID = "00000000-0000-0000-0000-000000000204"
+	PermissionCategoriesReadID  = "00000000-0000-0000-0000-000000000205"
+	PermissionCategoriesWriteID = "00000000-0000-0000-0000-000000000206"
+	PermissionTagsReadID        = "00000000-0000-0000-0000-000000000207"
+	PermissionTagsWriteID       = "00000000-0000-0000-0000-000000000208"
 )
 
 func SeedRBACDefaults(db *gorm.DB) error {
@@ -60,6 +64,30 @@ func SeedRBACDefaults(db *gorm.DB) error {
 	).Error; err != nil {
 		return err
 	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionCategoriesReadID, "categories:read",
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionCategoriesWriteID, "categories:write",
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionTagsReadID, "tags:read",
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionTagsWriteID, "tags:write",
+	).Error; err != nil {
+		return err
+	}
 
 	// role_permissions links
 	if err := db.Exec(
@@ -95,6 +123,30 @@ func SeedRBACDefaults(db *gorm.DB) error {
 	if err := db.Exec(
 		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
 		RoleAdminID, PermissionPagesWriteID,
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+		RoleAdminID, PermissionCategoriesReadID,
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+		RoleAdminID, PermissionCategoriesWriteID,
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+		RoleAdminID, PermissionTagsReadID,
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+		RoleAdminID, PermissionTagsWriteID,
 	).Error; err != nil {
 		return err
 	}

@@ -77,6 +77,15 @@ This document describes the planned phases for nextpress-backend.
   - `POST /v1/pages` (requires `pages:write`)
   - `PUT /v1/pages/:id` (requires `pages:write`)
   - `DELETE /v1/pages/:id` (requires `pages:write`)
+- Taxonomy: categories and tags basic CRUD APIs exist (RBAC-protected):
+  - `GET /v1/categories` (requires `categories:read`)
+  - `POST /v1/categories` (requires `categories:write`)
+  - `PUT /v1/categories/:id` (requires `categories:write`)
+  - `DELETE /v1/categories/:id` (requires `categories:write`)
+  - `GET /v1/tags` (requires `tags:read`)
+  - `POST /v1/tags` (requires `tags:write`)
+  - `PUT /v1/tags/:id` (requires `tags:write`)
+  - `DELETE /v1/tags/:id` (requires `tags:write`)
 
 ---
 
