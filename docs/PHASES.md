@@ -63,6 +63,15 @@ This document describes the planned phases for nextpress-backend.
 - Provide CRUD APIs and relations for content.
 - Enable filtering, searching, and listing for content entities.
 
+**Current status:**
+
+- Posts: schema + basic CRUD API exists (RBAC-protected):
+  - `GET /v1/posts` (requires `posts:read`)
+  - `GET /v1/posts/:id` (requires `posts:read`)
+  - `POST /v1/posts` (requires `posts:write`)
+  - `PUT /v1/posts/:id` (requires `posts:write`)
+  - `DELETE /v1/posts/:id` (requires `posts:write`)
+
 ---
 
 ### Phase 5 – Plugin System

@@ -1,0 +1,143 @@
+package infrastructure
+
+import (
+	"context"
+	"time"
+
+	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"gorm.io/gorm"
+)
+
+type gormPost struct {
+	ID          string         `gorm:"column:id;type:uuid;primaryKey"`
+	AuthorID    string         `gorm:"column:author_id;type:uuid;not null;index"`
+	Title       string         `gorm:"column:title;not null"`
+	Slug        string         `gorm:"column:slug;not null;uniqueIndex"`
+	Content     string         `gorm:"column:content;not null"`
+	Status      string         `gorm:"column:status;not null"`
+	PublishedAt *time.Time     `gorm:"column:published_at"`
+	CreatedAt   time.Time      `gorm:"column:created_at;not null"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at;not null"`
+	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;index"`
+}
+
+func (gormPost) TableName() string { return "posts" }
+
+type GormRepository struct {
+	db *gorm.DB
+}
+
+func NewGormRepository(db *gorm.DB) *GormRepository {
+	return &GormRepository{db: db}
+}
+
+func (r *GormRepository) Create(ctx context.Context, post *postDomain.Post) error {
+	m := fromDomain(post)
+	if err := r.db.WithContext(ctx).Create(m).Error; err != nil {
+		return err
+	}
+	*post = *toDomain(m)
+	return nil
+}
+
+func (r *GormRepository) FindByID(ctx context.Context, id postDomain.PostID) (*postDomain.Post, error) {
+	var row gormPost
+	if err := r.db.WithContext(ctx).
+		Where("id = ?", string(id)).
+		First(&row).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toDomain(&row), nil
+}
+
+func (r *GormRepository) FindBySlug(ctx context.Context, slug string) (*postDomain.Post, error) {
+	var row gormPost
+	if err := r.db.WithContext(ctx).
+		Where("slug = ?", slug).
+		First(&row).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toDomain(&row), nil
+}
+
+func (r *GormRepository) List(ctx context.Context, includeDeleted bool, limit int, offset int) ([]postDomain.Post, error) {
+	q := r.db.WithContext(ctx).Model(&gormPost{}).Order("created_at DESC").Limit(limit).Offset(offset)
+	if includeDeleted {
+		q = q.Unscoped()
+	}
+
+	var rows []gormPost
+	if err := q.Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	out := make([]postDomain.Post, 0, len(rows))
+	for i := range rows {
+		p := toDomain(&rows[i])
+		out = append(out, *p)
+	}
+	return out, nil
+}
+
+func (r *GormRepository) Update(ctx context.Context, post *postDomain.Post) error {
+	m := fromDomain(post)
+	if err := r.db.WithContext(ctx).
+		Model(&gormPost{}).
+		Where("id = ?", m.ID).
+		Updates(m).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *GormRepository) Delete(ctx context.Context, id postDomain.PostID) error {
+	return r.db.WithContext(ctx).
+		Where("id = ?", string(id)).
+		Delete(&gormPost{}).Error
+}
+
+func toDomain(m *gormPost) *postDomain.Post {
+	var deletedAt *time.Time
+	if m.DeletedAt.Valid {
+		t := m.DeletedAt.Time
+		deletedAt = &t
+	}
+	return &postDomain.Post{
+		ID:          postDomain.PostID(m.ID),
+		AuthorID:    m.AuthorID,
+		Title:       m.Title,
+		Slug:        m.Slug,
+		Content:     m.Content,
+		Status:      postDomain.Status(m.Status),
+		PublishedAt: m.PublishedAt,
+		CreatedAt:   m.CreatedAt,
+		UpdatedAt:   m.UpdatedAt,
+		DeletedAt:   deletedAt,
+	}
+}
+
+func fromDomain(p *postDomain.Post) *gormPost {
+	var deleted gorm.DeletedAt
+	if p.DeletedAt != nil {
+		deleted = gorm.DeletedAt{Time: *p.DeletedAt, Valid: true}
+	}
+	return &gormPost{
+		ID:          string(p.ID),
+		AuthorID:    p.AuthorID,
+		Title:       p.Title,
+		Slug:        p.Slug,
+		Content:     p.Content,
+		Status:      string(p.Status),
+		PublishedAt: p.PublishedAt,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+		DeletedAt:   deleted,
+	}
+}
+
