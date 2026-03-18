@@ -23,6 +23,9 @@ import (
 	mediaApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/application"
 	mediaInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/infrastructure"
 	mediaTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/transport"
+	menusApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/application"
+	menusInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/infrastructure"
+	menusTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/transport"
 	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
 	pagesInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/infrastructure"
 	pagesTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/transport"
@@ -108,6 +111,9 @@ func main() {
 	mediaStorage := mediaInfra.NewLocalStorage(mediaCfg.StorageDir, mediaCfg.PublicBaseURL, mediaCfg.MaxUploadBytes)
 	mediaService := mediaApp.NewService(mediaRepo, mediaStorage)
 	mediaHandler := mediaTransport.NewHandler(mediaService)
+	menusRepo := menusInfra.NewGormRepository(db)
+	menusService := menusApp.NewService(menusRepo)
+	menusHandler := menusTransport.NewHandler(menusService)
 
 	// Use Gin as the central HTTP router; we keep the setup centralized in the
 	// server package so that future modules can register routes cleanly.
@@ -137,6 +143,11 @@ func main() {
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 	mediaHandler.RegisterRoutes(
+		v1,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	menusHandler.RegisterRoutes(
 		v1,
 		platformMiddleware.AuthRequired(jwtProvider),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },

@@ -93,6 +93,14 @@ This document describes the planned phases for nextpress-backend.
   - `GET /v1/media` (requires `media:read`)
   - `GET /v1/media/:id` (requires `media:read`)
   - uploads are served at `MEDIA_PUBLIC_BASE_URL` (default `/uploads`)
+- Menus: schema + basic APIs exist (RBAC-protected):
+  - `GET /v1/menus` (requires `menus:read`)
+  - `POST /v1/menus` (requires `menus:write`)
+  - `GET /v1/menus/:id` (requires `menus:read`)
+  - `PUT /v1/menus/:id` (requires `menus:write`)
+  - `DELETE /v1/menus/:id` (requires `menus:write`)
+  - `GET /v1/menus/:id/items` (requires `menus:read`)
+  - `PUT /v1/menus/:id/items` (requires `menus:write`)
 
 ---
 
