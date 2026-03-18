@@ -10,6 +10,8 @@ const (
 	PermissionRBACManageID = "00000000-0000-0000-0000-000000000102"
 	PermissionPostsReadID  = "00000000-0000-0000-0000-000000000201"
 	PermissionPostsWriteID = "00000000-0000-0000-0000-000000000202"
+	PermissionPagesReadID  = "00000000-0000-0000-0000-000000000203"
+	PermissionPagesWriteID = "00000000-0000-0000-0000-000000000204"
 )
 
 func SeedRBACDefaults(db *gorm.DB) error {
@@ -46,6 +48,18 @@ func SeedRBACDefaults(db *gorm.DB) error {
 	).Error; err != nil {
 		return err
 	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionPagesReadID, "pages:read",
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionPagesWriteID, "pages:write",
+	).Error; err != nil {
+		return err
+	}
 
 	// role_permissions links
 	if err := db.Exec(
@@ -69,6 +83,18 @@ func SeedRBACDefaults(db *gorm.DB) error {
 	if err := db.Exec(
 		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
 		RoleAdminID, PermissionPostsWriteID,
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+		RoleAdminID, PermissionPagesReadID,
+	).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(
+		`INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+		RoleAdminID, PermissionPagesWriteID,
 	).Error; err != nil {
 		return err
 	}

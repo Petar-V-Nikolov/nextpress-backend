@@ -20,6 +20,9 @@ import (
 	authApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
 	authInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/infrastructure"
 	authTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/transport"
+	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
+	pagesInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/infrastructure"
+	pagesTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/transport"
 	postsApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
 	postsInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/infrastructure"
 	postsTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/transport"
@@ -88,6 +91,9 @@ func main() {
 	postsRepo := postsInfra.NewGormRepository(db)
 	postsService := postsApp.NewService(postsRepo)
 	postsHandler := postsTransport.NewHandler(postsService)
+	pagesRepo := pagesInfra.NewGormRepository(db)
+	pagesService := pagesApp.NewService(pagesRepo)
+	pagesHandler := pagesTransport.NewHandler(pagesService)
 
 	// Use Gin as the central HTTP router; we keep the setup centralized in the
 	// server package so that future modules can register routes cleanly.
@@ -100,6 +106,11 @@ func main() {
 
 	// Content APIs (Phase 4)
 	postsHandler.RegisterRoutes(
+		v1,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	pagesHandler.RegisterRoutes(
 		v1,
 		platformMiddleware.AuthRequired(jwtProvider),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
