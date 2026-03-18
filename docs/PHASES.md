@@ -43,6 +43,13 @@ This document describes the planned phases for nextpress-backend.
 - RBAC database schema is present (`roles`, `permissions`, `user_roles`, `role_permissions`).
 - Authorization middleware exists (`RequirePermission`) and is wired with a sample protected route:
   - `GET /v1/admin/ping` requires `admin:ping`.
+- Admin RBAC APIs exist (guarded by `rbac:manage`):
+  - `GET /v1/admin/roles`, `POST /v1/admin/roles`
+  - `GET /v1/admin/permissions`, `POST /v1/admin/permissions`
+  - `POST /v1/admin/roles/:role_id/permissions` (grant permission to role)
+  - `POST /v1/admin/users/:user_id/roles` (assign role to user)
+- Optional one-time bootstrap endpoint (guarded by auth + env flag):
+  - `POST /v1/admin/bootstrap/claim-admin` (requires `RBAC_BOOTSTRAP_ENABLED=true`)
 
 ---
 

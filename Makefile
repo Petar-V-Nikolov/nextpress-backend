@@ -37,16 +37,19 @@ clean:
 	go clean
 
 # =============================================================================
-# Database Seeding (placeholders until migrations/seeds are added)
+# Database Seeding
 # =============================================================================
 
-## seed: Run seeders (not implemented yet)
+## seed: Run all seeders
 seed:
-	@echo "Seeders are not implemented yet for nextpress-backend."
+	go run ./cmd/seed
 
-## seed-build: Build the seed binary (not implemented yet)
+## seed-build: Build the seed binary (bin/seed)
 seed-build:
-	@echo "Seed binary is not implemented yet for nextpress-backend."
+	@echo "Building seed binary..."
+	mkdir -p bin
+	go build -o bin/$(SEED_BINARY) ./cmd/seed
+	@echo "Done."
 
 # =============================================================================
 # Database Migrations (placeholders until migrations are added)

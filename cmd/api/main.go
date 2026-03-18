@@ -20,7 +20,9 @@ import (
 	authApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
 	authInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/infrastructure"
 	authTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/transport"
+	rbacApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/application"
 	rbacInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/infrastructure"
+	rbacTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/transport"
 	userInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/infrastructure"
 )
 
@@ -51,6 +53,7 @@ func main() {
 	appCfg := config.LoadAppConfig()
 	dbCfg := config.LoadDBConfig()
 	jwtCfg := config.LoadJWTConfig()
+	rbacCfg := config.LoadRBACConfig()
 
 	// Initialize a single database connection for the lifetime of the process.
 	// This avoids connection storms and keeps pooling behaviour predictable.
@@ -76,6 +79,9 @@ func main() {
 	authService := authApp.NewService(userRepo, jwtProvider, passwordHasher)
 	authHandler := authTransport.NewHandler(authService)
 	permissionChecker := rbacInfra.NewGormPermissionChecker(db)
+	rbacRepo := rbacInfra.NewGormRepository(db)
+	rbacService := rbacApp.NewService(rbacRepo)
+	rbacHandler := rbacTransport.NewHandler(rbacService)
 
 	// Use Gin as the central HTTP router; we keep the setup centralized in the
 	// server package so that future modules can register routes cleanly.
@@ -89,12 +95,49 @@ func main() {
 	// Phase 3: example of authorization middleware on protected routes.
 	admin := v1.Group("/admin")
 	admin.Use(platformMiddleware.AuthRequired(jwtProvider))
+
+	// RBAC admin APIs (Phase 3)
+	adminManagement := admin.Group("")
+	adminManagement.Use(platformMiddleware.RequirePermission(permissionChecker, "rbac:manage"))
+	rbacHandler.RegisterRoutes(adminManagement)
+
 	admin.GET("/ping",
 		platformMiddleware.RequirePermission(permissionChecker, "admin:ping"),
 		func(c *gin.Context) {
 			c.JSON(200, gin.H{"ok": true})
 		},
 	)
+
+	// One-time RBAC bootstrap (explicitly opt-in).
+	// This solves the "chicken-and-egg" problem of needing `rbac:manage` to grant `rbac:manage`.
+	if rbacCfg.BootstrapEnabled {
+		admin.POST("/bootstrap/claim-admin", func(c *gin.Context) {
+			var existing int64
+			if err := db.WithContext(c.Request.Context()).Table("user_roles").Count(&existing).Error; err != nil {
+				c.JSON(500, gin.H{"error": "internal_error"})
+				return
+			}
+			if existing > 0 {
+				c.JSON(409, gin.H{"error": "bootstrap_already_completed"})
+				return
+			}
+
+			userID, _ := c.Get(platformMiddleware.ContextUserIDKey)
+			uid, _ := userID.(string)
+			if uid == "" {
+				c.JSON(401, gin.H{"error": "invalid_user_context"})
+				return
+			}
+
+			// Seeded admin role ID from seeder `pkg/seed` (run `make seed` / `go run ./cmd/seed`).
+			if err := rbacService.AssignRoleToUser(c.Request.Context(), uid, "00000000-0000-0000-0000-000000000001"); err != nil {
+				c.JSON(500, gin.H{"error": "internal_error"})
+				return
+			}
+
+			c.JSON(200, gin.H{"ok": true})
+		})
+	}
 
 	// The Server holds the application configuration and shared dependencies
 	// such as the database handle. Additional modules will be layered on top
