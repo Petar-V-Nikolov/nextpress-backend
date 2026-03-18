@@ -29,6 +29,11 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup, auth gin.HandlerFunc, requ
 	pages.DELETE("/:id", auth, requirePerm("pages:write"), h.delete)
 }
 
+func (h *Handler) RegisterPublicRoutes(rg *gin.RouterGroup) {
+	pages := rg.Group("/pages")
+	pages.GET("/:slug", h.publicGetBySlug)
+}
+
 type createPageRequest struct {
 	Title   string `json:"title" binding:"required"`
 	Slug    string `json:"slug" binding:"required"`
@@ -98,6 +103,20 @@ func (h *Handler) list(c *gin.Context) {
 		out = append(out, pageToJSON(&p))
 	}
 	c.JSON(http.StatusOK, gin.H{"pages": out})
+}
+
+func (h *Handler) publicGetBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+	p, err := h.svc.PublicGetBySlug(c.Request.Context(), slug)
+	if err != nil {
+		if err == pageApp.ErrPageNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+	c.JSON(http.StatusOK, pageToJSON(p))
 }
 
 type updatePageRequest struct {

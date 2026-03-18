@@ -126,41 +126,45 @@ func main() {
 	v1 := engine.Group("/v1")
 	authHandler.RegisterRoutes(v1)
 
-	// Content APIs (Phase 4)
-	postsHandler.RegisterRoutes(
-		v1,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
-	pagesHandler.RegisterRoutes(
-		v1,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
-	taxHandler.RegisterRoutes(
-		v1,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
-	mediaHandler.RegisterRoutes(
-		v1,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
-	menusHandler.RegisterRoutes(
-		v1,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
+	// Public APIs (Phase 4): published content, no auth.
+	postsHandler.RegisterPublicRoutes(v1)
+	pagesHandler.RegisterPublicRoutes(v1)
+	menusHandler.RegisterPublicRoutes(v1)
 
 	// Serve uploads in local/dev mode. In production, prefer Nginx for static files.
 	if mediaCfg.PublicBaseURL != "" && mediaCfg.PublicBaseURL[0] == '/' {
 		engine.StaticFS(mediaCfg.PublicBaseURL, gin.Dir(mediaCfg.StorageDir, false))
 	}
 
-	// Phase 3: example of authorization middleware on protected routes.
+	// Admin/content APIs (Phase 3–4): protected, used by CMS/admin UI.
 	admin := v1.Group("/admin")
 	admin.Use(platformMiddleware.AuthRequired(jwtProvider))
+
+	postsHandler.RegisterRoutes(
+		admin,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	pagesHandler.RegisterRoutes(
+		admin,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	taxHandler.RegisterRoutes(
+		admin,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	mediaHandler.RegisterRoutes(
+		admin,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
+	menusHandler.RegisterRoutes(
+		admin,
+		platformMiddleware.AuthRequired(jwtProvider),
+		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
+	)
 
 	// RBAC admin APIs (Phase 3)
 	adminManagement := admin.Group("")

@@ -70,6 +70,25 @@ func (s *Service) GetMenu(ctx context.Context, id string) (*menuDomain.Menu, err
 	return m, nil
 }
 
+func (s *Service) PublicGetMenuBySlug(ctx context.Context, slug string) (*menuDomain.Menu, []menuDomain.MenuItem, error) {
+	slug = strings.TrimSpace(slug)
+	if slug == "" {
+		return nil, nil, ErrNotFound
+	}
+	m, err := s.repo.FindMenuBySlug(ctx, slug)
+	if err != nil {
+		return nil, nil, err
+	}
+	if m == nil {
+		return nil, nil, ErrNotFound
+	}
+	items, err := s.repo.ListMenuItems(ctx, m.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+	return m, items, nil
+}
+
 func (s *Service) UpdateMenu(ctx context.Context, id, name, slug string) (*menuDomain.Menu, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {

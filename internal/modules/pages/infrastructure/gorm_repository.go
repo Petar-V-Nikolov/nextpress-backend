@@ -66,6 +66,20 @@ func (r *GormRepository) FindBySlug(ctx context.Context, slug string) (*pageDoma
 	return toDomain(&row), nil
 }
 
+func (r *GormRepository) FindPublishedBySlug(ctx context.Context, slug string) (*pageDomain.Page, error) {
+	var row gormPage
+	if err := r.db.WithContext(ctx).
+		Where("slug = ?", slug).
+		Where("status = ?", string(pageDomain.StatusPublished)).
+		First(&row).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toDomain(&row), nil
+}
+
 func (r *GormRepository) List(ctx context.Context, includeDeleted bool, limit int, offset int) ([]pageDomain.Page, error) {
 	return r.ListFiltered(ctx, includeDeleted, limit, offset, "", "", "")
 }

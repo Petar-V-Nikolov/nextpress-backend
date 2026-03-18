@@ -88,6 +88,23 @@ func (r *GormRepository) FindMenuByID(ctx context.Context, id menuDomain.MenuID)
 	}, nil
 }
 
+func (r *GormRepository) FindMenuBySlug(ctx context.Context, slug string) (*menuDomain.Menu, error) {
+	var row gormMenu
+	if err := r.db.WithContext(ctx).Where("slug = ?", slug).First(&row).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &menuDomain.Menu{
+		ID:        menuDomain.MenuID(row.ID),
+		Name:      row.Name,
+		Slug:      row.Slug,
+		CreatedAt: row.CreatedAt,
+		UpdatedAt: row.UpdatedAt,
+	}, nil
+}
+
 func (r *GormRepository) UpdateMenu(ctx context.Context, m *menuDomain.Menu) error {
 	row := gormMenu{
 		ID:        string(m.ID),

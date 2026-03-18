@@ -7,6 +7,7 @@ type Repository interface {
 	CreateMenu(ctx context.Context, m *Menu) error
 	ListMenus(ctx context.Context, limit, offset int) ([]Menu, error)
 	FindMenuByID(ctx context.Context, id MenuID) (*Menu, error)
+	FindMenuBySlug(ctx context.Context, slug string) (*Menu, error)
 	UpdateMenu(ctx context.Context, m *Menu) error
 	DeleteMenu(ctx context.Context, id MenuID) error
 

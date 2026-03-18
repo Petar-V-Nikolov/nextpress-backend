@@ -110,6 +110,34 @@ func (s *Service) ListFiltered(ctx context.Context, limit, offset int, status st
 	return s.repo.ListFiltered(ctx, false, limit, offset, status, authorID, q)
 }
 
+func (s *Service) PublicList(ctx context.Context, limit, offset int, q string, categoryID string, tagID string) ([]postDomain.Post, error) {
+	if limit <= 0 || limit > 100 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	q = strings.TrimSpace(q)
+	categoryID = strings.TrimSpace(categoryID)
+	tagID = strings.TrimSpace(tagID)
+	return s.repo.ListPublished(ctx, limit, offset, q, categoryID, tagID)
+}
+
+func (s *Service) PublicGetBySlug(ctx context.Context, slug string) (*postDomain.Post, error) {
+	slug = strings.TrimSpace(slug)
+	if slug == "" {
+		return nil, ErrPostNotFound
+	}
+	p, err := s.repo.FindPublishedBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+	if p == nil {
+		return nil, ErrPostNotFound
+	}
+	return p, nil
+}
+
 func (s *Service) Update(ctx context.Context, id, title, slug, content, status string) (*postDomain.Post, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {

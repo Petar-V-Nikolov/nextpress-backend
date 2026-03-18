@@ -60,6 +60,12 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup, auth gin.HandlerFunc, requ
 	)
 }
 
+func (h *Handler) RegisterPublicRoutes(rg *gin.RouterGroup) {
+	posts := rg.Group("/posts")
+	posts.GET("", h.publicList)
+	posts.GET("/:slug", h.publicGetBySlug)
+}
+
 type createPostRequest struct {
 	Title   string `json:"title" binding:"required"`
 	Slug    string `json:"slug" binding:"required"`
@@ -129,6 +135,41 @@ func (h *Handler) list(c *gin.Context) {
 		out = append(out, postToJSON(&p))
 	}
 	c.JSON(http.StatusOK, gin.H{"posts": out})
+}
+
+func (h *Handler) publicList(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	offset, _ := strconv.Atoi(c.Query("offset"))
+	q := c.Query("q")
+	categoryID := c.Query("category_id")
+	tagID := c.Query("tag_id")
+
+	posts, err := h.svc.PublicList(c.Request.Context(), limit, offset, q, categoryID, tagID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+
+	out := make([]gin.H, 0, len(posts))
+	for i := range posts {
+		p := posts[i]
+		out = append(out, postToJSON(&p))
+	}
+	c.JSON(http.StatusOK, gin.H{"posts": out})
+}
+
+func (h *Handler) publicGetBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+	p, err := h.svc.PublicGetBySlug(c.Request.Context(), slug)
+	if err != nil {
+		if err == postApp.ErrPostNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+	c.JSON(http.StatusOK, postToJSON(p))
 }
 
 type updatePostRequest struct {

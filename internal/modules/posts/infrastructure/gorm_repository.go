@@ -101,6 +101,55 @@ func (r *GormRepository) ListFiltered(ctx context.Context, includeDeleted bool, 
 	return out, nil
 }
 
+func (r *GormRepository) ListPublished(ctx context.Context, limit int, offset int, q string, categoryID string, tagID string) ([]postDomain.Post, error) {
+	dbq := r.db.WithContext(ctx).
+		Model(&gormPost{}).
+		Where("status = ?", string(postDomain.StatusPublished)).
+		Order("published_at DESC").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset)
+
+	if q != "" {
+		like := "%" + q + "%"
+		dbq = dbq.Where("(title ILIKE ? OR content ILIKE ?)", like, like)
+	}
+	if categoryID != "" {
+		dbq = dbq.Joins("JOIN post_categories pc ON pc.post_id = posts.id").
+			Where("pc.category_id = ?", categoryID)
+	}
+	if tagID != "" {
+		dbq = dbq.Joins("JOIN post_tags pt ON pt.post_id = posts.id").
+			Where("pt.tag_id = ?", tagID)
+	}
+
+	var rows []gormPost
+	if err := dbq.Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	out := make([]postDomain.Post, 0, len(rows))
+	for i := range rows {
+		p := toDomain(&rows[i])
+		out = append(out, *p)
+	}
+	return out, nil
+}
+
+func (r *GormRepository) FindPublishedBySlug(ctx context.Context, slug string) (*postDomain.Post, error) {
+	var row gormPost
+	if err := r.db.WithContext(ctx).
+		Where("slug = ?", slug).
+		Where("status = ?", string(postDomain.StatusPublished)).
+		First(&row).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toDomain(&row), nil
+}
+
 func (r *GormRepository) Update(ctx context.Context, post *postDomain.Post) error {
 	m := fromDomain(post)
 	if err := r.db.WithContext(ctx).

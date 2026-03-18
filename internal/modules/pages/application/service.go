@@ -110,6 +110,21 @@ func (s *Service) ListFiltered(ctx context.Context, limit, offset int, status st
 	return s.repo.ListFiltered(ctx, false, limit, offset, status, authorID, q)
 }
 
+func (s *Service) PublicGetBySlug(ctx context.Context, slug string) (*pageDomain.Page, error) {
+	slug = strings.TrimSpace(slug)
+	if slug == "" {
+		return nil, ErrPageNotFound
+	}
+	p, err := s.repo.FindPublishedBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+	if p == nil {
+		return nil, ErrPageNotFound
+	}
+	return p, nil
+}
+
 func (s *Service) Update(ctx context.Context, id, title, slug, content, status string) (*pageDomain.Page, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {
