@@ -4,41 +4,71 @@ import (
 	"context"
 
 	pluginsDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/domain"
+	platformHooks "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/hooks"
 )
 
 // HookRegistry is the in-process registry for hook invocations.
-// Phase 5 will register real plugin-backed hook implementations; A0 only
-// provides a no-op registry with the calling infrastructure.
+// Handlers are invoked in registration order (typically one slot per enabled
+// plugin row from the database). Phase 5 can replace noopPluginSlot with real
+// implementations without changing the posts service contract.
 type HookRegistry struct {
-	// In later phases we will store enabled plugin hook implementations here.
+	chain []pluginsDomain.PostHooks
 }
 
 func NewHookRegistry() *HookRegistry {
-	return &HookRegistry{}
+	return &HookRegistry{chain: nil}
+}
+
+// RegisterPostHooks appends a hook implementation to the chain. Nil is ignored.
+func (r *HookRegistry) RegisterPostHooks(h pluginsDomain.PostHooks) {
+	if h == nil || r == nil {
+		return
+	}
+	r.chain = append(r.chain, h)
 }
 
 func (r *HookRegistry) BeforePostSave(ctx context.Context, postID string, slug string) error {
-	// No-op for A0.
+	for _, h := range r.chain {
+		if err := h.BeforePostSave(ctx, postID, slug); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func (r *HookRegistry) AfterPostSave(ctx context.Context, postID string, slug string) error {
-	// No-op for A0.
+	for _, h := range r.chain {
+		if err := h.AfterPostSave(ctx, postID, slug); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 var _ pluginsDomain.PostHooks = (*HookRegistry)(nil)
 
-// BootstrapPostHooks reads enabled plugins and wires their hook implementations.
-// For A0, the registry is a no-op, but we still perform the enabled plugins
-// lookup so later phases can extend the mapping.
+var _ platformHooks.PostSave = (*HookRegistry)(nil)
+
+// noopPluginSlot reserves one hook chain entry per enabled plugin. Real
+// plugin logic will replace or wrap this in later Phase 5 work.
+type noopPluginSlot struct{}
+
+func (noopPluginSlot) BeforePostSave(_ context.Context, _ string, _ string) error { return nil }
+
+func (noopPluginSlot) AfterPostSave(_ context.Context, _ string, _ string) error { return nil }
+
+// BootstrapPostHooks reads enabled plugins and registers one chain slot per row.
 func BootstrapPostHooks(ctx context.Context, repo pluginsDomain.Repository) (*HookRegistry, int, error) {
 	enabled, err := repo.ListEnabled(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	_ = enabled
-	return NewHookRegistry(), len(enabled), nil
+	reg := NewHookRegistry()
+	for range enabled {
+		reg.RegisterPostHooks(noopPluginSlot{})
+	}
+
+	return reg, len(enabled), nil
 }
 
