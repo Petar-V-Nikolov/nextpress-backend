@@ -1,6 +1,6 @@
 # Makefile for nextpress-backend
 
-# Default environment (used in future phases for migrations/seeds if needed)
+# Default environment for local runs (see .env for deployed servers)
 APP_ENV ?= local
 
 # Build variables
@@ -52,7 +52,7 @@ seed-build:
 	@echo "Done."
 
 # =============================================================================
-# Database Migrations (placeholders until migrations are added)
+# Database Migrations (see migrations/ and cmd/migrate)
 # =============================================================================
 
 ## migrate-up: Run all pending migrations

@@ -26,7 +26,7 @@ Branch flow (recommended): work flows **dev → staging → main**. Promote by m
 | Item            | Description |
 |-----------------|-------------|
 | **Deploy script** | `./scripts/deploy [production\|staging\|dev]` — run from the **root of that environment's folder** |
-| **Binary**        | Deploy builds `bin/server` (API binary); migrations/seed will be added in later phases |
+| **Binary**        | Builds **`bin/server`** from `cmd/api`; script runs **`migrate -command=up`**; optional **`bin/seed`** if `RUN_SEED_ON_DEPLOY=true` |
 | **Systemd**       | Template unit `nextpress-backend@.service`; instances: `nextpress-backend@production`, `nextpress-backend@staging`, `nextpress-backend@dev` |
 
 ---

@@ -25,9 +25,10 @@ Edit `.env`. Required:
 | Variable                    | Purpose |
 |----------------------------|---------|
 | `APP_PORT`                 | TCP port the API listens on (this server). Nginx will proxy to this port. |
-| `DB_DRIVER`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSLMODE` | PostgreSQL connection (future phases). |
+| `DB_*`                     | PostgreSQL connection. |
+| `JWT_SECRET`               | Strong secret for JWT signing (never commit real values). |
 
-Set `APP_ENV=staging` in `.env`.
+Set `APP_ENV=staging` in `.env`. See `.env.example` for media, rate limits, and optional `RUN_SEED_ON_DEPLOY`.
 
 ---
 

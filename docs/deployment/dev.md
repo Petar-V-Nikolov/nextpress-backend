@@ -25,7 +25,9 @@ Edit `.env`. Required:
 | Variable                    | Purpose |
 |----------------------------|---------|
 | `APP_PORT`                 | TCP port the API listens on (this server). Nginx will proxy to this port. |
-| `DB_DRIVER`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSLMODE` | PostgreSQL connection (future phases). |
+| `DB_*`                     | PostgreSQL connection (required for full API). |
+| `JWT_SECRET`               | Signing key for access/refresh tokens. |
+| `MEDIA_*` / `RATE_LIMIT_*` | Optional; see `.env.example`. |
 
 Set `APP_ENV=dev` in `.env`.
 
@@ -37,7 +39,7 @@ From the dev folder, run the deploy script with the `dev` argument. It expects `
 
 ```bash
 ./scripts/deploy dev
-``]
+```
 
 The script checks out latest `dev`, builds `bin/server`, and restarts the systemd service `nextpress-backend@dev` after you complete the Systemd step below.
 

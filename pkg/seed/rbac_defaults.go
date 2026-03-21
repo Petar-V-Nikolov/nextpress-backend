@@ -117,6 +117,12 @@ func SeedRBACDefaults(db *gorm.DB) error {
 	).Error; err != nil {
 		return err
 	}
+	if err := db.Exec(
+		`INSERT INTO permissions (id, code) VALUES (?, ?) ON CONFLICT (code) DO NOTHING`,
+		PermissionPluginsManageID, "plugins:manage",
+	).Error; err != nil {
+		return err
+	}
 
 	// role_permissions links
 	if err := db.Exec(

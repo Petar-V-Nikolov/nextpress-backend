@@ -1,131 +1,125 @@
-## nextpress-backend
+# nextpress-backend
 
-nextpress-backend is a **production-ready CMS backend** written in Go, designed as a **modular monolith** with a **global PostgreSQL database instance**, a **clean service layer**, and a future-proof **plugin system** (implemented in later phases).
+Production-oriented **CMS API** in Go: **modular monolith**, **PostgreSQL + GORM**, **Gin**, **JWT auth**, **RBAC**, **CMS core** (posts, pages, taxonomy, media, menus), **public read APIs**, **rate limiting**, **plugin registry + post-save hooks** (Phase 5 in progress).
 
-The current codebase includes the **foundation phase**:
+---
 
-- Strict, opinionated folder structure
-- Application bootstrap with Gin
-- Environment and configuration loading
-- Deployment-oriented scripts and configuration skeletons (Makefile, systemd, Nginx)
+## Current status (snapshot)
 
-### High-level architecture
+| Area | Status |
+|------|--------|
+| **Phase 1** – infra, config, migrations, deploy tooling | Done |
+| **Phase 2** – register / login / refresh, bcrypt, JWT | Done |
+| **Phase 3** – RBAC, seed, admin RBAC APIs | Done |
+| **Phase 4** – CMS CRUD + public `/v1/*` reads + hardening (rate limits, `X-Request-ID`, OpenAPI, tests) | Done |
+| **Phase 5** – `plugins` table, admin plugin CRUD, `HookRegistry`, posts `PostSave` hooks | **A0–A1 done**; real plugin handlers & loader next |
+| **Phase 6–7** | Planned (admin dashboard API, example ecommerce plugin) |
 
-- **Modular Monolith**: Features are grouped by domain under `internal/modules`, sharing a single process and database, while keeping clear boundaries for maintainability.
-- **Global DB instance**: A single Postgres connection (via GORM) is initialized once and injected where needed to avoid duplicated connection logic.
-- **Service layer**: Thin HTTP handlers, reusable application services, and clear separation of concerns without over-engineered DDD layers.
+Details and next steps: **`docs/PHASES.md`**.
 
-### Folder structure
+---
+
+## Stack
+
+- Go 1.26+
+- Gin, Zap, GORM, PostgreSQL
+- JWT access + refresh (`github.com/golang-jwt/jwt/v5`), bcrypt passwords
+
+---
+
+## Quick start (local)
+
+```bash
+cp .env.example .env
+# Edit .env — set DB_* for PostgreSQL
+go mod download
+make migrate-up    # apply SQL migrations
+make seed          # RBAC defaults (admin role + permissions)
+make run           # or: go run ./cmd/api
+```
+
+Health: `GET /health`, `GET /ready` (DB check).
+
+**Tests:** `go test ./...` · **Vet:** `go vet ./...` · **Build:** `make build` → `bin/server`
+
+**API contract:** `docs/openapi.yaml`
+
+---
+
+## Configuration
+
+Primary reference: **`.env.example`** (all variables with short comments).
+
+| Group | Examples |
+|-------|-----------|
+| App | `APP_NAME`, `APP_ENV`, `APP_PORT` |
+| DB | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSLMODE` |
+| JWT | `JWT_SECRET`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL` |
+| RBAC | `RBAC_BOOTSTRAP_ENABLED` (optional first-admin bootstrap) |
+| Media | `MEDIA_STORAGE_DIR`, `MEDIA_PUBLIC_BASE_URL`, `MEDIA_MAX_UPLOAD_BYTES` |
+| Rate limits | `RATE_LIMIT_ENABLED`, `RATE_LIMIT_*_MAX_PER_MINUTE` |
+
+---
+
+## Repository layout
 
 ```text
 .
 ├── cmd/
-│   └── api/
-│       └── main.go          # HTTP API entrypoint
+│   ├── api/           # HTTP API entrypoint
+│   ├── migrate/       # SQL migrations runner
+│   └── seed/          # Database seeders
 ├── internal/
-│   ├── config/              # Configuration loading and environment helpers
-│   ├── http/                # HTTP server setup (Gin engine, middlewares, routing)
-│   ├── db/                  # Global DB initialization and lifecycle management
-│   ├── modules/             # Feature modules (content, auth, media, etc.)
-│   ├── logging/             # Centralized logger setup
-│   └── shared/              # Shared helpers (errors, responses, etc.)
-├── deploy/
-│   ├── nginx/                        # Nginx configs per environment
-│   └── systemd/                      # Systemd template unit
-├── docs/
-│   └── deployment/                   # Deployment guides (local/dev/staging/production)
-├── scripts/
-│   ├── run_local.sh                  # Local run helper
-│   └── deploy                        # Ubuntu deploy script (systemd + Nginx)
-└── Makefile                          # Common developer tasks (build, run, test, docker)
+│   ├── config/        # Env-based configuration
+│   ├── modules/       # Feature slices (auth, user, rbac, posts, pages, …)
+│   ├── platform/      # DB, logger, middleware
+│   └── server/        # Gin engine, global middleware, health routes
+├── migrations/        # Timestamped SQL (pkg/migrate)
+├── pkg/
+│   ├── migrate/       # Migration runner
+│   └── seed/          # Seeder entry + RBAC defaults
+├── deploy/            # nginx, systemd templates
+├── docs/              # Phases, deployment, OpenAPI, seeding
+├── scripts/           # deploy, run_local.sh
+└── Makefile
 ```
 
-> Later phases will populate `internal/modules` with concrete CMS features (auth, content, media, plugins, etc.).
+---
 
-### Getting started
+## API layout (summary)
 
-#### Prerequisites
+- **Public (no auth):** `GET /v1/posts`, `GET /v1/posts/:slug`, `GET /v1/pages/:slug`, `GET /v1/menus/:slug`
+- **Auth:** `POST /v1/auth/register`, `/login`, `/refresh`
+- **Admin (JWT + permission):** `/v1/admin/*` — CMS CRUD, RBAC management, `GET/POST /v1/admin/plugins`, `PUT /v1/admin/plugins/:id` (`plugins:manage`)
 
-- Go 1.26+
-- PostgreSQL (for DB-backed phases)
+Full list: **`docs/openapi.yaml`**.
 
-#### Local development
-
-```bash
-cp .env.example .env
-go mod download
-make build
-make run    # or ./scripts/run_local.sh
-```
-
-#### Configuration
-
-- `.env` (optional) – for local overrides, loaded via `godotenv`.
-- `deployments/configs/app.<env>.yaml` – environment-specific defaults.
-
-Key environment variables (Phase 1) – see `.env.example`:
-
-- `APP_NAME` – application name (default: `NextPress`)
-- `APP_ENV` – e.g. `development`, `staging`, `production` (default: `development`)
-- `APP_PORT` – port for the HTTP server (default: `9090`)
-
-Database, JWT, and module-level configuration will be introduced in later phases.
-
-For full deployment instructions (Ubuntu + systemd + Nginx), see:
-
-- `docs/DEPLOYMENT.md`
-- `docs/deployment/production.md`
-- `docs/deployment/staging.md`
-- `docs/deployment/dev.md`
-- `docs/deployment/local.md`
-
-API Reference:
-- OpenAPI spec: `docs/openapi.yaml`
-
-# NextPress Backend
-
-NextPress is a modular CMS backend written in Go.
-
-## Stack
-
-- Go 1.26
-- Gin HTTP Framework
-- PostgreSQL
-- GORM
-- Zap Logger
-- JWT Authentication
-
-## Architecture
-
-The project follows:
-
-- Clean Architecture
-- Modular Monolith
-- Domain Driven Design
-
-## Project Structure
-
-cmd/api → application entry point
-
-internal/config → configuration system  
-internal/platform → shared infrastructure  
-internal/modules → domain modules
-
-pkg → reusable utilities
+---
 
 ## Git workflow
 
-- Long-lived branches:
-  - `dev` – active development and integration testing.
-  - `staging` – pre-production testing.
-  - `main` – production.
-- Promotion flow:
-  - New work is done on feature branches off `dev`, then merged into `dev`.
-  - To promote: merge `dev` into `staging`, push; merge `staging` into `main`, push.
-  - To keep branches in sync: merge `main` back into `staging` and `dev`, push.
-- Server mappings (recommended):
-  - `/var/www/nextpress-backend-dev` → tracks `dev` → service `nextpress-backend@dev`.
-  - `/var/www/nextpress-backend-staging` → tracks `staging` → service `nextpress-backend@staging`.
-  - `/var/www/nextpress-backend-production` → tracks `main` → service `nextpress-backend@production`.
+- **`dev`** — integration / daily work  
+- **`staging`** — pre-production  
+- **`main`** — production  
 
-See `docs/DEPLOYMENT.md` for how this ties into the deploy script and systemd units.
+Promote: merge `dev` → `staging` → `main` (push each).  
+Sync back: merge `main` into `staging` and `dev` when you need them aligned.
+
+Suggested server folders: `/var/www/nextpress-backend-{dev,staging,production}` — see **`docs/DEPLOYMENT.md`**.
+
+---
+
+## Documentation
+
+- **Roadmap & next steps:** `docs/PHASES.md`  
+- **Index of all docs:** `docs/README.md`  
+- **Deploy:** `docs/DEPLOYMENT.md` + `docs/deployment/*.md`  
+- **Seeders:** `docs/SEEDING.md`
+
+---
+
+## Architecture notes
+
+- **Modular monolith** — one process, one DB; boundaries under `internal/modules/*`.
+- **Clean layering** — transport → application → domain (+ infrastructure per module).
+- **Post-save hooks** — `posts/domain.PostSave` port; `HookRegistry` in plugins module implements it; wired in `cmd/api`.

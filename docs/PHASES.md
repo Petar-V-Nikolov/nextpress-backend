@@ -1,6 +1,18 @@
 ## Project Phases
 
-This document describes the planned phases for nextpress-backend.
+This document describes the planned phases for nextpress-backend: **what is implemented** and **what to do next**.
+
+### Snapshot — where we are
+
+| Phase | Summary |
+|-------|---------|
+| **1** | Infra, Gin, GORM, config, Zap, migrations (`pkg/migrate`), deploy scripts, Nginx/systemd docs |
+| **2** | JWT access/refresh, bcrypt, `user` + `auth` modules, `/v1/auth/*` |
+| **3** | RBAC schema, `RequirePermission`, admin RBAC APIs, seed, optional bootstrap |
+| **4** | Posts, pages, taxonomy, media, menus; admin + public APIs; rate limits, request ID, OpenAPI, tests |
+| **5** *(in progress)* | `plugins` table, admin plugin CRUD, `HookRegistry` chain, `posts/domain.PostSave` wired on create/update |
+
+**Next focus (recommended):** Phase 5 — map enabled plugins to real hook implementations (and/or page/menu hooks), optional dynamic routes; then Phase 6 admin/settings or Phase 7 sample plugin.
 
 ---
 
@@ -15,6 +27,8 @@ This document describes the planned phases for nextpress-backend.
 - Provide a migration system.
 - Provide deployment tooling (Makefile, systemd, Nginx, docs, scripts).
 
+**Current status:** Done — see repository `cmd/api`, `internal/server`, `internal/platform`, `migrations/`, `scripts/deploy`, `docs/deployment/`.
+
 ---
 
 ### Phase 2 – Authentication
@@ -26,6 +40,8 @@ This document describes the planned phases for nextpress-backend.
 - Use bcrypt for password hashing.
 - Keep logic in DDD-style `user` and `auth` modules.
 - Expose auth endpoints for register, login, and refresh.
+
+**Current status:** Done — `POST /v1/auth/register`, `/login`, `/refresh`; JWT middleware on `/v1/admin/*`.
 
 ---
 
@@ -153,3 +169,14 @@ This document describes the planned phases for nextpress-backend.
   - products, orders, cart, payments.
 - Implement ecommerce as a plugin, not part of the core.
 - Provide example APIs for catalog, cart, and checkout flows.
+
+---
+
+## Continuing development (checklist)
+
+1. **Database:** `make migrate-up` after pulling; `make seed` when RBAC defaults change.
+2. **Phase 5:** Replace noop hook slots with real handlers keyed by plugin `slug` / `config` JSON; consider transactions if hooks must roll back with the DB write.
+3. **Hardening:** Shared rate-limit store (Redis) for multi-instance; expand `httptest` / integration tests with test DB.
+4. **Docs:** Keep `README.md`, `docs/PHASES.md`, and `docs/openapi.yaml` in sync when adding endpoints.
+
+See also: `docs/README.md` (documentation index).

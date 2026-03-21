@@ -13,15 +13,13 @@ Run nextpress-backend on your machine for development or testing. No systemd or 
 
 | Requirement   | Details |
 |---------------|---------|
-| **Go**        | Version in `go.mod`. The project will not build with an older or incompatible version. |
-| **PostgreSQL**| Installed and running (for future phases). Configure `DB_*` variables in `.env` when DB is used. |
+| **Go**        | Version in `go.mod`. |
+| **PostgreSQL**| Required for a working API (auth, CMS, RBAC). Configure `DB_*` in `.env`. |
 | **Git**       | To clone the repository. |
 
 ---
 
 ## 1. Clone and setup
-
-Clone the repo, download dependencies, and create the environment file:
 
 ```bash
 git clone <repo-url> nextpress-backend
@@ -30,31 +28,49 @@ go mod download
 cp .env.example .env
 ```
 
-Edit `.env` as needed; at minimum you can leave defaults for local runs:
+Edit `.env`:
 
-- `APP_NAME` – name for logs and metrics.
-- `APP_ENV` – usually `development` locally.
-- `APP_PORT` – HTTP port (default `9090`).
+- **`DB_*`** — point at your local Postgres database.
+- **`JWT_SECRET`** — set a non-default value outside toy demos.
+- Optional: **`RATE_LIMIT_*`**, **`MEDIA_*`**, **`RBAC_BOOTSTRAP_ENABLED`** — see `.env.example`.
 
 ---
 
-## 2. Run the API
+## 2. Migrations and seed
 
-Using the helper script:
+```bash
+make migrate-up   # apply all SQL migrations
+make seed         # RBAC defaults (admin role + permissions)
+```
+
+---
+
+## 3. Run the API
 
 ```bash
 ./scripts/run_local.sh
+# or
+go run ./cmd/api
 ```
 
-Or directly with Go:
+Listen URL: `http://localhost:<APP_PORT>` (default **9090**).
 
-```bash
-APP_ENV=development APP_PORT=9090 go run ./cmd/api
-```
+**Smoke checks**
 
-The server listens on `APP_PORT` (e.g. `http://localhost:9090`).
+- `GET /health` — process up  
+- `GET /ready` — database reachable  
+- API reference: `docs/openapi.yaml`
 
 ---
 
-[← Menu](../DEPLOYMENT.md)
+## 4. Tests
+
+```bash
+go test ./...
+go vet ./...
+```
+
+---
+
+[← Menu](../DEPLOYMENT.md) · [Seeding](../SEEDING.md) · [Phases](../PHASES.md)
 
