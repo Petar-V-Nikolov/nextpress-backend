@@ -178,5 +178,6 @@ This document describes the planned phases for nextpress-backend: **what is impl
 2. **Phase 5:** Replace noop hook slots with real handlers keyed by plugin `slug` / `config` JSON; consider transactions if hooks must roll back with the DB write.
 3. **Hardening:** Shared rate-limit store (Redis) for multi-instance; expand `httptest` / integration tests with test DB.
 4. **Docs:** Keep `README.md`, `docs/PHASES.md`, and `docs/openapi.yaml` in sync when adding endpoints.
+5. **Git:** Follow **`docs/GIT_FLOW.md`** when promoting `dev` → `staging` → `main` or syncing branches after releases.
 
 See also: `docs/README.md` (documentation index).

@@ -17,7 +17,7 @@ Each environment (production, staging, dev) can run on a **separate server** or 
 
 Port is set in `.env` on each server (e.g. 9090, 9091, 9092; if multiple envs share one server, use different ports).
 
-Branch flow (recommended): work flows **dev → staging → main**. Promote by merging and pushing between branches as needed.
+Branch flow (recommended): work flows **dev → staging → main**. Promote by merging and pushing between branches as needed. Step-by-step commands and optional feature/hotfix flows: **[GIT_FLOW.md](GIT_FLOW.md)**.
 
 ---
 

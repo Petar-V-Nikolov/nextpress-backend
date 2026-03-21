@@ -98,14 +98,15 @@ Full list: **`docs/openapi.yaml`**.
 
 ## Git workflow
 
-- **`dev`** — integration / daily work  
-- **`staging`** — pre-production  
-- **`main`** — production  
+| Branch | Role |
+|--------|------|
+| **`dev`** | Integration / daily work |
+| **`staging`** | Pre-production |
+| **`main`** | Production |
 
-Promote: merge `dev` → `staging` → `main` (push each).  
-Sync back: merge `main` into `staging` and `dev` when you need them aligned.
+**Promotion:** `dev` → `staging` → `main` (merge + push each step). **Full guide** (feature branches, hotfixes, sync-back, commands): **`docs/GIT_FLOW.md`**.
 
-Suggested server folders: `/var/www/nextpress-backend-{dev,staging,production}` — see **`docs/DEPLOYMENT.md`**.
+Server layout and deploy: **`docs/DEPLOYMENT.md`** (`/var/www/nextpress-backend-{dev,staging,production}`).
 
 ---
 

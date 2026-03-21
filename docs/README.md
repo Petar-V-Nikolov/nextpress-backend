@@ -2,6 +2,7 @@
 
 | Document | Purpose |
 |----------|---------|
+| [GIT_FLOW.md](GIT_FLOW.md) | **Branches (`dev` / `staging` / `main`), merges, PRs, deploy alignment** |
 | [PHASES.md](PHASES.md) | Roadmap: what is done per phase and **what to build next** |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Hub for server deployment (Ubuntu, systemd, Nginx) |
 | [deployment/local.md](deployment/local.md) | Run on your laptop (no systemd) |
@@ -11,4 +12,4 @@
 | [SEEDING.md](SEEDING.md) | RBAC / default data seeders |
 | [openapi.yaml](openapi.yaml) | OpenAPI 3 spec for the HTTP API |
 
-Repository root **README.md** has the quick start, stack, and git workflow.
+Repository root **README.md** has the quick start and stack; **git flow** is detailed in [GIT_FLOW.md](GIT_FLOW.md).
