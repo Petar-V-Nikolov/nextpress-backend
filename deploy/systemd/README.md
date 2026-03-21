@@ -21,5 +21,7 @@ sudo systemctl enable nextpress-backend@<env>
 sudo systemctl start nextpress-backend@<env>
 ```
 
-See deployment guides under `docs/deployment/` for full steps. The `scripts/deploy` script runs **migrate up** before restarting the service; optional **seed** is controlled by `RUN_SEED_ON_DEPLOY` in `.env` (see `docs/DEPLOYMENT.md`).
+For full server setup (Nginx, TLS, folders), see **[docs/deployment/](../../docs/deployment/)**.
+
+`scripts/deploy` runs **migrate up** before restarting the service. Optional **seed** on deploy is controlled by `RUN_SEED_ON_DEPLOY` in `.env` — see **[DEPLOYMENT.md](../../docs/DEPLOYMENT.md)**.
 
