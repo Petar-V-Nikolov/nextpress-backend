@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 
 	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	platformHooks "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/hooks"
 )
 
 var (
@@ -20,11 +21,15 @@ var (
 )
 
 type Service struct {
-	repo postDomain.Repository
+	repo  postDomain.Repository
+	hooks platformHooks.PostSave // optional; nil skips hook calls
 }
 
-func NewService(repo postDomain.Repository) *Service {
-	return &Service{repo: repo}
+// NewService constructs the posts application service. hooks may be nil
+// (no post-save callbacks). When non-nil, BeforePostSave runs before DB writes
+// and AfterPostSave after successful Create/Update.
+func NewService(repo postDomain.Repository, hooks platformHooks.PostSave) *Service {
+	return &Service{repo: repo, hooks: hooks}
 }
 
 func (s *Service) Create(ctx context.Context, authorID, title, slug, content string) (*postDomain.Post, error) {
@@ -55,11 +60,23 @@ func (s *Service) Create(ctx context.Context, authorID, title, slug, content str
 		UpdatedAt: now,
 	}
 
+	if s.hooks != nil {
+		if err := s.hooks.BeforePostSave(ctx, string(p.ID), p.Slug); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := s.repo.Create(ctx, p); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err
+	}
+
+	if s.hooks != nil {
+		if err := s.hooks.AfterPostSave(ctx, string(p.ID), p.Slug); err != nil {
+			return nil, err
+		}
 	}
 
 	return p, nil
@@ -183,11 +200,24 @@ func (s *Service) Update(ctx context.Context, id, title, slug, content, status s
 	}
 
 	p.UpdatedAt = time.Now().UTC()
+
+	if s.hooks != nil {
+		if err := s.hooks.BeforePostSave(ctx, string(p.ID), p.Slug); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := s.repo.Update(ctx, p); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err
+	}
+
+	if s.hooks != nil {
+		if err := s.hooks.AfterPostSave(ctx, string(p.ID), p.Slug); err != nil {
+			return nil, err
+		}
 	}
 
 	return p, nil

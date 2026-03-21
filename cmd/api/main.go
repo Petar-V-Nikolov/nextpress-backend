@@ -102,8 +102,19 @@ func main() {
 	rbacRepo := rbacInfra.NewGormRepository(db)
 	rbacService := rbacApp.NewService(rbacRepo)
 	rbacHandler := rbacTransport.NewHandler(rbacService)
+
+	// Plugins repo + hook bootstrap before posts service so post save hooks are wired.
+	pluginsRepo := pluginsInfra.NewGormRepository(db)
+	postHooks, enabledPluginCount, err := pluginsApp.BootstrapPostHooks(ctx, pluginsRepo)
+	if err != nil {
+		logger.Fatalw("failed to bootstrap plugin hooks",
+			"error", err,
+		)
+	}
+	logger.Infow("plugin hooks bootstrapped", "enabled_plugins", enabledPluginCount)
+
 	postsRepo := postsInfra.NewGormRepository(db)
-	postsService := postsApp.NewService(postsRepo)
+	postsService := postsApp.NewService(postsRepo, postHooks)
 	postsHandler := postsTransport.NewHandler(postsService)
 	pagesRepo := pagesInfra.NewGormRepository(db)
 	pagesService := pagesApp.NewService(pagesRepo)
@@ -119,21 +130,8 @@ func main() {
 	menusService := menusApp.NewService(menusRepo)
 	menusHandler := menusTransport.NewHandler(menusService)
 
-	pluginsRepo := pluginsInfra.NewGormRepository(db)
 	pluginsService := pluginsApp.NewService(pluginsRepo)
 	pluginsHandler := pluginsTransport.NewHandler(pluginsService)
-
-	// Bootstrap hook infrastructure from enabled plugins. A0 currently wires a
-	// no-op registry, but the lookup path is already in place so Phase 5 can
-	// attach real plugin hooks later without refactoring bootstrap logic.
-	postHooks, enabledCount, err := pluginsApp.BootstrapPostHooks(ctx, pluginsRepo)
-	if err != nil {
-		logger.Fatalw("failed to bootstrap plugin hooks",
-			"error", err,
-		)
-	}
-	_ = postHooks
-	logger.Infow("plugin hooks bootstrapped", "enabled_plugins", enabledCount)
 
 	// Use Gin as the central HTTP router; we keep the setup centralized in the
 	// server package so that future modules can register routes cleanly.

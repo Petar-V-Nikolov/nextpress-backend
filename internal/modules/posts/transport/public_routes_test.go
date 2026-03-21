@@ -114,7 +114,7 @@ func TestPublicPostsRoute_ReturnsPublishedPosts(t *testing.T) {
 		},
 	}
 
-	svc := postsApp.NewService(repo)
+	svc := postsApp.NewService(repo, nil)
 	h := NewHandler(svc)
 
 	router := gin.New()
@@ -157,7 +157,7 @@ func TestAdminPostsRoute_RequiresAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	repo := &mockPostRepo{published: []postDomain.Post{}}
-	svc := postsApp.NewService(repo)
+	svc := postsApp.NewService(repo, nil)
 	h := NewHandler(svc)
 
 	parser := dummyAccessTokenParser{}
