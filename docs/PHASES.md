@@ -123,13 +123,13 @@ This document describes the planned phases for nextpress-backend.
 - Allow plugins to register routes, permissions, migrations, and hooks.
 - Implement a plugin loader that wires plugins at startup.
 
-**Current status (A0):**
+**Current status (A0 + A1):**
 - Database model: `plugins` table migration added (UUID id, slug/name, enabled, version, config JSONB).
 - Plugin registry module added (`internal/modules/plugins`):
   - Admin endpoints: `GET /v1/admin/plugins`, `POST /v1/admin/plugins`, `PUT /v1/admin/plugins/:id` (RBAC: `plugins:manage`).
 - Hook infrastructure:
-  - Hook interfaces and an A0 no-op `HookRegistry` exist.
-  - Startup bootstrap reads enabled plugins and initializes hook registry wiring (Phase 5 will extend with real plugin-backed implementations later).
+  - `platform/hooks.PostSave` is the edge contract; posts `Create`/`Update` call `BeforePostSave` / `AfterPostSave` around persistence.
+  - `HookRegistry` chains `PostHooks` implementations; bootstrap registers one noop slot per **enabled** plugin row (ready for real handlers).
 
 ---
 
