@@ -5,7 +5,10 @@ import (
 	"errors"
 	"strings"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	posterr "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ident"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/metrics"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/seo"
 )
 
 // PostSubresourcesService validates and orchestrates post sub-resource persistence.
@@ -23,7 +26,7 @@ func (s *PostSubresourcesService) requirePost(ctx context.Context, postID string
 	if postID == "" {
 		return ErrPostNotFound
 	}
-	p, err := s.stores.Reader.FindByID(ctx, postDomain.PostID(postID))
+	p, err := s.stores.Reader.FindByID(ctx, ident.PostID(postID))
 	if err != nil {
 		return err
 	}
@@ -33,12 +36,12 @@ func (s *PostSubresourcesService) requirePost(ctx context.Context, postID string
 	return nil
 }
 
-func (s *PostSubresourcesService) GetMetricsForPost(ctx context.Context, postID string) (*postDomain.PostMetrics, error) {
+func (s *PostSubresourcesService) GetMetricsForPost(ctx context.Context, postID string) (*metrics.PostMetrics, error) {
 	postID = strings.TrimSpace(postID)
 	if err := s.requirePost(ctx, postID); err != nil {
 		return nil, err
 	}
-	return s.stores.Metrics.GetMetrics(ctx, postDomain.PostID(postID))
+	return s.stores.Metrics.GetMetrics(ctx, ident.PostID(postID))
 }
 
 func (s *PostSubresourcesService) DeleteSEO(ctx context.Context, postID string) error {
@@ -46,18 +49,18 @@ func (s *PostSubresourcesService) DeleteSEO(ctx context.Context, postID string) 
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	return s.stores.SEO.DeleteSEO(ctx, postDomain.PostID(postID))
+	return s.stores.SEO.DeleteSEO(ctx, ident.PostID(postID))
 }
 
-func (s *PostSubresourcesService) UpsertSEO(ctx context.Context, postID string, seo *postDomain.PostSEO) error {
+func (s *PostSubresourcesService) UpsertSEO(ctx context.Context, postID string, doc *seo.PostSEO) error {
 	postID = strings.TrimSpace(postID)
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	if seo == nil {
+	if doc == nil {
 		return ErrInvalidArgument
 	}
-	return s.stores.SEO.UpsertSEOOnly(ctx, postDomain.PostID(postID), seo)
+	return s.stores.SEO.UpsertSEOOnly(ctx, ident.PostID(postID), doc)
 }
 
 func (s *PostSubresourcesService) SetFeaturedImage(ctx context.Context, postID string, mediaID *string, alt *string, width *int, height *int, focalX *float32, focalY *float32, credit *string, license *string) error {
@@ -65,7 +68,7 @@ func (s *PostSubresourcesService) SetFeaturedImage(ctx context.Context, postID s
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	return s.stores.Featured.SetFeaturedImage(ctx, postDomain.PostID(postID), mediaID, alt, width, height, focalX, focalY, credit, license)
+	return s.stores.Featured.SetFeaturedImage(ctx, ident.PostID(postID), mediaID, alt, width, height, focalX, focalY, credit, license)
 }
 
 func (s *PostSubresourcesService) SetPostSeries(ctx context.Context, postID string, seriesID *string, partIndex *int, partLabel *string) error {
@@ -73,7 +76,7 @@ func (s *PostSubresourcesService) SetPostSeries(ctx context.Context, postID stri
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	return s.stores.SeriesLink.SetPostSeries(ctx, postDomain.PostID(postID), seriesID, partIndex, partLabel)
+	return s.stores.SeriesLink.SetPostSeries(ctx, ident.PostID(postID), seriesID, partIndex, partLabel)
 }
 
 func (s *PostSubresourcesService) ReplaceCoauthors(ctx context.Context, postID string, userIDs []string) error {
@@ -81,7 +84,7 @@ func (s *PostSubresourcesService) ReplaceCoauthors(ctx context.Context, postID s
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	return s.stores.Coauthors.ReplaceCoauthors(ctx, postDomain.PostID(postID), userIDs)
+	return s.stores.Coauthors.ReplaceCoauthors(ctx, ident.PostID(postID), userIDs)
 }
 
 func (s *PostSubresourcesService) CreateGalleryItem(ctx context.Context, postID, mediaID string, sortOrder int, caption *string, alt *string) (string, error) {
@@ -93,7 +96,7 @@ func (s *PostSubresourcesService) CreateGalleryItem(ctx context.Context, postID,
 	if mediaID == "" {
 		return "", ErrInvalidArgument
 	}
-	id, err := s.stores.Gallery.CreateGalleryItem(ctx, postDomain.PostID(postID), mediaID, sortOrder, caption, alt)
+	id, err := s.stores.Gallery.CreateGalleryItem(ctx, ident.PostID(postID), mediaID, sortOrder, caption, alt)
 	if err != nil {
 		if err.Error() == "media_id_required" {
 			return "", ErrInvalidArgument
@@ -112,8 +115,8 @@ func (s *PostSubresourcesService) UpdateGalleryItem(ctx context.Context, postID,
 	if sortOrder == nil && caption == nil && alt == nil {
 		return ErrInvalidArgument
 	}
-	err := s.stores.Gallery.UpdateGalleryItem(ctx, postDomain.PostID(postID), itemID, sortOrder, caption, alt)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	err := s.stores.Gallery.UpdateGalleryItem(ctx, ident.PostID(postID), itemID, sortOrder, caption, alt)
+	if errors.Is(err, posterr.ErrNotFound) {
 		return ErrNotFound
 	}
 	return err
@@ -125,7 +128,7 @@ func (s *PostSubresourcesService) DeleteGalleryItem(ctx context.Context, postID,
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	return s.stores.Gallery.DeleteGalleryItem(ctx, postDomain.PostID(postID), itemID)
+	return s.stores.Gallery.DeleteGalleryItem(ctx, ident.PostID(postID), itemID)
 }
 
 func (s *PostSubresourcesService) CreateChangelog(ctx context.Context, postID string, userID *string, note string) (string, error) {
@@ -137,7 +140,7 @@ func (s *PostSubresourcesService) CreateChangelog(ctx context.Context, postID st
 	if note == "" {
 		return "", ErrInvalidArgument
 	}
-	id, err := s.stores.Changelog.CreateChangelog(ctx, postDomain.PostID(postID), userID, note)
+	id, err := s.stores.Changelog.CreateChangelog(ctx, ident.PostID(postID), userID, note)
 	if err != nil {
 		if err.Error() == "note_required" {
 			return "", ErrInvalidArgument
@@ -153,8 +156,8 @@ func (s *PostSubresourcesService) DeleteChangelog(ctx context.Context, postID, c
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	err := s.stores.Changelog.DeleteChangelog(ctx, postDomain.PostID(postID), changelogID)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	err := s.stores.Changelog.DeleteChangelog(ctx, ident.PostID(postID), changelogID)
+	if errors.Is(err, posterr.ErrNotFound) {
 		return ErrNotFound
 	}
 	return err
@@ -165,7 +168,7 @@ func (s *PostSubresourcesService) CreateSyndication(ctx context.Context, postID,
 	if err := s.requirePost(ctx, postID); err != nil {
 		return "", err
 	}
-	id, err := s.stores.Syndication.CreateSyndication(ctx, postDomain.PostID(postID), platform, url, status)
+	id, err := s.stores.Syndication.CreateSyndication(ctx, ident.PostID(postID), platform, url, status)
 	if err != nil {
 		if err.Error() == "platform_url_required" {
 			return "", ErrInvalidArgument
@@ -181,8 +184,8 @@ func (s *PostSubresourcesService) UpdateSyndication(ctx context.Context, postID,
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	err := s.stores.Syndication.UpdateSyndication(ctx, postDomain.PostID(postID), syndicationID, platform, url, status)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	err := s.stores.Syndication.UpdateSyndication(ctx, ident.PostID(postID), syndicationID, platform, url, status)
+	if errors.Is(err, posterr.ErrNotFound) {
 		return ErrNotFound
 	}
 	return err
@@ -194,8 +197,8 @@ func (s *PostSubresourcesService) DeleteSyndication(ctx context.Context, postID,
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	err := s.stores.Syndication.DeleteSyndication(ctx, postDomain.PostID(postID), syndicationID)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	err := s.stores.Syndication.DeleteSyndication(ctx, ident.PostID(postID), syndicationID)
+	if errors.Is(err, posterr.ErrNotFound) {
 		return ErrNotFound
 	}
 	return err
@@ -204,7 +207,7 @@ func (s *PostSubresourcesService) DeleteSyndication(ctx context.Context, postID,
 func (s *PostSubresourcesService) UpdateSyndicationGlobal(ctx context.Context, syndicationID string, platform, url, status *string) error {
 	syndicationID = strings.TrimSpace(syndicationID)
 	err := s.stores.Syndication.UpdateSyndicationByID(ctx, syndicationID, platform, url, status)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	if errors.Is(err, posterr.ErrNotFound) {
 		return ErrNotFound
 	}
 	return err
@@ -213,7 +216,7 @@ func (s *PostSubresourcesService) UpdateSyndicationGlobal(ctx context.Context, s
 func (s *PostSubresourcesService) DeleteSyndicationGlobal(ctx context.Context, syndicationID string) error {
 	syndicationID = strings.TrimSpace(syndicationID)
 	err := s.stores.Syndication.DeleteSyndicationByID(ctx, syndicationID)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	if errors.Is(err, posterr.ErrNotFound) {
 		return ErrNotFound
 	}
 	return err
@@ -228,8 +231,8 @@ func (s *PostSubresourcesService) PutPostTranslation(ctx context.Context, postID
 	if locale == "" {
 		return "", ErrInvalidArgument
 	}
-	resolved, err := s.stores.Translations.PutPostTranslation(ctx, postDomain.PostID(postID), groupID, locale)
-	if errors.Is(err, postDomain.ErrNotFound) {
+	resolved, err := s.stores.Translations.PutPostTranslation(ctx, ident.PostID(postID), groupID, locale)
+	if errors.Is(err, posterr.ErrNotFound) {
 		return "", ErrNotFound
 	}
 	return resolved, err
@@ -240,5 +243,5 @@ func (s *PostSubresourcesService) ClearPostTranslation(ctx context.Context, post
 	if err := s.requirePost(ctx, postID); err != nil {
 		return err
 	}
-	return s.stores.Translations.ClearPostTranslation(ctx, postDomain.PostID(postID))
+	return s.stores.Translations.ClearPostTranslation(ctx, ident.PostID(postID))
 }

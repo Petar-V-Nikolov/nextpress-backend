@@ -3,20 +3,21 @@ package application
 import (
 	"errors"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	posterr "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ports"
 )
 
 var (
-	ErrInvalidPost       = errors.New("invalid_post")
-	ErrSlugTaken         = errors.New("slug_taken")
-	ErrPostNotFound      = errors.New("post_not_found")
-	ErrInvalidStatus     = errors.New("invalid_status")
+	ErrInvalidPost   = errors.New("invalid_post")
+	ErrSlugTaken     = errors.New("slug_taken")
+	ErrPostNotFound  = errors.New("post_not_found")
+	ErrInvalidStatus = errors.New("invalid_status")
 	// Prefer these domain errors for application/storage boundary mapping.
-	ErrNotFound        = postDomain.ErrNotFound
-	ErrInvalidArgument = postDomain.ErrInvalidArgument
-	ErrConflict        = postDomain.ErrConflict
+	ErrNotFound        = posterr.ErrNotFound
+	ErrInvalidArgument = posterr.ErrInvalidArgument
+	ErrConflict        = posterr.ErrConflict
 	// ErrInvalidSubresource is an alias for ErrInvalidArgument (legacy name).
-	ErrInvalidSubresource = postDomain.ErrInvalidArgument
+	ErrInvalidSubresource = posterr.ErrInvalidArgument
 )
 
 // Service is the façade over focused posts sub-services. Method names are promoted via embedding.
@@ -28,11 +29,11 @@ type Service struct {
 }
 
 // NewService constructs the posts module application layer.
-func NewService(repo postDomain.Repository, hooks postDomain.PostSave) *Service {
+func NewService(repo ports.Repository, hooks ports.PostSave) *Service {
 	return &Service{
-		CorePostsService:          NewCorePostsService(repo, hooks),
-		PostSubresourcesService:   NewPostSubresourcesService(PostSubresourceStoresFrom(repo)),
-		SeriesService:             NewSeriesService(repo),
-		TranslationGroupsService:  NewTranslationGroupsService(repo),
+		CorePostsService:         NewCorePostsService(repo, hooks),
+		PostSubresourcesService:  NewPostSubresourcesService(PostSubresourceStoresFrom(repo)),
+		SeriesService:            NewSeriesService(repo),
+		TranslationGroupsService: NewTranslationGroupsService(repo),
 	}
 }

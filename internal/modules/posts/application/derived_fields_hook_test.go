@@ -40,4 +40,3 @@ func TestReadingTimeMinutes(t *testing.T) {
 		t.Fatalf("got=%d want=2", got)
 	}
 }
-

@@ -8,21 +8,24 @@ import (
 
 	"github.com/google/uuid"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	posterr "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ident"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/model"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ports"
 )
 
 // CorePostsService handles core post CRUD, public reads, and taxonomy assignments.
 type CorePostsService struct {
-	repo  postDomain.CorePostsPersistence
-	hooks postDomain.PostSave
+	repo  ports.CorePostsPersistence
+	hooks ports.PostSave
 }
 
 // NewCorePostsService constructs the core posts application service.
-func NewCorePostsService(repo postDomain.CorePostsPersistence, hooks postDomain.PostSave) *CorePostsService {
+func NewCorePostsService(repo ports.CorePostsPersistence, hooks ports.PostSave) *CorePostsService {
 	return &CorePostsService{repo: repo, hooks: hooks}
 }
 
-func (s *CorePostsService) Create(ctx context.Context, authorID, title, slug, content string) (*postDomain.Post, error) {
+func (s *CorePostsService) Create(ctx context.Context, authorID, title, slug, content string) (*model.Post, error) {
 	title = strings.TrimSpace(title)
 	slug = normalizeSlug(slug)
 	content = strings.TrimSpace(content)
@@ -39,20 +42,20 @@ func (s *CorePostsService) Create(ctx context.Context, authorID, title, slug, co
 	}
 
 	now := time.Now().UTC()
-	p := &postDomain.Post{
-		ID:             postDomain.PostID(uuid.NewString()),
-		AuthorID:       authorID,
-		Title:          title,
-		Slug:           slug,
-		Content:        content,
-		Status:         postDomain.StatusDraft,
-		Visibility:     "public",
-		Locale:         "en-US",
-		Timezone:       "UTC",
-		WorkflowStage:  "draft",
-		Revision:       1,
-		CreatedAt:      now,
-		UpdatedAt:      now,
+	p := &model.Post{
+		ID:            ident.PostID(uuid.NewString()),
+		AuthorID:      authorID,
+		Title:         title,
+		Slug:          slug,
+		Content:       content,
+		Status:        ident.StatusDraft,
+		Visibility:    "public",
+		Locale:        "en-US",
+		Timezone:      "UTC",
+		WorkflowStage: "draft",
+		Revision:      1,
+		CreatedAt:     now,
+		UpdatedAt:     now,
 	}
 
 	if s.hooks != nil {
@@ -62,7 +65,7 @@ func (s *CorePostsService) Create(ctx context.Context, authorID, title, slug, co
 	}
 
 	if err := s.repo.Create(ctx, p); err != nil {
-		if errors.Is(err, postDomain.ErrConflict) {
+		if errors.Is(err, posterr.ErrConflict) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err
@@ -77,12 +80,12 @@ func (s *CorePostsService) Create(ctx context.Context, authorID, title, slug, co
 	return p, nil
 }
 
-func (s *CorePostsService) GetByID(ctx context.Context, id string) (*postDomain.Post, error) {
+func (s *CorePostsService) GetByID(ctx context.Context, id string) (*model.Post, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {
 		return nil, ErrPostNotFound
 	}
-	p, err := s.repo.FindByID(ctx, postDomain.PostID(id))
+	p, err := s.repo.FindByID(ctx, ident.PostID(id))
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +95,7 @@ func (s *CorePostsService) GetByID(ctx context.Context, id string) (*postDomain.
 	return p, nil
 }
 
-func (s *CorePostsService) List(ctx context.Context, limit, offset int) ([]postDomain.Post, error) {
+func (s *CorePostsService) List(ctx context.Context, limit, offset int) ([]model.Post, error) {
 	if limit <= 0 || limit > 100 {
 		limit = 20
 	}
@@ -102,7 +105,7 @@ func (s *CorePostsService) List(ctx context.Context, limit, offset int) ([]postD
 	return s.repo.ListFiltered(ctx, false, limit, offset, "", "", "")
 }
 
-func (s *CorePostsService) ListFiltered(ctx context.Context, limit, offset int, status string, authorID string, q string) ([]postDomain.Post, error) {
+func (s *CorePostsService) ListFiltered(ctx context.Context, limit, offset int, status string, authorID string, q string) ([]model.Post, error) {
 	if limit <= 0 || limit > 100 {
 		limit = 20
 	}
@@ -111,8 +114,8 @@ func (s *CorePostsService) ListFiltered(ctx context.Context, limit, offset int, 
 	}
 	status = strings.ToLower(strings.TrimSpace(status))
 	if status != "" {
-		switch postDomain.Status(status) {
-		case postDomain.StatusDraft, postDomain.StatusPublished, postDomain.StatusArchived:
+		switch ident.Status(status) {
+		case ident.StatusDraft, ident.StatusPublished, ident.StatusArchived:
 		default:
 			return nil, ErrInvalidStatus
 		}
@@ -122,7 +125,7 @@ func (s *CorePostsService) ListFiltered(ctx context.Context, limit, offset int, 
 	return s.repo.ListFiltered(ctx, false, limit, offset, status, authorID, q)
 }
 
-func (s *CorePostsService) PublicList(ctx context.Context, limit, offset int, q string, categoryID string, tagID string) ([]postDomain.Post, error) {
+func (s *CorePostsService) PublicList(ctx context.Context, limit, offset int, q string, categoryID string, tagID string) ([]model.Post, error) {
 	if limit <= 0 || limit > 100 {
 		limit = 20
 	}
@@ -135,7 +138,7 @@ func (s *CorePostsService) PublicList(ctx context.Context, limit, offset int, q 
 	return s.repo.ListPublished(ctx, limit, offset, q, categoryID, tagID)
 }
 
-func (s *CorePostsService) PublicGetBySlug(ctx context.Context, slug string) (*postDomain.Post, error) {
+func (s *CorePostsService) PublicGetBySlug(ctx context.Context, slug string) (*model.Post, error) {
 	slug = strings.TrimSpace(slug)
 	if slug == "" {
 		return nil, ErrPostNotFound
@@ -150,13 +153,13 @@ func (s *CorePostsService) PublicGetBySlug(ctx context.Context, slug string) (*p
 	return p, nil
 }
 
-func (s *CorePostsService) Update(ctx context.Context, id, title, slug, content, status string) (*postDomain.Post, error) {
+func (s *CorePostsService) Update(ctx context.Context, id, title, slug, content, status string) (*model.Post, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {
 		return nil, ErrPostNotFound
 	}
 
-	p, err := s.repo.FindByID(ctx, postDomain.PostID(id))
+	p, err := s.repo.FindByID(ctx, ident.PostID(id))
 	if err != nil {
 		return nil, err
 	}
@@ -181,11 +184,11 @@ func (s *CorePostsService) Update(ctx context.Context, id, title, slug, content,
 		p.Content = c
 	}
 	if status != "" {
-		st := postDomain.Status(strings.ToLower(strings.TrimSpace(status)))
+		st := ident.Status(strings.ToLower(strings.TrimSpace(status)))
 		switch st {
-		case postDomain.StatusDraft, postDomain.StatusPublished, postDomain.StatusArchived:
+		case ident.StatusDraft, ident.StatusPublished, ident.StatusArchived:
 			p.Status = st
-			if st == postDomain.StatusPublished && p.PublishedAt == nil {
+			if st == ident.StatusPublished && p.PublishedAt == nil {
 				now := time.Now().UTC()
 				p.PublishedAt = &now
 			}
@@ -219,7 +222,7 @@ func (s *CorePostsService) Update(ctx context.Context, id, title, slug, content,
 	}
 
 	if err := s.repo.Update(ctx, p); err != nil {
-		if errors.Is(err, postDomain.ErrConflict) {
+		if errors.Is(err, posterr.ErrConflict) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err
@@ -235,7 +238,7 @@ func (s *CorePostsService) Update(ctx context.Context, id, title, slug, content,
 }
 
 // Save persists an already-loaded post with any fields updated by callers.
-func (s *CorePostsService) Save(ctx context.Context, p *postDomain.Post) (*postDomain.Post, error) {
+func (s *CorePostsService) Save(ctx context.Context, p *model.Post) (*model.Post, error) {
 	if p == nil || strings.TrimSpace(string(p.ID)) == "" {
 		return nil, ErrPostNotFound
 	}
@@ -265,7 +268,7 @@ func (s *CorePostsService) Save(ctx context.Context, p *postDomain.Post) (*postD
 	}
 
 	if err := s.repo.Update(ctx, p); err != nil {
-		if errors.Is(err, postDomain.ErrConflict) {
+		if errors.Is(err, posterr.ErrConflict) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err
@@ -285,7 +288,7 @@ func (s *CorePostsService) Delete(ctx context.Context, id string) error {
 	if id == "" {
 		return ErrPostNotFound
 	}
-	return s.repo.Delete(ctx, postDomain.PostID(id))
+	return s.repo.Delete(ctx, ident.PostID(id))
 }
 
 func (s *CorePostsService) SetCategories(ctx context.Context, postID string, categoryIDs []string) error {
@@ -294,7 +297,7 @@ func (s *CorePostsService) SetCategories(ctx context.Context, postID string, cat
 		return ErrPostNotFound
 	}
 
-	p, err := s.repo.FindByID(ctx, postDomain.PostID(postID))
+	p, err := s.repo.FindByID(ctx, ident.PostID(postID))
 	if err != nil {
 		return err
 	}
@@ -302,7 +305,7 @@ func (s *CorePostsService) SetCategories(ctx context.Context, postID string, cat
 		return ErrPostNotFound
 	}
 
-	return s.repo.SetCategories(ctx, postDomain.PostID(postID), categoryIDs)
+	return s.repo.SetCategories(ctx, ident.PostID(postID), categoryIDs)
 }
 
 func (s *CorePostsService) SetTags(ctx context.Context, postID string, tagIDs []string) error {
@@ -311,7 +314,7 @@ func (s *CorePostsService) SetTags(ctx context.Context, postID string, tagIDs []
 		return ErrPostNotFound
 	}
 
-	p, err := s.repo.FindByID(ctx, postDomain.PostID(postID))
+	p, err := s.repo.FindByID(ctx, ident.PostID(postID))
 	if err != nil {
 		return err
 	}
@@ -319,7 +322,7 @@ func (s *CorePostsService) SetTags(ctx context.Context, postID string, tagIDs []
 		return ErrPostNotFound
 	}
 
-	return s.repo.SetTags(ctx, postDomain.PostID(postID), tagIDs)
+	return s.repo.SetTags(ctx, ident.PostID(postID), tagIDs)
 }
 
 func (s *CorePostsService) SetPrimaryCategory(ctx context.Context, postID string, categoryID *string) error {
@@ -327,14 +330,14 @@ func (s *CorePostsService) SetPrimaryCategory(ctx context.Context, postID string
 	if postID == "" {
 		return ErrPostNotFound
 	}
-	p, err := s.repo.FindByID(ctx, postDomain.PostID(postID))
+	p, err := s.repo.FindByID(ctx, ident.PostID(postID))
 	if err != nil {
 		return err
 	}
 	if p == nil {
 		return ErrPostNotFound
 	}
-	return s.repo.SetPrimaryCategory(ctx, postDomain.PostID(postID), categoryID)
+	return s.repo.SetPrimaryCategory(ctx, ident.PostID(postID), categoryID)
 }
 
 func normalizeSlug(slug string) string {

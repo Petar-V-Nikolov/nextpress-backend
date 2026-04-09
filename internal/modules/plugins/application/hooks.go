@@ -4,7 +4,7 @@ import (
 	"context"
 
 	pluginsDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/domain"
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	postPorts "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ports"
 )
 
 // HookRegistry is the in-process registry for hook invocations.
@@ -47,7 +47,7 @@ func (r *HookRegistry) AfterPostSave(ctx context.Context, postID string, slug st
 
 var _ pluginsDomain.PostHooks = (*HookRegistry)(nil)
 
-var _ postDomain.PostSave = (*HookRegistry)(nil)
+var _ postPorts.PostSave = (*HookRegistry)(nil)
 
 // noopPluginSlot reserves one hook chain entry per enabled plugin. Real
 // plugin logic will replace or wrap this in later Phase 5 work.
@@ -71,4 +71,3 @@ func BootstrapPostHooks(ctx context.Context, repo pluginsDomain.Repository) (*Ho
 
 	return reg, len(enabled), nil
 }
-

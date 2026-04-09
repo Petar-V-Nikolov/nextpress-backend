@@ -5,32 +5,33 @@ import (
 	"errors"
 	"strings"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	posterr "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/series"
 )
 
 // SeriesService handles top-level series CRUD.
 type SeriesService struct {
-	repo postDomain.SeriesRepository
+	repo series.SeriesRepository
 }
 
 // NewSeriesService constructs the series application service.
-func NewSeriesService(repo postDomain.SeriesRepository) *SeriesService {
+func NewSeriesService(repo series.SeriesRepository) *SeriesService {
 	return &SeriesService{repo: repo}
 }
 
-func (s *SeriesService) ListSeries(ctx context.Context) ([]postDomain.Series, error) {
+func (s *SeriesService) ListSeries(ctx context.Context) ([]series.Series, error) {
 	return s.repo.ListSeries(ctx)
 }
 
-func (s *SeriesService) CreateSeries(ctx context.Context, title, slug string) (*postDomain.Series, error) {
+func (s *SeriesService) CreateSeries(ctx context.Context, title, slug string) (*series.Series, error) {
 	title = strings.TrimSpace(title)
 	slug = strings.TrimSpace(slug)
 	if title == "" || slug == "" {
 		return nil, ErrInvalidArgument
 	}
-	sr := &postDomain.Series{Title: title, Slug: slug}
+	sr := &series.Series{Title: title, Slug: slug}
 	if err := s.repo.CreateSeries(ctx, sr); err != nil {
-		if errors.Is(err, postDomain.ErrConflict) {
+		if errors.Is(err, posterr.ErrConflict) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err
@@ -38,7 +39,7 @@ func (s *SeriesService) CreateSeries(ctx context.Context, title, slug string) (*
 	return sr, nil
 }
 
-func (s *SeriesService) GetSeries(ctx context.Context, id string) (*postDomain.Series, error) {
+func (s *SeriesService) GetSeries(ctx context.Context, id string) (*series.Series, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {
 		return nil, ErrNotFound
@@ -53,7 +54,7 @@ func (s *SeriesService) GetSeries(ctx context.Context, id string) (*postDomain.S
 	return sr, nil
 }
 
-func (s *SeriesService) UpdateSeries(ctx context.Context, id string, title, slug *string) (*postDomain.Series, error) {
+func (s *SeriesService) UpdateSeries(ctx context.Context, id string, title, slug *string) (*series.Series, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {
 		return nil, ErrNotFound
@@ -75,10 +76,10 @@ func (s *SeriesService) UpdateSeries(ctx context.Context, id string, title, slug
 		return nil, ErrInvalidArgument
 	}
 	if err := s.repo.UpdateSeries(ctx, ex); err != nil {
-		if errors.Is(err, postDomain.ErrNotFound) {
+		if errors.Is(err, posterr.ErrNotFound) {
 			return nil, ErrNotFound
 		}
-		if errors.Is(err, postDomain.ErrConflict) {
+		if errors.Is(err, posterr.ErrConflict) {
 			return nil, ErrSlugTaken
 		}
 		return nil, err

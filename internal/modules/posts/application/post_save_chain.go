@@ -3,17 +3,17 @@ package application
 import (
 	"context"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ports"
 )
 
 // PostSaveChain composes multiple PostSave implementations.
 // Nil entries are ignored.
 type PostSaveChain struct {
-	chain []postDomain.PostSave
+	chain []ports.PostSave
 }
 
-func NewPostSaveChain(items ...postDomain.PostSave) *PostSaveChain {
-	out := &PostSaveChain{chain: make([]postDomain.PostSave, 0, len(items))}
+func NewPostSaveChain(items ...ports.PostSave) *PostSaveChain {
+	out := &PostSaveChain{chain: make([]ports.PostSave, 0, len(items))}
 	for _, it := range items {
 		if it == nil {
 			continue
@@ -41,5 +41,4 @@ func (c *PostSaveChain) AfterPostSave(ctx context.Context, postID, slug string) 
 	return nil
 }
 
-var _ postDomain.PostSave = (*PostSaveChain)(nil)
-
+var _ ports.PostSave = (*PostSaveChain)(nil)

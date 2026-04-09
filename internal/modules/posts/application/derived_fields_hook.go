@@ -7,16 +7,18 @@ import (
 	"strings"
 	"time"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ident"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/metrics"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ports"
 )
 
 // DerivedFieldsHook computes and persists derived editorial fields (excerpt + metrics)
 // using the PostSave seam. It operates after the core post write succeeds.
 type DerivedFieldsHook struct {
-	repo postDomain.PostLoadUpdater
+	repo ports.PostLoadUpdater
 }
 
-func NewDerivedFieldsHook(repo postDomain.PostLoadUpdater) *DerivedFieldsHook {
+func NewDerivedFieldsHook(repo ports.PostLoadUpdater) *DerivedFieldsHook {
 	return &DerivedFieldsHook{repo: repo}
 }
 
@@ -26,7 +28,7 @@ func (h *DerivedFieldsHook) AfterPostSave(ctx context.Context, postID string, _ 
 	if h == nil || h.repo == nil {
 		return nil
 	}
-	p, err := h.repo.FindByID(ctx, postDomain.PostID(strings.TrimSpace(postID)))
+	p, err := h.repo.FindByID(ctx, ident.PostID(strings.TrimSpace(postID)))
 	if err != nil || p == nil {
 		return err
 	}
@@ -41,7 +43,7 @@ func (h *DerivedFieldsHook) AfterPostSave(ctx context.Context, postID string, _ 
 	wc, cc := countWordsAndChars(p.Content)
 	rtMin := readingTimeMinutes(wc, 200)
 	if p.Metrics == nil {
-		p.Metrics = &postDomain.PostMetrics{}
+		p.Metrics = &metrics.PostMetrics{}
 	}
 	if p.Metrics.WordCount != wc || p.Metrics.CharacterCount != cc || p.Metrics.ReadingTimeMinutes != rtMin || p.Metrics.EstReadTimeSeconds != rtMin*60 {
 		p.Metrics.WordCount = wc
@@ -61,7 +63,7 @@ func (h *DerivedFieldsHook) AfterPostSave(ctx context.Context, postID string, _ 
 	return h.repo.Update(ctx, p)
 }
 
-var _ postDomain.PostSave = (*DerivedFieldsHook)(nil)
+var _ ports.PostSave = (*DerivedFieldsHook)(nil)
 
 var markdownNoise = regexp.MustCompile(`(?m)^[#>\-\*\+]\s+`)
 var whitespace = regexp.MustCompile(`\s+`)
@@ -110,4 +112,3 @@ func readingTimeMinutes(wordCount int, wpm int) int {
 	}
 	return min
 }
-

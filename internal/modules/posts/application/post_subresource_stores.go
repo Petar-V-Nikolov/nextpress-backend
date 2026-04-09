@@ -1,25 +1,29 @@
 package application
 
 import (
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/extensions"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/metrics"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ports"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/relations"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/seo"
 )
 
 // PostSubresourceStores groups narrow persistence ports for post sub-resources.
 type PostSubresourceStores struct {
-	Reader       postDomain.PostReader
-	SEO          postDomain.PostSEOStore
-	Metrics      postDomain.PostMetricsStore
-	Featured     postDomain.PostFeaturedImageStore
-	SeriesLink   postDomain.PostSeriesLinkStore
-	Coauthors    postDomain.PostCoauthorsStore
-	Gallery      postDomain.PostGalleryStore
-	Changelog    postDomain.PostChangelogStore
-	Syndication  postDomain.PostSyndicationStore
-	Translations postDomain.PostTranslationsStore
+	Reader       ports.PostReader
+	SEO          seo.PostSEOStore
+	Metrics      metrics.PostMetricsStore
+	Featured     relations.PostFeaturedImageStore
+	SeriesLink   relations.PostSeriesLinkStore
+	Coauthors    relations.PostCoauthorsStore
+	Gallery      extensions.PostGalleryStore
+	Changelog    extensions.PostChangelogStore
+	Syndication  extensions.PostSyndicationStore
+	Translations extensions.PostTranslationsStore
 }
 
 // PostSubresourceStoresFrom adapts a full Repository into store fields (same concrete value).
-func PostSubresourceStoresFrom(r postDomain.Repository) PostSubresourceStores {
+func PostSubresourceStoresFrom(r ports.Repository) PostSubresourceStores {
 	return PostSubresourceStores{
 		Reader:       r,
 		SEO:          r,

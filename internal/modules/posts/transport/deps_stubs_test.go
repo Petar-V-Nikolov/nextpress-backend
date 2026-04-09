@@ -3,17 +3,19 @@ package transport
 import (
 	"context"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/metrics"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/seo"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/series"
 )
 
 // stubPostsSubresources is a test double for PostsSubresources (all no-ops / empty).
 type stubPostsSubresources struct{}
 
-func (stubPostsSubresources) GetMetricsForPost(_ context.Context, _ string) (*postDomain.PostMetrics, error) {
+func (stubPostsSubresources) GetMetricsForPost(_ context.Context, _ string) (*metrics.PostMetrics, error) {
 	return nil, nil
 }
 func (stubPostsSubresources) DeleteSEO(_ context.Context, _ string) error { return nil }
-func (stubPostsSubresources) UpsertSEO(_ context.Context, _ string, _ *postDomain.PostSEO) error {
+func (stubPostsSubresources) UpsertSEO(_ context.Context, _ string, _ *seo.PostSEO) error {
 	return nil
 }
 func (stubPostsSubresources) SetFeaturedImage(_ context.Context, _ string, _, _ *string, _, _ *int, _, _ *float32, _, _ *string) error {
@@ -22,7 +24,9 @@ func (stubPostsSubresources) SetFeaturedImage(_ context.Context, _ string, _, _ 
 func (stubPostsSubresources) SetPostSeries(_ context.Context, _ string, _ *string, _ *int, _ *string) error {
 	return nil
 }
-func (stubPostsSubresources) ReplaceCoauthors(_ context.Context, _ string, _ []string) error { return nil }
+func (stubPostsSubresources) ReplaceCoauthors(_ context.Context, _ string, _ []string) error {
+	return nil
+}
 func (stubPostsSubresources) CreateGalleryItem(_ context.Context, _, _ string, _ int, _, _ *string) (string, error) {
 	return "", nil
 }
@@ -52,14 +56,14 @@ func (stubPostsSubresources) ClearPostTranslation(_ context.Context, _ string) e
 
 type stubSeriesAdmin struct{}
 
-func (stubSeriesAdmin) ListSeries(_ context.Context) ([]postDomain.Series, error)    { return nil, nil }
-func (stubSeriesAdmin) CreateSeries(_ context.Context, _, _ string) (*postDomain.Series, error) {
+func (stubSeriesAdmin) ListSeries(_ context.Context) ([]series.Series, error) { return nil, nil }
+func (stubSeriesAdmin) CreateSeries(_ context.Context, _, _ string) (*series.Series, error) {
 	return nil, nil
 }
-func (stubSeriesAdmin) GetSeries(_ context.Context, _ string) (*postDomain.Series, error) {
+func (stubSeriesAdmin) GetSeries(_ context.Context, _ string) (*series.Series, error) {
 	return nil, nil
 }
-func (stubSeriesAdmin) UpdateSeries(_ context.Context, _ string, _, _ *string) (*postDomain.Series, error) {
+func (stubSeriesAdmin) UpdateSeries(_ context.Context, _ string, _, _ *string) (*series.Series, error) {
 	return nil, nil
 }
 func (stubSeriesAdmin) DeleteSeries(_ context.Context, _ string) error { return nil }

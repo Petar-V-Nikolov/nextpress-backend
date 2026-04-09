@@ -1,6 +1,18 @@
-package domain
+package series
 
-import "context"
+import (
+	"context"
+	"time"
+)
+
+// Series is a curated post series entity.
+type Series struct {
+	ID        string
+	Title     string
+	Slug      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
 
 // SeriesRepository is top-level CRUD for series.
 type SeriesRepository interface {

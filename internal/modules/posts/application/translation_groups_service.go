@@ -7,16 +7,17 @@ import (
 
 	"github.com/google/uuid"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	posterr "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/extensions"
 )
 
 // TranslationGroupsService manages translation_groups rows.
 type TranslationGroupsService struct {
-	repo postDomain.TranslationGroupRepository
+	repo extensions.TranslationGroupRepository
 }
 
 // NewTranslationGroupsService constructs the translation groups service.
-func NewTranslationGroupsService(repo postDomain.TranslationGroupRepository) *TranslationGroupsService {
+func NewTranslationGroupsService(repo extensions.TranslationGroupRepository) *TranslationGroupsService {
 	return &TranslationGroupsService{repo: repo}
 }
 
@@ -29,7 +30,7 @@ func (s *TranslationGroupsService) CreateTranslationGroup(ctx context.Context, e
 		id = uuid.NewString()
 	}
 	if err := s.repo.CreateTranslationGroup(ctx, id); err != nil {
-		if errors.Is(err, postDomain.ErrConflict) {
+		if errors.Is(err, posterr.ErrConflict) {
 			return "", ErrConflict
 		}
 		return "", err

@@ -12,7 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	postsApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ident"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/model"
 	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
 )
 
@@ -36,22 +37,22 @@ func (m mockPermissionChecker) UserHasPermission(_ context.Context, _ string, _ 
 
 // mockPostsCore implements PostsCore for route tests (only public list/slug behaviors are non-trivial).
 type mockPostsCore struct {
-	published []postDomain.Post
+	published []model.Post
 }
 
-func (m *mockPostsCore) Create(_ context.Context, _, _, _, _ string) (*postDomain.Post, error) {
+func (m *mockPostsCore) Create(_ context.Context, _, _, _, _ string) (*model.Post, error) {
 	return nil, postsApp.ErrInvalidPost
 }
 
-func (m *mockPostsCore) GetByID(_ context.Context, _ string) (*postDomain.Post, error) {
+func (m *mockPostsCore) GetByID(_ context.Context, _ string) (*model.Post, error) {
 	return nil, postsApp.ErrPostNotFound
 }
 
-func (m *mockPostsCore) ListFiltered(_ context.Context, _, _ int, _, _, _ string) ([]postDomain.Post, error) {
+func (m *mockPostsCore) ListFiltered(_ context.Context, _, _ int, _, _, _ string) ([]model.Post, error) {
 	return nil, nil
 }
 
-func (m *mockPostsCore) PublicList(_ context.Context, limit, offset int, _ string, _, _ string) ([]postDomain.Post, error) {
+func (m *mockPostsCore) PublicList(_ context.Context, limit, offset int, _ string, _, _ string) ([]model.Post, error) {
 	if offset < 0 {
 		offset = 0
 	}
@@ -60,7 +61,7 @@ func (m *mockPostsCore) PublicList(_ context.Context, limit, offset int, _ strin
 	}
 	start := offset
 	if start > len(m.published) {
-		return []postDomain.Post{}, nil
+		return []model.Post{}, nil
 	}
 	end := start + limit
 	if end > len(m.published) {
@@ -69,7 +70,7 @@ func (m *mockPostsCore) PublicList(_ context.Context, limit, offset int, _ strin
 	return m.published[start:end], nil
 }
 
-func (m *mockPostsCore) PublicGetBySlug(_ context.Context, slug string) (*postDomain.Post, error) {
+func (m *mockPostsCore) PublicGetBySlug(_ context.Context, slug string) (*model.Post, error) {
 	for i := range m.published {
 		if m.published[i].Slug == slug {
 			p := m.published[i]
@@ -79,11 +80,11 @@ func (m *mockPostsCore) PublicGetBySlug(_ context.Context, slug string) (*postDo
 	return nil, postsApp.ErrPostNotFound
 }
 
-func (m *mockPostsCore) Update(_ context.Context, _, _, _, _, _ string) (*postDomain.Post, error) {
+func (m *mockPostsCore) Update(_ context.Context, _, _, _, _, _ string) (*model.Post, error) {
 	return nil, postsApp.ErrPostNotFound
 }
 
-func (m *mockPostsCore) Save(_ context.Context, _ *postDomain.Post) (*postDomain.Post, error) {
+func (m *mockPostsCore) Save(_ context.Context, _ *model.Post) (*model.Post, error) {
 	return nil, postsApp.ErrPostNotFound
 }
 
@@ -108,14 +109,14 @@ func TestPublicPostsRoute_ReturnsPublishedPosts(t *testing.T) {
 
 	now := time.Now().UTC()
 	core := &mockPostsCore{
-		published: []postDomain.Post{
+		published: []model.Post{
 			{
-				ID:          postDomain.PostID("p1"),
+				ID:          ident.PostID("p1"),
 				AuthorID:    "a1",
 				Title:       "Hello",
 				Slug:        "hello",
 				Content:     "content",
-				Status:      postDomain.StatusPublished,
+				Status:      ident.StatusPublished,
 				PublishedAt: &now,
 				CreatedAt:   now,
 				UpdatedAt:   now,
@@ -156,7 +157,7 @@ func TestPublicPostsRoute_ReturnsPublishedPosts(t *testing.T) {
 	if out.Posts[0].Slug != "hello" {
 		t.Fatalf(`expected slug "hello", got %q`, out.Posts[0].Slug)
 	}
-	if out.Posts[0].Status != string(postDomain.StatusPublished) {
+	if out.Posts[0].Status != string(ident.StatusPublished) {
 		t.Fatalf(`expected status "published", got %q`, out.Posts[0].Status)
 	}
 }

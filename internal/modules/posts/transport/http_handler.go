@@ -8,7 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/metrics"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/model"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/seo"
 	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
 )
 
@@ -130,7 +132,7 @@ func (h *Handler) setMetrics(c *gin.Context) {
 	}
 
 	if p.Metrics == nil {
-		p.Metrics = &postDomain.PostMetrics{}
+		p.Metrics = &metrics.PostMetrics{}
 	}
 	if req.Metrics.WordCount != nil {
 		p.Metrics.WordCount = *req.Metrics.WordCount
@@ -521,7 +523,7 @@ func (h *Handler) setTags(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
-func postToJSON(p *postDomain.Post) gin.H {
+func postToJSON(p *model.Post) gin.H {
 	var publishedAt any
 	if p.PublishedAt != nil {
 		publishedAt = p.PublishedAt
@@ -751,7 +753,7 @@ func parseTimePtr(s *string) *time.Time {
 	return &tt
 }
 
-func applyCreateExtrasFromRequest(p *postDomain.Post, req *createPostRequest) {
+func applyCreateExtrasFromRequest(p *model.Post, req *createPostRequest) {
 	if req.UUID != nil {
 		p.UUID = req.UUID
 	}
@@ -807,7 +809,7 @@ func applyCreateExtrasFromRequest(p *postDomain.Post, req *createPostRequest) {
 		p.FeaturedLicense = req.FeaturedImage.License
 	}
 	if req.SEO != nil {
-		p.SEO = &postDomain.PostSEO{
+		p.SEO = &seo.PostSEO{
 			Title:          req.SEO.Title,
 			Description:    req.SEO.Description,
 			CanonicalURL:   req.SEO.CanonicalURL,
@@ -820,7 +822,7 @@ func applyCreateExtrasFromRequest(p *postDomain.Post, req *createPostRequest) {
 		}
 	}
 	if req.Metrics != nil {
-		m := &postDomain.PostMetrics{}
+		m := &metrics.PostMetrics{}
 		if req.Metrics.WordCount != nil {
 			m.WordCount = *req.Metrics.WordCount
 		}
@@ -865,7 +867,7 @@ func applyCreateExtrasFromRequest(p *postDomain.Post, req *createPostRequest) {
 	}
 }
 
-func applyUpdateExtrasFromRequest(p *postDomain.Post, req *updatePostRequest) {
+func applyUpdateExtrasFromRequest(p *model.Post, req *updatePostRequest) {
 	if req.UUID != nil {
 		p.UUID = req.UUID
 	}
@@ -934,7 +936,7 @@ func applyUpdateExtrasFromRequest(p *postDomain.Post, req *updatePostRequest) {
 	}
 	if req.SEO != nil {
 		if p.SEO == nil {
-			p.SEO = &postDomain.PostSEO{}
+			p.SEO = &seo.PostSEO{}
 		}
 		p.SEO.Title = req.SEO.Title
 		p.SEO.Description = req.SEO.Description
@@ -948,7 +950,7 @@ func applyUpdateExtrasFromRequest(p *postDomain.Post, req *updatePostRequest) {
 	}
 	if req.Metrics != nil {
 		if p.Metrics == nil {
-			p.Metrics = &postDomain.PostMetrics{}
+			p.Metrics = &metrics.PostMetrics{}
 		}
 		if req.Metrics.WordCount != nil {
 			p.Metrics.WordCount = *req.Metrics.WordCount

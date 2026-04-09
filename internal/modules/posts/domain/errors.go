@@ -12,4 +12,3 @@ var (
 	// ErrInvalidArgument indicates the request is invalid (validation failure).
 	ErrInvalidArgument = errors.New("invalid_argument")
 )
-

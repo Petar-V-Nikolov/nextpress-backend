@@ -5,7 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	postDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/metrics"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/seo"
+	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/series"
 	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
 )
 
@@ -169,7 +171,7 @@ func (h *Handler) respondFullPost(c *gin.Context, postID string, status int) {
 	c.JSON(status, postToJSON(p))
 }
 
-func metricsToGinH(m *postDomain.PostMetrics) gin.H {
+func metricsToGinH(m *metrics.PostMetrics) gin.H {
 	if m == nil {
 		return nil
 	}
@@ -191,24 +193,24 @@ func metricsToGinH(m *postDomain.PostMetrics) gin.H {
 	}
 }
 
-func seoToGinH(seo *postDomain.PostSEO) any {
-	if seo == nil {
+func seoToGinH(doc *seo.PostSEO) any {
+	if doc == nil {
 		return nil
 	}
 	return gin.H{
-		"title":          seo.Title,
-		"description":    seo.Description,
-		"canonicalUrl":   seo.CanonicalURL,
-		"robots":         seo.Robots,
-		"ogType":         seo.OGType,
-		"ogImage":        seo.OGImageURL,
-		"twitterCard":    seo.TwitterCard,
-		"structuredData": jsonToAny(seo.StructuredData),
-		"updatedAt":      seo.UpdatedAt,
+		"title":          doc.Title,
+		"description":    doc.Description,
+		"canonicalUrl":   doc.CanonicalURL,
+		"robots":         doc.Robots,
+		"ogType":         doc.OGType,
+		"ogImage":        doc.OGImageURL,
+		"twitterCard":    doc.TwitterCard,
+		"structuredData": jsonToAny(doc.StructuredData),
+		"updatedAt":      doc.UpdatedAt,
 	}
 }
 
-func seriesToGinH(s *postDomain.Series) gin.H {
+func seriesToGinH(s *series.Series) gin.H {
 	if s == nil {
 		return nil
 	}
@@ -259,7 +261,7 @@ func (h *Handler) adminPutSEO(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_payload"})
 		return
 	}
-	seo := &postDomain.PostSEO{
+	payload := &seo.PostSEO{
 		Title:        req.Title,
 		Description:  req.Description,
 		CanonicalURL: req.CanonicalURL,
@@ -269,9 +271,9 @@ func (h *Handler) adminPutSEO(c *gin.Context) {
 		TwitterCard:  req.TwitterCard,
 	}
 	if req.StructuredData != nil {
-		seo.StructuredData = anyToJSON(req.StructuredData)
+		payload.StructuredData = anyToJSON(req.StructuredData)
 	}
-	if err := h.sub.UpsertSEO(c.Request.Context(), id, seo); err != nil {
+	if err := h.sub.UpsertSEO(c.Request.Context(), id, payload); err != nil {
 		respondPostsServiceError(c, err)
 		return
 	}
