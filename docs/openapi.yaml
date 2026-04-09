@@ -37,15 +37,108 @@ components:
       type: object
       properties:
         id: { type: string }
-        author_id: { type: string }
+        uuid: { type: string, nullable: true }
+        authorId: { type: string }
+        author:
+          type: object
+          nullable: true
+          additionalProperties: true
         title: { type: string }
         slug: { type: string }
+        subtitle: { type: string }
+        excerpt: { type: string }
+        type: { type: string }
+        format: { type: string }
+        visibility: { type: string }
+        locale: { type: string }
+        timezone: { type: string }
         content: { type: string }
         status: { type: string, enum: [draft, published, archived] }
-        published_at: { type: string, nullable: true }
-        created_at: { type: string }
-        updated_at: { type: string }
-      required: [id, author_id, title, slug, status, created_at, updated_at]
+        workflowStage: { type: string }
+        revision: { type: integer }
+        reviewerUserId: { type: string, nullable: true }
+        reviewer:
+          type: object
+          nullable: true
+          additionalProperties: true
+        lastEditedByUserId: { type: string, nullable: true }
+        lastEditedBy:
+          type: object
+          nullable: true
+          additionalProperties: true
+        editors:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        scheduledPublishAt: { type: string, nullable: true }
+        publishedAt: { type: string, nullable: true }
+        firstIndexedAt: { type: string, nullable: true }
+        customFields:
+          type: object
+          additionalProperties: true
+          nullable: true
+        flags:
+          type: object
+          additionalProperties: true
+          nullable: true
+        engagement:
+          type: object
+          additionalProperties: true
+          nullable: true
+        workflow:
+          type: object
+          additionalProperties: true
+          nullable: true
+        categories:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        category:
+          type: object
+          nullable: true
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        series:
+          type: object
+          nullable: true
+          additionalProperties: true
+        syndication:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        translations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        translationGroupId: { type: string, nullable: true }
+        gallery:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        featuredImage:
+          type: object
+          nullable: true
+          additionalProperties: true
+        seo:
+          type: object
+          nullable: true
+          additionalProperties: true
+        metrics:
+          type: object
+          nullable: true
+          additionalProperties: true
+        createdAt: { type: string }
+        updatedAt: { type: string }
+      required: [id, authorId, title, slug, status, createdAt, updatedAt]
 
     page:
       type: object
@@ -489,6 +582,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "409":
+          description: Slug already taken by another post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
     delete:
       tags: [admin]
       security:
@@ -514,12 +623,17 @@ paths:
       tags: [admin]
       security:
         - bearerAuth: []
-      description: Requires `posts:write`
+      description: Requires `posts:write`. Default response is `{ok: true}`. Use query `expand=post` to return the full post object (same shape as GET /v1/admin/posts/{id}).
       parameters:
         - in: path
           name: id
           required: true
           schema: { type: string }
+        - in: query
+          name: expand
+          required: false
+          schema: { type: string, enum: [post] }
+          description: If `post`, response body is the full post instead of `{ok: true}`.
       requestBody:
         required: true
         content:
@@ -533,15 +647,57 @@ paths:
               required: [ids]
       responses:
         "200":
+          description: Either `{ok: true}` or full post when `expand=post`.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok: { type: boolean }
-                required: [ok]
+                oneOf:
+                  - type: object
+                    properties:
+                      ok: { type: boolean }
+                    required: [ok]
+                  - $ref: "#/components/schemas/post"
 
   /v1/admin/posts/{id}/tags:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`. Default `{ok: true}`; optional `expand=post` returns full post.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: expand
+          required: false
+          schema: { type: string, enum: [post] }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items: { type: string }
+              required: [ids]
+      responses:
+        "200":
+          description: Either `{ok: true}` or full post when `expand=post`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      ok: { type: boolean }
+                    required: [ok]
+                  - $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/metrics:
     put:
       tags: [admin]
       security:
@@ -559,10 +715,507 @@ paths:
             schema:
               type: object
               properties:
-                ids:
+                metrics:
+                  type: object
+                  additionalProperties: true
+              required: [metrics]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/primary-category:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId: { type: string, nullable: true }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/metrics:
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:read`. Returns metrics row if present.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics: { type: object, nullable: true, additionalProperties: true }
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/admin/posts/{id}/seo:
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:read`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  seo: { type: object, nullable: true, additionalProperties: true }
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/featured-image:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/series-link:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`. Omit or null `seriesId` to unlink.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                seriesId: { type: string, nullable: true }
+                partIndex: { type: integer, nullable: true }
+                partLabel: { type: string, nullable: true }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/coauthors:
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:read`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  coAuthors:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userIds:
                   type: array
                   items: { type: string }
-              required: [ids]
+              required: [userIds]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/gallery:
+    post:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mediaId: { type: string }
+                sortOrder: { type: integer }
+                caption: { type: string, nullable: true }
+                alt: { type: string, nullable: true }
+              required: [mediaId]
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  itemId: { type: string }
+                  post:
+                    $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/gallery/{itemId}:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: itemId
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: itemId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/changelog:
+    post:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`. Defaults `userId` to the caller when omitted.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId: { type: string, nullable: true }
+                note: { type: string }
+              required: [note]
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  changelogId: { type: string }
+                  post:
+                    $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/changelog/{changelogId}:
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: changelogId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/syndication:
+    post:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                platform: { type: string }
+                url: { type: string }
+                status: { type: string }
+              required: [platform, url]
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  syndicationId: { type: string }
+                  post:
+                    $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/syndication/{syndicationId}:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: syndicationId
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: syndicationId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/posts/{id}/translations:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`. Creates a translation group if `groupId` is omitted.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupId: { type: string, nullable: true }
+                locale: { type: string }
+              required: [locale]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  translationGroupId: { type: string }
+                  post:
+                    $ref: "#/components/schemas/post"
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Clears this post's translation row.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/post"
+
+  /v1/admin/syndication/{id}:
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`. Updates by syndication row id (any post).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
       responses:
         "200":
           content:
@@ -571,7 +1224,213 @@ paths:
                 type: object
                 properties:
                   ok: { type: boolean }
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+
+  /v1/admin/series:
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:read`
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+    post:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                slug: { type: string }
+              required: [title, slug]
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /v1/admin/series/{id}:
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+    put:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                slug: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Use query `expand=series` to include a snapshot of the deleted series in the response.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: expand
+          required: false
+          schema:
+            type: string
+            enum: [series]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  series:
+                    type: object
+                    additionalProperties: true
                 required: [ok]
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/admin/translation-groups:
+    post:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:write`. Empty body generates an id; optional `id` to use a specific UUID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: string, nullable: true }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/admin/translation-groups/{id}:
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:read`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+    delete:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
 
   /v1/admin/pages:
     get:
