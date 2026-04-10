@@ -1,49 +1,52 @@
-# Database Seeding
+# Database seeding
 
-Seeders populate reference data and optional development data. They are **idempotent**: running them multiple times will not duplicate rows that use `ON CONFLICT DO NOTHING` (permissions by `code`, roles by `name`, etc.).
+**How-to** — run seeders and understand default RBAC data.
+
+Seeders load **reference data** (especially RBAC). They are **idempotent**: natural keys use `ON CONFLICT DO NOTHING` (or equivalent) so repeat runs do not duplicate roles, permissions, etc.
 
 ## Prerequisites
 
-- Database migrations have been applied (`make migrate-up`).
-- `.env` has valid `DB_*` settings so the seed command can connect (same as `cmd/migrate`).
+1. Migrations applied: `make migrate-up`.
+2. `.env` contains valid `DB_*` (same as `cmd/migrate` / `cmd/seed`).
 
-## How to run
+## Run
 
 ```bash
 make seed
-# or
-go run ./cmd/seed
-# or build
-make seed-build && ./bin/seed
+# or: go run ./cmd/seed
+# or: make seed-build && ./bin/seed
 ```
 
-## What is seeded
+## RBAC defaults
 
-### RBAC defaults (`pkg/seed/rbac_defaults.go`)
+Source: `pkg/seed/rbac_defaults.go`.
 
-**Role**
+### Role
 
-| Name   | Notes        |
-|--------|--------------|
-| `admin`| Seeded UUID `00000000-0000-0000-0000-000000000001` |
+| Name | Notes |
+|------|--------|
+| `admin` | Fixed UUID `00000000-0000-0000-0000-000000000001` |
 
-**Permissions** (all granted to `admin`)
+### Permissions (granted to `admin`)
 
-| Code               | Used for |
-|--------------------|----------|
-| `admin:ping`       | `GET /v1/admin/ping` |
-| `rbac:manage`      | Admin RBAC APIs (`/v1/admin/roles`, `/permissions`, assign role/permission) |
-| `posts:read` / `posts:write` | Post CRUD + taxonomy assignment on posts |
-| `pages:read` / `pages:write` | Page CRUD |
+| Code | Typical use |
+|------|-------------|
+| `admin:ping` | `GET /v1/admin/ping` |
+| `rbac:manage` | Role/permission APIs, user–role assignment |
+| `posts:read` / `posts:write` | Posts and post–taxonomy links |
+| `pages:read` / `pages:write` | Pages |
 | `categories:read` / `categories:write` | Categories |
 | `tags:read` / `tags:write` | Tags |
-| `media:read` / `media:write` | Media upload/list |
-| `menus:read` / `menus:write` | Menus + items |
-| `plugins:manage`   | `GET/POST /v1/admin/plugins`, `PUT /v1/admin/plugins/:id` |
+| `media:read` / `media:write` | Media |
+| `menus:read` / `menus:write` | Menus and items |
+| `plugins:manage` | Plugin admin endpoints |
 
-After seeding, assign the `admin` role to a user (via RBAC API or one-time bootstrap — see `docs/PHASES.md` Phase 3).
+After seeding, assign `admin` to a user via RBAC APIs or optional bootstrap — see [`ROADMAP.md`](ROADMAP.md) (RBAC).
 
-## Related
+## Deploy
 
-- **Migrations:** `make migrate-up` / `cmd/migrate`
-- **Deploy:** optional seed on deploy via `RUN_SEED_ON_DEPLOY` (see `scripts/deploy`)
+`RUN_SEED_ON_DEPLOY=true` in `.env` runs `./bin/seed` during `scripts/deploy`.
+
+---
+
+**See also:** [Documentation index](README.md) · [Deployment](DEPLOYMENT.md) · [TODO](TODO.md) (**Auth & users** / **RBAC** sections)

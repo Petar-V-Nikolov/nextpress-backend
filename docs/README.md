@@ -1,31 +1,47 @@
 # Documentation
 
-This folder contains the longer-form docs. For quick start, configuration, and common commands see the repository root `README.md`.
+How this folder is organised (aligned with [Diátaxis](https://diataxis.fr/): tutorials, how-to, reference, explanation).
 
-## Start here
+| Type | Document | Purpose |
+|------|----------|---------|
+| **Tutorial** | [Root `README.md`](../README.md) | Fast path: clone, configure, run locally. |
+| **How-to** | [Deployment (servers)](DEPLOYMENT.md) | Ubuntu, Nginx, systemd, `scripts/deploy`, branches. |
+| **How-to** | [Local development](deployment/local.md) | Laptop setup, optional ES/GraphQL, tests. |
+| **How-to** | [Database seeding](SEEDING.md) | Run seeders, RBAC defaults, permission codes. |
+| **Reference** | [`openapi.yaml`](openapi.yaml) | REST paths, request/response schemas. |
+| **Reference** | [`internal/graphql/schema.graphqls`](../internal/graphql/schema.graphqls) | GraphQL schema (not in OpenAPI). |
+| **Reference** | [`.env.example`](../.env.example) | All environment variables. |
+| **Explanation** | [Roadmap](ROADMAP.md) | What is shipped, current themes, future direction. |
+| **Task list** | [TODO](TODO.md) | Full shipped/`[ ]` open checklist; keep in sync with code. |
 
-| Document | Use it when you need… |
-|----------|------------------------|
-| [PHASES.md](PHASES.md) | The roadmap: what’s implemented and what to build next |
-| [openapi.yaml](openapi.yaml) | The API contract (routes + schemas); optional GraphQL is separate — see `internal/graphql/schema.graphqls` |
-| [SEEDING.md](SEEDING.md) | RBAC defaults, seeded role/permission codes, and seeding commands |
+**Contributors:** [Contributing guide](../CONTRIBUTING.md).
 
-## Working with branches / environments
+## How these docs connect
 
-| Document | Use it when you need… |
-|----------|------------------------|
-| [GIT_FLOW.md](GIT_FLOW.md) | How `dev` / `staging` / `main` map to deployments; promotion and hotfix flows |
+```text
+../README.md  ─────────────►  quick start, stack, links into docs/
+       │
+       ▼
+docs/README.md  (this page) ─►  map of every doc
+       │
+       ├── ROADMAP.md  ───────►  short “why / shipped / themes”
+       ├── TODO.md  ──────────►  full [x] / [ ] checklist (source of truth for scope)
+       ├── openapi.yaml  ─────►  REST reference
+       ├── DEPLOYMENT.md + deployment/local.md  ─►  run on server vs laptop
+       ├── SEEDING.md  ───────►  RBAC seed + permission table
+       └── CONTRIBUTING.md  ──►  when to update the above on a PR
+```
 
-## Deployment
+- **Start here** if you are new: [root `README.md`](../README.md) → then come back to this index.
+- **Track work:** edit [`TODO.md`](TODO.md) with the code; refresh [`ROADMAP.md`](ROADMAP.md) when themes change ([`CONTRIBUTING.md`](../CONTRIBUTING.md)).
 
-| Document | Use it when you need… |
-|----------|------------------------|
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment hub (Ubuntu, systemd, Nginx, TLS) |
-| [deployment/local.md](deployment/local.md) | Run locally (no systemd/Nginx) |
-| [deployment/dev.md](deployment/dev.md) | Deploy the `dev` environment |
-| [deployment/staging.md](deployment/staging.md) | Deploy the `staging` environment |
-| [deployment/production.md](deployment/production.md) | Deploy the `production` environment (`main`) |
+## Machine-readable API
 
-## Notes
+Import [`openapi.yaml`](openapi.yaml) into Postman, Stoplight, or your gateway. Regenerate GraphQL code after schema edits: `make graphql`.
 
-- Deployment templates live in `deploy/` (with their own READMEs).
+## Config templates
+
+- `deploy/systemd/nextpress-backend@.service`
+- `deploy/nginx/*.conf`
+
+Instructions live in [DEPLOYMENT.md](DEPLOYMENT.md).

@@ -1,104 +1,106 @@
-# Makefile for nextpress-backend
+# NextPress Backend — developer tasks
+#
+# Requires: Go (see go.mod), PostgreSQL for migrate/seed/run.
+# Config: copy .env.example to .env (DB_*, JWT_*, etc.).
 
-# Default environment for local runs (see .env for deployed servers)
-APP_ENV ?= local
+# Binaries written under bin/
+BINARY_NAME   := server
+MIGRATE_BINARY := migrate
+SEED_BINARY   := seed
 
-# Build variables
-BINARY_NAME=server
-MIGRATE_BINARY=migrate
-SEED_BINARY=seed
+# migrate-steps: direction (up = apply N, down = roll back N)
+MIGRATE_CMD ?= up
 
-.PHONY: all build run clean test migrate-up migrate-down migrate-steps migrate-drop migrate-version seed seed-build db-fresh help tidy deps graphql
+.PHONY: help all build run clean \
+	test test-coverage tidy deps graphql \
+	seed seed-build \
+	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh
 
-## help: Display this help message
+## help: List targets and short descriptions
 help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@sed -n 's/^##//p' $(MAKEFILE_LIST) | column -t -s ':' | sed -e 's/^/ /'
+	@sed -n 's/^##//p' $(MAKEFILE_LIST) | column -t -s ':' | sed -e 's/^/  /'
 
-## all: Build the server binary
+## all: Same as build
 all: build
 
-## build: Build the API server binary (bin/server)
+## build: Produce bin/server from cmd/api
 build:
-	@echo "Building nextpress-backend server..."
-	mkdir -p bin
+	@echo "Building $(BINARY_NAME)..."
+	@mkdir -p bin
 	go build -o bin/$(BINARY_NAME) ./cmd/api
 	@echo "Done."
 
-## run: Run the API server directly with go run
+## run: Start the API with go run (loads .env from cwd if present)
 run:
 	go run ./cmd/api
 
-## clean: Clean build artifacts
+## clean: Remove bin/ and go clean
 clean:
 	rm -rf bin/
 	go clean
 
-# =============================================================================
-# Database Seeding
-# =============================================================================
+# --- Database: seed -----------------------------------------------------------
 
-## seed: Run all seeders
+## seed: Run seeders (go run ./cmd/seed)
 seed:
 	go run ./cmd/seed
 
-## seed-build: Build the seed binary (bin/seed)
+## seed-build: Build bin/seed
 seed-build:
-	@echo "Building seed binary..."
-	mkdir -p bin
+	@echo "Building $(SEED_BINARY)..."
+	@mkdir -p bin
 	go build -o bin/$(SEED_BINARY) ./cmd/seed
 	@echo "Done."
 
-# =============================================================================
-# Database Migrations (see migrations/ and cmd/migrate)
-# =============================================================================
+# --- Database: migrations (migrations/, cmd/migrate) ---------------------------
 
-## migrate-up: Run all pending migrations
+## migrate-up: Apply all pending migrations
 migrate-up:
 	go run ./cmd/migrate -command=up
 
-## migrate-down: Rollback the last migration
+## migrate-down: Roll back one migration (-steps=1; omitting steps would roll back all)
 migrate-down:
-	go run ./cmd/migrate -command=down
+	go run ./cmd/migrate -command=down -steps=1
 
-## migrate-steps: Run a specific number of migration steps
+## migrate-steps: Apply or roll back STEPS migrations (MIGRATE_CMD=up|down)
 migrate-steps:
-	@echo "Usage: make migrate-steps STEPS=n"
-	@true
+	@test -n "$(STEPS)" || (echo >&2 "Usage: make migrate-steps STEPS=n [MIGRATE_CMD=up|down]"; exit 1)
+	go run ./cmd/migrate -command=$(MIGRATE_CMD) -steps=$(STEPS)
 
-## migrate-version: Show current migration version
+## migrate-version: Print current schema version / dirty flag
 migrate-version:
 	go run ./cmd/migrate -command=version
 
-## migrate-drop: Drop all tables (dangerous)
+## migrate-drop: Drop all tables (interactive confirm)
 migrate-drop:
-	@echo "WARNING: This will drop all tables in the database!"
-	@read -p "Are you sure? [y/N] " confirm && [ $${confirm:-N} = y ]
+	@echo "WARNING: This drops all tables in the configured database."
+	@read -p "Type y to continue: " confirm && [ "$${confirm:-N}" = y ]
 	go run ./cmd/migrate -command=drop
 
-## db-fresh: Drop all tables then run all migrations
-db-fresh:
-	$(MAKE) migrate-drop
-	$(MAKE) migrate-up
+## db-fresh: migrate-drop then migrate-up (destructive)
+db-fresh: migrate-drop migrate-up
 
-## test: Run tests
+# --- Tests and modules ---------------------------------------------------------
+
+## test: Run all tests with verbose output
 test:
 	go test -v ./...
 
-## test-coverage: Run tests with coverage
+## test-coverage: Run tests with coverage summary
 test-coverage:
 	go test -cover ./...
 
-## tidy: Tidy up dependencies
+## tidy: go mod tidy
 tidy:
 	go mod tidy
 
-## deps: Download dependencies
+## deps: go mod download
 deps:
 	go mod download
 
-## graphql: Regenerate code from internal/graphql/schema.graphqls (gqlgen)
+## graphql: Regenerate gqlgen code from internal/graphql/schema.graphqls
 graphql:
 	go run github.com/99designs/gqlgen generate

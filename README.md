@@ -1,30 +1,27 @@
-# nextpress-backend
+# NextPress Backend
 
-Production-oriented **CMS API** in Go.
+Headless-style **CMS HTTP API** in Go: **REST** ([OpenAPI](docs/openapi.yaml)), optional **GraphQL**, **PostgreSQL**, **JWT** auth, **RBAC** on admin routes.
 
-- **Architecture**: modular monolith (`internal/modules/*`)
-- **HTTP**: Gin
-- **DB**: PostgreSQL + GORM + SQL migrations (`migrations/`, `cmd/migrate`)
-- **Auth**: bcrypt passwords, JWT access + refresh
-- **Authorization**: RBAC permissions on `/v1/admin/*`
-- **CMS core**: posts, pages, taxonomy (categories/tags), media, menus (+ public read APIs)
-- **Hardening**: request IDs + structured logs, in-memory rate limiting
-- **Extensibility (WIP)**: plugin registry + post-save hook chain
+**Docs:** [`docs/README.md`](docs/README.md) (index) · **Checklist:** [`docs/TODO.md`](docs/TODO.md) · **Direction:** [`docs/ROADMAP.md`](docs/ROADMAP.md) · **Contributing:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
-## Status / roadmap
+## Stack
 
-This repo is developed in phases (infra → auth → RBAC → CMS core → plugins). The authoritative roadmap is `docs/PHASES.md`.
+| | |
+|--|--|
+| Layout | Modular monolith — `internal/modules/*` |
+| HTTP | Gin |
+| Persistence | GORM + SQL migrations (`migrations/`, `cmd/migrate`) |
+| Plugins | Registry + post-save hooks — status: [roadmap](docs/ROADMAP.md), tasks: [TODO](docs/TODO.md#plugins) |
 
 ## Requirements
 
-- **Go**: 1.26 (see `go.mod`)
-- **PostgreSQL**: required for a working API (auth/CMS/RBAC)
+- Go ≥ 1.26 ([`go.mod`](go.mod))
+- PostgreSQL
 
-## Quick start (local)
+## Quick start
 
 ```bash
-cp .env.example .env
-# edit .env: set DB_* to your Postgres, change JWT_SECRET
+cp .env.example .env   # set DB_* and JWT_SECRET
 
 make deps
 make migrate-up
@@ -32,78 +29,50 @@ make seed
 make run
 ```
 
-- **Base URL**: `http://localhost:<APP_PORT>` (default `9090`)
-- **Health**: `GET /health`
-- **Readiness** (DB check): `GET /ready`
-- **API spec**: `docs/openapi.yaml`
+| | |
+|--|--|
+| API | `http://localhost:9090` (`APP_PORT`) |
+| Health | `GET /health` · `GET /ready` |
+| REST spec | [`docs/openapi.yaml`](docs/openapi.yaml) |
 
-## Common commands
+## Makefile
 
 ```bash
 make help
-make build
-make test
-make tidy
-
-make migrate-up
-make migrate-down
-make migrate-version
-make db-fresh   # dangerous: drops all tables
-
+make build run test tidy deps
+make migrate-up migrate-down migrate-version
+make db-fresh          # destructive
 make seed
-
-# Regenerate GraphQL code after schema changes (requires gqlgen)
-make graphql
+make graphql           # after editing internal/graphql/schema.graphqls
 ```
 
-## Configuration (.env)
+Configuration: [`.env.example`](.env.example). Optional Elasticsearch / GraphQL notes: [`docs/deployment/local.md`](docs/deployment/local.md).
 
-Primary reference is `.env.example` (all variables, with short notes). Highlights:
+## API surface (summary)
 
-- **App**: `APP_NAME`, `APP_ENV`, `APP_PORT`
-- **Database**: `DB_*` (host/port/name/user/password/sslmode)
-- **JWT**: `JWT_SECRET`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL`
-- **RBAC bootstrap** (optional): `RBAC_BOOTSTRAP_ENABLED=true` enables `POST /v1/admin/bootstrap/claim-admin`
-- **Media**: `MEDIA_STORAGE_DIR`, `MEDIA_PUBLIC_BASE_URL`, `MEDIA_MAX_UPLOAD_BYTES`
-- **Rate limiting**: `RATE_LIMIT_ENABLED`, `RATE_LIMIT_*_MAX_PER_MINUTE`
-- **GraphQL** (optional): `GRAPHQL_ENABLED`, `GRAPHQL_PATH`, `GRAPHQL_PLAYGROUND_ENABLED` (playground only mounts when `APP_ENV` is `local` or `dev`) — schema in `internal/graphql/schema.graphqls` (not in OpenAPI)
-- **Elasticsearch** (optional): `ELASTICSEARCH_ENABLED`, `ELASTICSEARCH_URLS`, `ELASTICSEARCH_INDEX_PREFIX`, auth (`ELASTICSEARCH_API_KEY` or user/password), `ELASTICSEARCH_AUTO_CREATE_INDEX` — see `docs/deployment/local.md`
+- **Auth:** `POST /v1/auth/register`, `/login`, `/refresh`
+- **Public:** posts, pages, menus (and search when Elasticsearch is enabled)
+- **GraphQL:** if enabled — `GRAPHQL_PATH` (default `/v1/graphql`)
+- **Admin:** `/v1/admin/*` — JWT + permissions
 
-## API overview
+Details: OpenAPI and source.
 
-- **Auth**: `POST /v1/auth/register`, `/v1/auth/login`, `/v1/auth/refresh`
-- **Public read** (no auth): `GET /v1/posts`, `/v1/posts/:slug`, `GET /v1/posts/search` (when Elasticsearch is enabled), `/v1/pages/:slug`, `/v1/menus/:slug`
-- **GraphQL** (no auth for read-only queries when enabled): `post`, `posts`, `page(slug)` — `POST`/`GET` on `GRAPHQL_PATH` (default `/v1/graphql`)
-- **Admin**: `/v1/admin/*` (JWT + permission checks); optional `POST /v1/admin/posts/search/reindex` when Elasticsearch is enabled (`posts:write`)
+## RBAC
 
-Full list and schemas are in `docs/openapi.yaml`.
-
-## RBAC: getting an admin user
-
-RBAC defaults are seeded by `make seed` (see `docs/SEEDING.md`). After you have at least one registered user:
-
-- **Recommended**: use the RBAC admin APIs (guarded by `rbac:manage`) to assign roles/permissions
-- **Optional**: enable the one-time bootstrap endpoint with `RBAC_BOOTSTRAP_ENABLED=true` (see `cmd/api/main.go` and `docs/PHASES.md`)
+[`make seed`](docs/SEEDING.md) loads default roles and permissions. Assign `admin` via RBAC APIs or optional bootstrap (`RBAC_BOOTSTRAP_ENABLED`) — see [roadmap](docs/ROADMAP.md).
 
 ## Repository layout
 
 ```text
-cmd/          entrypoints (api, migrate, seed)
-internal/     app code (config, platform, modules, server wiring)
-migrations/   timestamped SQL migrations
-pkg/          shared libraries used by entrypoints
-deploy/       nginx + systemd templates
-docs/         roadmap, deployment, seeding, OpenAPI
-scripts/      deploy + local run helpers
-Makefile      developer commands
+cmd/          api, migrate, seed
+internal/     config, platform, graphql, server, modules
+migrations/   SQL
+pkg/          shared libraries
+deploy/       nginx, systemd templates
+docs/         guides, OpenAPI (see docs/README.md)
+scripts/      deploy, local run
 ```
 
-## Git workflow and deployment
+## Deployment
 
-- **Branches**: `dev` → `staging` → `main` (promotion by merge + push)
-- **Workflow**: `docs/GIT_FLOW.md`
-- **Deployment hub**: `docs/DEPLOYMENT.md` and `docs/deployment/*.md`
-
-## Documentation index
-
-Start at `docs/README.md`.
+Servers and Git flow: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Local deep-dive: [`docs/deployment/local.md`](docs/deployment/local.md).
