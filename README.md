@@ -59,7 +59,7 @@ Details: OpenAPI and source.
 
 ## RBAC
 
-[`make seed`](docs/SEEDING.md) loads default roles and permissions. Assign `admin` via RBAC APIs or optional bootstrap (`RBAC_BOOTSTRAP_ENABLED`) - see [roadmap](docs/ROADMAP.md).
+[`make seed`](docs/SEEDING.md) runs all seeders: RBAC defaults, a seeded `superadmin`, and 100 deterministic records per content table for local/dev datasets.
 
 ## Repository layout
 
