@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -21,6 +22,7 @@ func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
 
 	// Global middleware stack. We keep this minimal in Phase 1 and will extend
 	// it (e.g. for authentication, request IDs, metrics) in later phases.
+	engine.Use(cors.New(buildCORSConfig()))
 	engine.Use(gin.Recovery())
 	engine.Use(platformMiddleware.RequestIDMiddleware())
 	engine.Use(requestLoggingMiddleware(log))
