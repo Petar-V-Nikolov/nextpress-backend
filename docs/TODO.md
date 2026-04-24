@@ -110,7 +110,7 @@
 - [x] Client config + env vars (`.env.example`)
 - [x] Posts index + public search + admin reindex when enabled
 - [x] Indexing on save / scheduled publish path (when ES on)
-- [ ] Operational runbook: index templates, upgrades, multi-cluster (beyond current docs)
+- [x] Operational runbook: index templates, upgrades, multi-cluster (beyond current docs)
 
 ---
 

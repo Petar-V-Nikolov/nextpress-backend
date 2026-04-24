@@ -7,6 +7,7 @@ How this folder is organised (aligned with [Diátaxis](https://diataxis.fr/): tu
 | **Tutorial** | [Root `README.md`](../README.md) | Fast path: clone, configure, run locally. |
 | **How-to** | [Deployment (servers)](DEPLOYMENT.md) | Ubuntu, Nginx, systemd, `scripts/deploy`, branches. |
 | **How-to** | [Local development](deployment/local.md) | Laptop setup, optional Nginx/systemd, ES/GraphQL, tests. |
+| **How-to** | [Elasticsearch operations runbook](ELASTICSEARCH_OPERATIONS.md) | Index templates, upgrades/reindex, multi-cluster operations. |
 | **How-to** | [Database seeding](SEEDING.md) | Run seeders, RBAC defaults, permission codes. |
 | **Reference** | [`openapi.yaml`](openapi.yaml) | REST paths, request/response schemas. |
 | **Reference** | [`internal/graphql/schema.graphqls`](../internal/graphql/schema.graphqls) | GraphQL schema (not in OpenAPI). |
@@ -27,6 +28,7 @@ docs/README.md  (this page) ─►  map of every doc
        ├── ROADMAP.md  ───────►  short “why / shipped / themes”
        ├── TODO.md  ──────────►  full [x] / [ ] checklist (source of truth for scope)
        ├── openapi.yaml  ─────►  REST reference
+       ├── ELASTICSEARCH_OPERATIONS.md  ─►  ES templates, upgrades, multi-cluster runbook
        ├── DEPLOYMENT.md + deployment/local.md  ─►  run on server vs laptop
        ├── SEEDING.md  ───────►  RBAC seed + permission table
        └── CONTRIBUTING.md  ──►  when to update the above on a PR
