@@ -133,6 +133,7 @@
 - [x] Posts derived-fields hook test
 - [x] Config tests (GraphQL / ES-related)
 - [x] Auth application service unit tests (register/login/refresh paths)
+- [x] RBAC application service unit tests (roles/permissions/assignments)
 - [ ] **Unit tests** for: `auth`, `rbac`, `user`, `pages`, `taxonomy`, `media`, `menus`, `plugins` transport/application (most modules)
 - [ ] **Integration tests** with real Postgres (docker or CI service)
 - [ ] **CI workflow** (GitHub Actions or other): `go test`, `go vet`, optional `golangci-lint`
