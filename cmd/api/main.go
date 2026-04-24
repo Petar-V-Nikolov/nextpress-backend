@@ -365,6 +365,9 @@ UPDATE posts
 			Resolvers: &gqlapi.Resolver{
 				PostsCore: postsService.CorePostsService,
 				Pages:     pagesService,
+				Taxonomy:  taxService,
+				Menus:     menusService,
+				Search:    postsIdx,
 			},
 		}))
 		path := strings.TrimSpace(graphqlCfg.Path)

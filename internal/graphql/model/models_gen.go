@@ -2,6 +2,29 @@
 
 package model
 
+type Category struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
+type Menu struct {
+	ID    string      `json:"id"`
+	Name  string      `json:"name"`
+	Slug  string      `json:"slug"`
+	Items []*MenuItem `json:"items"`
+}
+
+type MenuItem struct {
+	ID        string  `json:"id"`
+	ParentID  *string `json:"parentId,omitempty"`
+	Label     string  `json:"label"`
+	ItemType  string  `json:"itemType"`
+	RefID     *string `json:"refId,omitempty"`
+	URL       *string `json:"url,omitempty"`
+	SortOrder int     `json:"sortOrder"`
+}
+
 type Page struct {
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`
@@ -24,4 +47,10 @@ type PostConnection struct {
 }
 
 type Query struct {
+}
+
+type Tag struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
 }

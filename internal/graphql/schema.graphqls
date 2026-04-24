@@ -19,8 +19,41 @@ type PostConnection {
   posts: [Post!]!
 }
 
+type Category {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type MenuItem {
+  id: ID!
+  parentId: ID
+  label: String!
+  itemType: String!
+  refId: String
+  url: String
+  sortOrder: Int!
+}
+
+type Menu {
+  id: ID!
+  name: String!
+  slug: String!
+  items: [MenuItem!]!
+}
+
 type Query {
   post(slug: String!): Post
   posts(limit: Int, offset: Int): PostConnection!
+  searchPosts(q: String!, limit: Int, offset: Int): PostConnection!
   page(slug: String!): Page
+  categories(limit: Int, offset: Int): [Category!]!
+  tags(limit: Int, offset: Int): [Tag!]!
+  menu(slug: String!): Menu
 }

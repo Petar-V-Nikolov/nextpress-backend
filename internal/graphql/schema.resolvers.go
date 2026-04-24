@@ -11,6 +11,7 @@ import (
 
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/generated"
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/model"
+	menuApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/application"
 	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
 	postApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
 )
@@ -54,6 +55,38 @@ func (r *queryResolver) Posts(ctx context.Context, limit *int, offset *int) (*mo
 	return &model.PostConnection{Posts: out}, nil
 }
 
+// SearchPosts is the resolver for the searchPosts field.
+func (r *queryResolver) SearchPosts(ctx context.Context, q string, limit *int, offset *int) (*model.PostConnection, error) {
+	if r.PostsCore == nil {
+		return &model.PostConnection{Posts: []*model.Post{}}, nil
+	}
+	if r.Search == nil {
+		return &model.PostConnection{Posts: []*model.Post{}}, nil
+	}
+
+	lim := 0
+	if limit != nil {
+		lim = *limit
+	}
+	off := 0
+	if offset != nil {
+		off = *offset
+	}
+	ids, err := r.Search.SearchPostIDs(ctx, q, lim, off)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.Post, 0, len(ids))
+	for _, id := range ids {
+		p, err := r.PostsCore.GetByID(ctx, id)
+		if err != nil || p == nil {
+			continue
+		}
+		out = append(out, domainPostToGQL(p))
+	}
+	return &model.PostConnection{Posts: out}, nil
+}
+
 // Page is the resolver for the page field.
 func (r *queryResolver) Page(ctx context.Context, slug string) (*model.Page, error) {
 	if r.Pages == nil {
@@ -67,6 +100,69 @@ func (r *queryResolver) Page(ctx context.Context, slug string) (*model.Page, err
 		return nil, err
 	}
 	return domainPageToGQL(p), nil
+}
+
+// Categories is the resolver for the categories field.
+func (r *queryResolver) Categories(ctx context.Context, limit *int, offset *int) ([]*model.Category, error) {
+	if r.Taxonomy == nil {
+		return []*model.Category{}, nil
+	}
+	lim := 0
+	if limit != nil {
+		lim = *limit
+	}
+	off := 0
+	if offset != nil {
+		off = *offset
+	}
+	list, err := r.Taxonomy.ListCategories(ctx, lim, off)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.Category, 0, len(list))
+	for i := range list {
+		out = append(out, domainCategoryToGQL(&list[i]))
+	}
+	return out, nil
+}
+
+// Tags is the resolver for the tags field.
+func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*model.Tag, error) {
+	if r.Taxonomy == nil {
+		return []*model.Tag{}, nil
+	}
+	lim := 0
+	if limit != nil {
+		lim = *limit
+	}
+	off := 0
+	if offset != nil {
+		off = *offset
+	}
+	list, err := r.Taxonomy.ListTags(ctx, lim, off)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.Tag, 0, len(list))
+	for i := range list {
+		out = append(out, domainTagToGQL(&list[i]))
+	}
+	return out, nil
+}
+
+// Menu is the resolver for the menu field.
+func (r *queryResolver) Menu(ctx context.Context, slug string) (*model.Menu, error) {
+	if r.Menus == nil {
+		return nil, nil
+	}
+	menu, items, err := r.Menus.PublicGetMenuBySlug(ctx, slug)
+	if err != nil {
+		if errors.Is(err, menuApp.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return domainMenuToGQL(menu, items), nil
 }
 
 // Query returns generated.QueryResolver implementation.
