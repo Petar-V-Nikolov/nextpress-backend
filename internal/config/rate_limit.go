@@ -10,6 +10,12 @@ type RateLimitConfig struct {
 	AdminMaxPerMinute  int
 
 	Window time.Duration
+
+	RedisEnabled  bool
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
+	RedisPrefix   string
 }
 
 func LoadRateLimitConfig() RateLimitConfig {
@@ -18,7 +24,12 @@ func LoadRateLimitConfig() RateLimitConfig {
 		PublicMaxPerMinute: parseInt(GetEnv("RATE_LIMIT_PUBLIC_MAX_PER_MINUTE", "120"), 120),
 		AuthMaxPerMinute:   parseInt(GetEnv("RATE_LIMIT_AUTH_MAX_PER_MINUTE", "30"), 30),
 		AdminMaxPerMinute:  parseInt(GetEnv("RATE_LIMIT_ADMIN_MAX_PER_MINUTE", "60"), 60),
-		Window:           time.Minute,
+		Window:            time.Minute,
+		RedisEnabled:      parseBool(GetEnv("RATE_LIMIT_REDIS_ENABLED", "false")),
+		RedisAddr:         GetEnv("RATE_LIMIT_REDIS_ADDR", ""),
+		RedisPassword:     GetEnv("RATE_LIMIT_REDIS_PASSWORD", ""),
+		RedisDB:           parseInt(GetEnv("RATE_LIMIT_REDIS_DB", "0"), 0),
+		RedisPrefix:       GetEnv("RATE_LIMIT_REDIS_PREFIX", "nextpress:ratelimit"),
 	}
 }
 

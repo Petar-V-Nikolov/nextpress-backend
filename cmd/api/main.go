@@ -12,6 +12,7 @@ import (
 	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/config"
@@ -270,9 +271,28 @@ UPDATE posts
 		adminMax = 0
 	}
 
-	publicLimiter := platformMiddleware.NewFixedWindowRateLimiter(publicMax, rateCfg.Window)
-	authLimiter := platformMiddleware.NewFixedWindowRateLimiter(authMax, rateCfg.Window)
-	adminLimiter := platformMiddleware.NewFixedWindowRateLimiter(adminMax, rateCfg.Window)
+	type rateLimiter interface {
+		Middleware(scope string) gin.HandlerFunc
+	}
+	var publicLimiter rateLimiter = platformMiddleware.NewFixedWindowRateLimiter(publicMax, rateCfg.Window)
+	var authLimiter rateLimiter = platformMiddleware.NewFixedWindowRateLimiter(authMax, rateCfg.Window)
+	var adminLimiter rateLimiter = platformMiddleware.NewFixedWindowRateLimiter(adminMax, rateCfg.Window)
+	if rateCfg.RedisEnabled && strings.TrimSpace(rateCfg.RedisAddr) != "" {
+		redisClient := redis.NewClient(&redis.Options{
+			Addr:     rateCfg.RedisAddr,
+			Password: rateCfg.RedisPassword,
+			DB:       rateCfg.RedisDB,
+		})
+		if err := redisClient.Ping(ctx).Err(); err != nil {
+			logger.Warnw("shared rate limit store unavailable; using in-memory limiter", "error", err)
+		} else {
+			counterStore := platformMiddleware.NewRedisCounterStore(redisClient, rateCfg.RedisPrefix)
+			publicLimiter = platformMiddleware.NewSharedFixedWindowRateLimiter(publicMax, rateCfg.Window, counterStore)
+			authLimiter = platformMiddleware.NewSharedFixedWindowRateLimiter(authMax, rateCfg.Window, counterStore)
+			adminLimiter = platformMiddleware.NewSharedFixedWindowRateLimiter(adminMax, rateCfg.Window, counterStore)
+			logger.Infow("shared rate limiting enabled", "backend", "redis")
+		}
+	}
 
 	authGroup := v1.Group("")
 	authGroup.Use(authLimiter.Middleware("auth"))
