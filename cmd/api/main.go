@@ -51,6 +51,8 @@ import (
 	userInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/infrastructure"
 )
 
+var version = "dev"
+
 func main() {
 	// Use a dedicated context for the lifetime of the application; this makes it
 	// straightforward to propagate graceful shutdown signals to all subsystems.
@@ -69,7 +71,7 @@ func main() {
 	}(baseLogger)
 
 	logger.Infow("starting nextpress-backend",
-		"version", "0.1.0-phase2",
+		"version", version,
 	)
 
 	// Load environment variables (from .env if present) and app configuration
@@ -244,7 +246,16 @@ UPDATE posts
 	engine := gin.New()
 	// Allow multipart uploads up to configured size (defaults to 10MB).
 	engine.MaxMultipartMemory = mediaCfg.MaxUploadBytes
-	server.ConfigureEngine(engine, logger, db)
+	readinessChecks := make([]server.ReadinessCheck, 0, 1)
+	if postsIdx != nil {
+		readinessChecks = append(readinessChecks, server.ReadinessCheck{
+			Name: "elasticsearch",
+			Check: func(ctx context.Context) error {
+				return postsIdx.Ready(ctx)
+			},
+		})
+	}
+	server.ConfigureEngine(engine, logger, db, version, readinessChecks...)
 
 	// API v1 group
 	v1 := engine.Group("/v1")

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -12,10 +13,15 @@ import (
 	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
 )
 
+type ReadinessCheck struct {
+	Name  string
+	Check func(context.Context) error
+}
+
 // ConfigureEngine applies global middleware and registers all top-level routes.
 // Feature modules will later plug into the provided router via dedicated
 // registration functions to keep boundaries clear.
-func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
+func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB, appVersion string, checks ...ReadinessCheck) {
 	// In production you typically want to disable Gin's debug output and rely
 	// on structured logging instead.
 	gin.SetMode(gin.ReleaseMode)
@@ -29,7 +35,8 @@ func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
 
 	engine.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
+			"status":  "ok",
+			"version": appVersion,
 		})
 	})
 
@@ -57,8 +64,30 @@ func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
 			return
 		}
 
+		for _, check := range checks {
+			if check.Check == nil {
+				continue
+			}
+			ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+			err := check.Check(ctx)
+			cancel()
+			if err != nil {
+				log.Warnw("readiness check failed",
+					"component", check.Name,
+					"error", err,
+				)
+				c.JSON(http.StatusServiceUnavailable, gin.H{
+					"status":    "not ready",
+					"component": check.Name,
+					"details":   "dependency check failed",
+				})
+				return
+			}
+		}
+
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ready",
+			"status":  "ready",
+			"version": appVersion,
 		})
 	})
 
@@ -67,6 +96,7 @@ func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
 	engine.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"service": "nextpress-backend",
+			"version": appVersion,
 		})
 	})
 }

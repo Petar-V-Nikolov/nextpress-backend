@@ -43,6 +43,14 @@ func NewPostsIndex(client *elasticsearch.Client, cfg config.ElasticsearchConfig,
 // Name returns the concrete index name.
 func (p *PostsIndex) Name() string { return p.name }
 
+// Ready verifies Elasticsearch reachability for readiness probes.
+func (p *PostsIndex) Ready(ctx context.Context) error {
+	if p == nil || p.client == nil {
+		return nil
+	}
+	return Ping(ctx, p.client)
+}
+
 const postsIndexMapping = `{
   "mappings": {
     "properties": {

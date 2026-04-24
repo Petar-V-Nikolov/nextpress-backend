@@ -7,6 +7,7 @@
 BINARY_NAME   := server
 MIGRATE_BINARY := migrate
 SEED_BINARY   := seed
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 # migrate-steps: direction (up = apply N, down = roll back N)
 MIGRATE_CMD ?= up
@@ -31,7 +32,7 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p bin
-	go build -o bin/$(BINARY_NAME) ./cmd/api
+	go build -ldflags "-X main.version=$(VERSION)" -o bin/$(BINARY_NAME) ./cmd/api
 	@echo "Done."
 
 ## run: Start the API with go run (loads .env from cwd if present)
