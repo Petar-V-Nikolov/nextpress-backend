@@ -100,8 +100,8 @@
 - [x] `GET/POST /v1/admin/plugins`, `PUT /v1/admin/plugins/{id}` (`plugins:manage`)
 - [x] `PostSave` hook chain registration at startup
 - [x] One **noop** hook slot per enabled plugin (chain runs; no real plugin logic)
-- [ ] **Real** `BeforePostSave` / `AfterPostSave` implementations (dispatch by plugin `slug` / `config`)
-- [ ] Document and implement **error / transaction policy** (fail post save vs log-and-continue)
+- [x] **Real** `BeforePostSave` / `AfterPostSave` implementations (dispatch by plugin `slug` / `config`)
+- [x] Document and implement **error / transaction policy** (fail post save vs log-and-continue)
 
 ---
 
