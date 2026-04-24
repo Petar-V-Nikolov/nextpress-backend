@@ -26,11 +26,11 @@ func TestSharedFixedWindowRateLimiter_BlocksAfterLimit(t *testing.T) {
 
 	r := gin.New()
 	r.Use(limiter.Middleware("public"))
-	r.GET("/v1/posts", func(c *gin.Context) {
+	r.GET("/posts", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
-	req1 := httptest.NewRequest(http.MethodGet, "/v1/posts", nil)
+	req1 := httptest.NewRequest(http.MethodGet, "/posts", nil)
 	req1.RemoteAddr = "1.2.3.4:1234"
 	w1 := httptest.NewRecorder()
 	r.ServeHTTP(w1, req1)
@@ -38,7 +38,7 @@ func TestSharedFixedWindowRateLimiter_BlocksAfterLimit(t *testing.T) {
 		t.Fatalf("expected first request 200, got %d", w1.Code)
 	}
 
-	req2 := httptest.NewRequest(http.MethodGet, "/v1/posts", nil)
+	req2 := httptest.NewRequest(http.MethodGet, "/posts", nil)
 	req2.RemoteAddr = "1.2.3.4:1234"
 	w2 := httptest.NewRecorder()
 	r.ServeHTTP(w2, req2)

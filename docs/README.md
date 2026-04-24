@@ -8,6 +8,7 @@ How this folder is organised (aligned with [Diátaxis](https://diataxis.fr/): tu
 | **How-to** | [Deployment (servers)](DEPLOYMENT.md) | Ubuntu, Nginx, systemd, `scripts/deploy`, branches. |
 | **How-to** | [Local development](deployment/local.md) | Laptop setup, optional Nginx/systemd, ES/GraphQL, tests. |
 | **How-to** | [Elasticsearch operations runbook](ELASTICSEARCH_OPERATIONS.md) | Index templates, upgrades/reindex, multi-cluster operations. |
+| **Explanation** | [API versioning strategy](API_VERSIONING.md) | Current decision (`API_BASE_PATH`) and migration paths (URL/header versioning). |
 | **How-to** | [Database seeding](SEEDING.md) | Run seeders, RBAC defaults, permission codes. |
 | **How-to** | [Security and hardening](SECURITY.md) | CVE review, CORS policy, rate-limit tuning, JWT rotation guidance. |
 | **Reference** | [`openapi.yaml`](openapi.yaml) | REST paths, request/response schemas. |

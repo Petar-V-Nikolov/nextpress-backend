@@ -248,7 +248,7 @@ paths:
                   status: { type: string }
                   details: { type: string }
 
-  /v1/auth/register:
+  /auth/register:
     post:
       tags: [auth]
       requestBody:
@@ -283,7 +283,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/auth/login:
+  /auth/login:
     post:
       tags: [auth]
       requestBody:
@@ -310,7 +310,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/auth/refresh:
+  /auth/refresh:
     post:
       tags: [auth]
       requestBody:
@@ -336,7 +336,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/posts:
+  /posts:
     get:
       tags: [public]
       description: List published posts (no auth, RBAC not applicable)
@@ -375,7 +375,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/posts/search:
+  /posts/search:
     get:
       tags: [public]
       description: Elasticsearch full-text search (requires ELASTICSEARCH_ENABLED); returns 501 with search_disabled when disabled
@@ -392,7 +392,7 @@ paths:
           schema: { type: integer, default: 0 }
       responses:
         "200":
-          description: same shape as GET /v1/posts list
+          description: same shape as GET /posts list
           content:
             application/json:
               schema:
@@ -421,7 +421,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/posts/{slug}:
+  /posts/{slug}:
     get:
       tags: [public]
       parameters:
@@ -441,7 +441,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/pages/{slug}:
+  /pages/{slug}:
     get:
       tags: [public]
       parameters:
@@ -461,7 +461,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/menus/{slug}:
+  /menus/{slug}:
     get:
       tags: [public]
       parameters:
@@ -490,7 +490,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/ping:
+  /admin/ping:
     get:
       tags: [admin]
       security:
@@ -516,7 +516,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts:
+  /admin/posts:
     get:
       tags: [admin]
       security:
@@ -578,7 +578,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts/search/reindex:
+  /admin/posts/search/reindex:
     post:
       tags: [admin]
       security:
@@ -616,7 +616,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts/{id}:
+  /admin/posts/{id}:
     get:
       tags: [admin]
       security:
@@ -702,12 +702,12 @@ paths:
                   ok: { type: boolean }
                 required: [ok]
 
-  /v1/admin/posts/{id}/categories:
+  /admin/posts/{id}/categories:
     put:
       tags: [admin]
       security:
         - bearerAuth: []
-      description: Requires `posts:write`. Default response is `{ok: true}`. Use query `expand=post` to return the full post object (same shape as GET /v1/admin/posts/{id}).
+      description: Requires `posts:write`. Default response is `{ok: true}`. Use query `expand=post` to return the full post object (same shape as GET /admin/posts/{id}).
       parameters:
         - in: path
           name: id
@@ -742,7 +742,7 @@ paths:
                     required: [ok]
                   - $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/tags:
+  /admin/posts/{id}/tags:
     put:
       tags: [admin]
       security:
@@ -781,7 +781,7 @@ paths:
                     required: [ok]
                   - $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/metrics:
+  /admin/posts/{id}/metrics:
     put:
       tags: [admin]
       security:
@@ -810,7 +810,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/primary-category:
+  /admin/posts/{id}/primary-category:
     put:
       tags: [admin]
       security:
@@ -836,7 +836,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/metrics:
+  /admin/posts/{id}/metrics:
     get:
       tags: [admin]
       security:
@@ -861,7 +861,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts/{id}/seo:
+  /admin/posts/{id}/seo:
     get:
       tags: [admin]
       security:
@@ -920,7 +920,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/featured-image:
+  /admin/posts/{id}/featured-image:
     put:
       tags: [admin]
       security:
@@ -945,7 +945,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/series-link:
+  /admin/posts/{id}/series-link:
     put:
       tags: [admin]
       security:
@@ -972,7 +972,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/coauthors:
+  /admin/posts/{id}/coauthors:
     get:
       tags: [admin]
       security:
@@ -1023,7 +1023,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/gallery:
+  /admin/posts/{id}/gallery:
     post:
       tags: [admin]
       security:
@@ -1057,7 +1057,7 @@ paths:
                   post:
                     $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/gallery/{itemId}:
+  /admin/posts/{id}/gallery/{itemId}:
     put:
       tags: [admin]
       security:
@@ -1104,7 +1104,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/changelog:
+  /admin/posts/{id}/changelog:
     post:
       tags: [admin]
       security:
@@ -1136,7 +1136,7 @@ paths:
                   post:
                     $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/changelog/{changelogId}:
+  /admin/posts/{id}/changelog/{changelogId}:
     delete:
       tags: [admin]
       security:
@@ -1157,7 +1157,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/syndication:
+  /admin/posts/{id}/syndication:
     post:
       tags: [admin]
       security:
@@ -1189,7 +1189,7 @@ paths:
                   post:
                     $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/syndication/{syndicationId}:
+  /admin/posts/{id}/syndication/{syndicationId}:
     put:
       tags: [admin]
       security:
@@ -1235,7 +1235,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/translations:
+  /admin/posts/{id}/translations:
     put:
       tags: [admin]
       security:
@@ -1283,7 +1283,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/syndication/{id}:
+  /admin/syndication/{id}:
     put:
       tags: [admin]
       security:
@@ -1326,7 +1326,7 @@ paths:
                 properties:
                   ok: { type: boolean }
 
-  /v1/admin/series:
+  /admin/series:
     get:
       tags: [admin]
       security:
@@ -1367,7 +1367,7 @@ paths:
                 type: object
                 additionalProperties: true
 
-  /v1/admin/series/{id}:
+  /admin/series/{id}:
     get:
       tags: [admin]
       security:
@@ -1447,7 +1447,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/translation-groups:
+  /admin/translation-groups:
     post:
       tags: [admin]
       security:
@@ -1474,7 +1474,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/translation-groups/{id}:
+  /admin/translation-groups/{id}:
     get:
       tags: [admin]
       security:
@@ -1516,7 +1516,7 @@ paths:
                 properties:
                   ok: { type: boolean }
 
-  /v1/admin/pages:
+  /admin/pages:
     get:
       tags: [admin]
       security:
@@ -1557,7 +1557,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/page"
 
-  /v1/admin/pages/{id}:
+  /admin/pages/{id}:
     get:
       tags: [admin]
       security:
@@ -1584,7 +1584,7 @@ paths:
       security:
         - bearerAuth: []
 
-  /v1/admin/categories:
+  /admin/categories:
     get:
       tags: [admin]
       security:
@@ -1607,7 +1607,7 @@ paths:
       security:
         - bearerAuth: []
       description: Requires `categories:write`
-  /v1/admin/categories/{id}:
+  /admin/categories/{id}:
     put:
       tags: [admin]
       security:
@@ -1618,7 +1618,7 @@ paths:
       security:
         - bearerAuth: []
 
-  /v1/admin/tags:
+  /admin/tags:
     get:
       tags: [admin]
       security:
@@ -1629,7 +1629,7 @@ paths:
       security:
         - bearerAuth: []
       description: Requires `tags:write`
-  /v1/admin/tags/{id}:
+  /admin/tags/{id}:
     put:
       tags: [admin]
       security:
@@ -1639,7 +1639,7 @@ paths:
       security:
         - bearerAuth: []
 
-  /v1/admin/media:
+  /admin/media:
     get:
       tags: [admin]
       security:
@@ -1680,7 +1680,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/media"
 
-  /v1/admin/media/{id}:
+  /admin/media/{id}:
     get:
       tags: [admin]
       security:
@@ -1698,7 +1698,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/media"
 
-  /v1/admin/menus:
+  /admin/menus:
     get:
       tags: [admin]
       security:
@@ -1722,7 +1722,7 @@ paths:
         - bearerAuth: []
       description: Requires `menus:write`
 
-  /v1/admin/menus/{id}:
+  /admin/menus/{id}:
     get:
       tags: [admin]
       security:
@@ -1738,7 +1738,7 @@ paths:
       security:
         - bearerAuth: []
 
-  /v1/admin/menus/{id}/items:
+  /admin/menus/{id}/items:
     get:
       tags: [admin]
       security:
@@ -1750,12 +1750,12 @@ paths:
         - bearerAuth: []
       description: Requires `menus:write`
 
-  /v1/admin/bootstrap/claim-admin:
+  /admin/bootstrap/claim-admin:
     post:
       tags: [admin]
       description: |
         One-time RBAC bootstrap endpoint. Exists only when `RBAC_BOOTSTRAP_ENABLED=true`.
-        It is in the `/v1/admin/*` group, so it always requires a valid access token,
+        It is in the `/admin/*` group, so it always requires a valid access token,
         and it assigns the seeded admin role to the current user.
       security:
         - bearerAuth: []
@@ -1770,7 +1770,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/roles:
+  /admin/roles:
     get:
       tags: [admin]
       security:
@@ -1779,7 +1779,7 @@ paths:
       tags: [admin]
       security:
         - bearerAuth: []
-  /v1/admin/permissions:
+  /admin/permissions:
     get:
       tags: [admin]
       security:
@@ -1788,18 +1788,18 @@ paths:
       tags: [admin]
       security:
         - bearerAuth: []
-  /v1/admin/roles/{role_id}/permissions:
+  /admin/roles/{role_id}/permissions:
     post:
       tags: [admin]
       security:
         - bearerAuth: []
-  /v1/admin/users/{user_id}/roles:
+  /admin/users/{user_id}/roles:
     post:
       tags: [admin]
       security:
         - bearerAuth: []
 
-  /v1/admin/plugins:
+  /admin/plugins:
     get:
       tags: [admin]
       security:
@@ -1844,7 +1844,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/plugin"
 
-  /v1/admin/plugins/{id}:
+  /admin/plugins/{id}:
     put:
       tags: [admin]
       security:

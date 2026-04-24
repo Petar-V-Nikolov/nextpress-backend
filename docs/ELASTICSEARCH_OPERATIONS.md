@@ -16,8 +16,8 @@ Related docs: [Local development](deployment/local.md) · [Deployment](DEPLOYMEN
 - Elasticsearch is optional; PostgreSQL remains source of truth.
 - The posts index name is `<ELASTICSEARCH_INDEX_PREFIX>_posts` (default prefix `nextpress`).
 - When enabled, indexing happens on post save and on scheduled publish promotion.
-- Public search route: `GET /v1/posts/search`
-- Admin reindex route: `POST /v1/admin/posts/search/reindex` (`posts:write`)
+- Public search route: `GET /posts/search`
+- Admin reindex route: `POST /admin/posts/search/reindex` (`posts:write`)
 - In `local`/`dev`, auto-create index defaults to on unless explicitly overridden:
   - `ELASTICSEARCH_AUTO_CREATE_INDEX=true|false`
 
@@ -65,7 +65,7 @@ Use this when upgrading Elasticsearch major versions, changing analyzers, or cha
    - New index name with version suffix (example: `nextpress_posts_v2`)
    - Apply desired settings/mappings/template
 2. Reindex data
-   - Trigger app-level repopulation via `POST /v1/admin/posts/search/reindex`
+   - Trigger app-level repopulation via `POST /admin/posts/search/reindex`
    - Or use Elasticsearch `_reindex` if doing index-to-index migration
 3. Validate
    - Check document counts vs published posts in PostgreSQL
@@ -108,7 +108,7 @@ At startup:
 
 Routine checks:
 - Cluster health (green/yellow policy based on SLOs)
-- Search latency (`/v1/posts/search`)
+- Search latency (`/posts/search`)
 - Admin reindex duration and failure rate
 - Index size and shard growth trends
 

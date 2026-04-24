@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "nextpress-admin-api",
     "name": "NextPress Admin API",
-    "description": "Protected admin endpoints under /v1/admin. Uses Authorization: Bearer {{admin_access_token}}.",
+    "description": "Protected admin endpoints under /admin. Uses Authorization: Bearer {{admin_access_token}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -10,7 +10,7 @@
       "name": "Media",
       "item": [
         {
-          "name": "GET /v1/admin/media",
+          "name": "GET /admin/media",
           "request": {
             "method": "GET",
             "header": [
@@ -20,7 +20,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/media",
+              "raw": "{{base_url}}/admin/media",
               "host": [
                 "{{base_url}}"
               ],
@@ -33,7 +33,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/media/{id}",
+          "name": "GET /admin/media/{id}",
           "request": {
             "method": "GET",
             "header": [
@@ -43,7 +43,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/media/:id",
+              "raw": "{{base_url}}/admin/media/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -63,7 +63,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/media",
+          "name": "POST /admin/media",
           "request": {
             "method": "POST",
             "header": [
@@ -73,7 +73,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/media",
+              "raw": "{{base_url}}/admin/media",
               "host": [
                 "{{base_url}}"
               ],
@@ -101,7 +101,7 @@
       "name": "Menus",
       "item": [
         {
-          "name": "DELETE /v1/admin/menus/{id}",
+          "name": "DELETE /admin/menus/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -111,7 +111,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus/:id",
+              "raw": "{{base_url}}/admin/menus/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -131,7 +131,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/menus",
+          "name": "GET /admin/menus",
           "request": {
             "method": "GET",
             "header": [
@@ -141,7 +141,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus",
+              "raw": "{{base_url}}/admin/menus",
               "host": [
                 "{{base_url}}"
               ],
@@ -154,7 +154,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/menus/{id}",
+          "name": "GET /admin/menus/{id}",
           "request": {
             "method": "GET",
             "header": [
@@ -164,7 +164,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus/:id",
+              "raw": "{{base_url}}/admin/menus/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -184,7 +184,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/menus/{id}/items",
+          "name": "GET /admin/menus/{id}/items",
           "request": {
             "method": "GET",
             "header": [
@@ -194,7 +194,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus/:id/items",
+              "raw": "{{base_url}}/admin/menus/:id/items",
               "host": [
                 "{{base_url}}"
               ],
@@ -215,7 +215,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/menus",
+          "name": "POST /admin/menus",
           "request": {
             "method": "POST",
             "header": [
@@ -229,7 +229,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus",
+              "raw": "{{base_url}}/admin/menus",
               "host": [
                 "{{base_url}}"
               ],
@@ -246,7 +246,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/menus/{id}",
+          "name": "PUT /admin/menus/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -260,7 +260,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus/:id",
+              "raw": "{{base_url}}/admin/menus/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -284,7 +284,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/menus/{id}/items",
+          "name": "PUT /admin/menus/{id}/items",
           "request": {
             "method": "PUT",
             "header": [
@@ -298,7 +298,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/menus/:id/items",
+              "raw": "{{base_url}}/admin/menus/:id/items",
               "host": [
                 "{{base_url}}"
               ],
@@ -328,7 +328,7 @@
       "name": "Pages",
       "item": [
         {
-          "name": "DELETE /v1/admin/pages/{id}",
+          "name": "DELETE /admin/pages/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -338,7 +338,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/pages/:id",
+              "raw": "{{base_url}}/admin/pages/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -358,7 +358,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/pages",
+          "name": "GET /admin/pages",
           "request": {
             "method": "GET",
             "header": [
@@ -368,7 +368,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/pages",
+              "raw": "{{base_url}}/admin/pages",
               "host": [
                 "{{base_url}}"
               ],
@@ -381,7 +381,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/pages/{id}",
+          "name": "GET /admin/pages/{id}",
           "request": {
             "method": "GET",
             "header": [
@@ -391,7 +391,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/pages/:id",
+              "raw": "{{base_url}}/admin/pages/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -411,7 +411,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/pages",
+          "name": "POST /admin/pages",
           "request": {
             "method": "POST",
             "header": [
@@ -425,7 +425,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/pages",
+              "raw": "{{base_url}}/admin/pages",
               "host": [
                 "{{base_url}}"
               ],
@@ -442,7 +442,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/pages/{id}",
+          "name": "PUT /admin/pages/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -456,7 +456,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/pages/:id",
+              "raw": "{{base_url}}/admin/pages/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -485,7 +485,7 @@
       "name": "Plugins",
       "item": [
         {
-          "name": "GET /v1/admin/plugins",
+          "name": "GET /admin/plugins",
           "request": {
             "method": "GET",
             "header": [
@@ -495,7 +495,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/plugins",
+              "raw": "{{base_url}}/admin/plugins",
               "host": [
                 "{{base_url}}"
               ],
@@ -508,7 +508,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/plugins",
+          "name": "POST /admin/plugins",
           "request": {
             "method": "POST",
             "header": [
@@ -522,7 +522,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/plugins",
+              "raw": "{{base_url}}/admin/plugins",
               "host": [
                 "{{base_url}}"
               ],
@@ -539,7 +539,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/plugins/{id}",
+          "name": "PUT /admin/plugins/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -553,7 +553,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/plugins/:id",
+              "raw": "{{base_url}}/admin/plugins/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -582,7 +582,7 @@
       "name": "Posts",
       "item": [
         {
-          "name": "DELETE /v1/admin/posts/{id}",
+          "name": "DELETE /admin/posts/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -592,7 +592,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id",
+              "raw": "{{base_url}}/admin/posts/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -612,7 +612,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/posts/{id}/changelog/{changelogId}",
+          "name": "DELETE /admin/posts/{id}/changelog/{changelogId}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -622,7 +622,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/changelog/:changelogId",
+              "raw": "{{base_url}}/admin/posts/:id/changelog/:changelogId",
               "host": [
                 "{{base_url}}"
               ],
@@ -648,7 +648,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/posts/{id}/gallery/{itemId}",
+          "name": "DELETE /admin/posts/{id}/gallery/{itemId}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -658,7 +658,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/gallery/:itemId",
+              "raw": "{{base_url}}/admin/posts/:id/gallery/:itemId",
               "host": [
                 "{{base_url}}"
               ],
@@ -684,7 +684,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/posts/{id}/seo",
+          "name": "DELETE /admin/posts/{id}/seo",
           "request": {
             "method": "DELETE",
             "header": [
@@ -694,7 +694,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/seo",
+              "raw": "{{base_url}}/admin/posts/:id/seo",
               "host": [
                 "{{base_url}}"
               ],
@@ -715,7 +715,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/posts/{id}/syndication/{syndicationId}",
+          "name": "DELETE /admin/posts/{id}/syndication/{syndicationId}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -725,7 +725,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/syndication/:syndicationId",
+              "raw": "{{base_url}}/admin/posts/:id/syndication/:syndicationId",
               "host": [
                 "{{base_url}}"
               ],
@@ -751,7 +751,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/posts/{id}/translations",
+          "name": "DELETE /admin/posts/{id}/translations",
           "request": {
             "method": "DELETE",
             "header": [
@@ -761,7 +761,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/translations",
+              "raw": "{{base_url}}/admin/posts/:id/translations",
               "host": [
                 "{{base_url}}"
               ],
@@ -782,7 +782,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/series/{id}",
+          "name": "DELETE /admin/series/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -792,7 +792,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/series/:id",
+              "raw": "{{base_url}}/admin/series/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -812,7 +812,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/syndication/{id}",
+          "name": "DELETE /admin/syndication/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -822,7 +822,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/syndication/:id",
+              "raw": "{{base_url}}/admin/syndication/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -842,7 +842,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/translation-groups/{id}",
+          "name": "DELETE /admin/translation-groups/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -852,7 +852,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/translation-groups/:id",
+              "raw": "{{base_url}}/admin/translation-groups/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -872,7 +872,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/posts",
+          "name": "GET /admin/posts",
           "request": {
             "method": "GET",
             "header": [
@@ -882,7 +882,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts",
+              "raw": "{{base_url}}/admin/posts",
               "host": [
                 "{{base_url}}"
               ],
@@ -895,7 +895,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/posts/{id}",
+          "name": "GET /admin/posts/{id}",
           "request": {
             "method": "GET",
             "header": [
@@ -905,7 +905,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id",
+              "raw": "{{base_url}}/admin/posts/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -925,7 +925,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/posts/{id}/coauthors",
+          "name": "GET /admin/posts/{id}/coauthors",
           "request": {
             "method": "GET",
             "header": [
@@ -935,7 +935,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/coauthors",
+              "raw": "{{base_url}}/admin/posts/:id/coauthors",
               "host": [
                 "{{base_url}}"
               ],
@@ -956,7 +956,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/posts/{id}/metrics",
+          "name": "GET /admin/posts/{id}/metrics",
           "request": {
             "method": "GET",
             "header": [
@@ -966,7 +966,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/metrics",
+              "raw": "{{base_url}}/admin/posts/:id/metrics",
               "host": [
                 "{{base_url}}"
               ],
@@ -987,7 +987,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/posts/{id}/seo",
+          "name": "GET /admin/posts/{id}/seo",
           "request": {
             "method": "GET",
             "header": [
@@ -997,7 +997,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/seo",
+              "raw": "{{base_url}}/admin/posts/:id/seo",
               "host": [
                 "{{base_url}}"
               ],
@@ -1018,7 +1018,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/series",
+          "name": "GET /admin/series",
           "request": {
             "method": "GET",
             "header": [
@@ -1028,7 +1028,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/series",
+              "raw": "{{base_url}}/admin/series",
               "host": [
                 "{{base_url}}"
               ],
@@ -1041,7 +1041,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/series/{id}",
+          "name": "GET /admin/series/{id}",
           "request": {
             "method": "GET",
             "header": [
@@ -1051,7 +1051,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/series/:id",
+              "raw": "{{base_url}}/admin/series/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -1071,7 +1071,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/translation-groups/{id}",
+          "name": "GET /admin/translation-groups/{id}",
           "request": {
             "method": "GET",
             "header": [
@@ -1081,7 +1081,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/translation-groups/:id",
+              "raw": "{{base_url}}/admin/translation-groups/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -1101,7 +1101,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/posts",
+          "name": "POST /admin/posts",
           "request": {
             "method": "POST",
             "header": [
@@ -1115,7 +1115,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts",
+              "raw": "{{base_url}}/admin/posts",
               "host": [
                 "{{base_url}}"
               ],
@@ -1132,7 +1132,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/posts/search/reindex",
+          "name": "POST /admin/posts/search/reindex",
           "request": {
             "method": "POST",
             "header": [
@@ -1146,7 +1146,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/search/reindex",
+              "raw": "{{base_url}}/admin/posts/search/reindex",
               "host": [
                 "{{base_url}}"
               ],
@@ -1165,7 +1165,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/posts/{id}/changelog",
+          "name": "POST /admin/posts/{id}/changelog",
           "request": {
             "method": "POST",
             "header": [
@@ -1179,7 +1179,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/changelog",
+              "raw": "{{base_url}}/admin/posts/:id/changelog",
               "host": [
                 "{{base_url}}"
               ],
@@ -1204,7 +1204,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/posts/{id}/gallery",
+          "name": "POST /admin/posts/{id}/gallery",
           "request": {
             "method": "POST",
             "header": [
@@ -1218,7 +1218,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/gallery",
+              "raw": "{{base_url}}/admin/posts/:id/gallery",
               "host": [
                 "{{base_url}}"
               ],
@@ -1243,7 +1243,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/posts/{id}/syndication",
+          "name": "POST /admin/posts/{id}/syndication",
           "request": {
             "method": "POST",
             "header": [
@@ -1257,7 +1257,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/syndication",
+              "raw": "{{base_url}}/admin/posts/:id/syndication",
               "host": [
                 "{{base_url}}"
               ],
@@ -1282,7 +1282,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/series",
+          "name": "POST /admin/series",
           "request": {
             "method": "POST",
             "header": [
@@ -1296,7 +1296,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/series",
+              "raw": "{{base_url}}/admin/series",
               "host": [
                 "{{base_url}}"
               ],
@@ -1313,7 +1313,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/translation-groups",
+          "name": "POST /admin/translation-groups",
           "request": {
             "method": "POST",
             "header": [
@@ -1327,7 +1327,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/translation-groups",
+              "raw": "{{base_url}}/admin/translation-groups",
               "host": [
                 "{{base_url}}"
               ],
@@ -1344,7 +1344,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}",
+          "name": "PUT /admin/posts/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -1358,7 +1358,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id",
+              "raw": "{{base_url}}/admin/posts/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -1382,7 +1382,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/categories",
+          "name": "PUT /admin/posts/{id}/categories",
           "request": {
             "method": "PUT",
             "header": [
@@ -1396,7 +1396,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/categories",
+              "raw": "{{base_url}}/admin/posts/:id/categories",
               "host": [
                 "{{base_url}}"
               ],
@@ -1421,7 +1421,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/coauthors",
+          "name": "PUT /admin/posts/{id}/coauthors",
           "request": {
             "method": "PUT",
             "header": [
@@ -1435,7 +1435,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/coauthors",
+              "raw": "{{base_url}}/admin/posts/:id/coauthors",
               "host": [
                 "{{base_url}}"
               ],
@@ -1460,7 +1460,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/featured-image",
+          "name": "PUT /admin/posts/{id}/featured-image",
           "request": {
             "method": "PUT",
             "header": [
@@ -1474,7 +1474,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/featured-image",
+              "raw": "{{base_url}}/admin/posts/:id/featured-image",
               "host": [
                 "{{base_url}}"
               ],
@@ -1499,7 +1499,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/gallery/{itemId}",
+          "name": "PUT /admin/posts/{id}/gallery/{itemId}",
           "request": {
             "method": "PUT",
             "header": [
@@ -1513,7 +1513,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/gallery/:itemId",
+              "raw": "{{base_url}}/admin/posts/:id/gallery/:itemId",
               "host": [
                 "{{base_url}}"
               ],
@@ -1543,7 +1543,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/metrics",
+          "name": "PUT /admin/posts/{id}/metrics",
           "request": {
             "method": "PUT",
             "header": [
@@ -1557,7 +1557,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/metrics",
+              "raw": "{{base_url}}/admin/posts/:id/metrics",
               "host": [
                 "{{base_url}}"
               ],
@@ -1582,7 +1582,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/primary-category",
+          "name": "PUT /admin/posts/{id}/primary-category",
           "request": {
             "method": "PUT",
             "header": [
@@ -1596,7 +1596,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/primary-category",
+              "raw": "{{base_url}}/admin/posts/:id/primary-category",
               "host": [
                 "{{base_url}}"
               ],
@@ -1621,7 +1621,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/seo",
+          "name": "PUT /admin/posts/{id}/seo",
           "request": {
             "method": "PUT",
             "header": [
@@ -1635,7 +1635,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/seo",
+              "raw": "{{base_url}}/admin/posts/:id/seo",
               "host": [
                 "{{base_url}}"
               ],
@@ -1660,7 +1660,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/series-link",
+          "name": "PUT /admin/posts/{id}/series-link",
           "request": {
             "method": "PUT",
             "header": [
@@ -1674,7 +1674,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/series-link",
+              "raw": "{{base_url}}/admin/posts/:id/series-link",
               "host": [
                 "{{base_url}}"
               ],
@@ -1699,7 +1699,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/syndication/{syndicationId}",
+          "name": "PUT /admin/posts/{id}/syndication/{syndicationId}",
           "request": {
             "method": "PUT",
             "header": [
@@ -1713,7 +1713,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/syndication/:syndicationId",
+              "raw": "{{base_url}}/admin/posts/:id/syndication/:syndicationId",
               "host": [
                 "{{base_url}}"
               ],
@@ -1743,7 +1743,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/tags",
+          "name": "PUT /admin/posts/{id}/tags",
           "request": {
             "method": "PUT",
             "header": [
@@ -1757,7 +1757,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/tags",
+              "raw": "{{base_url}}/admin/posts/:id/tags",
               "host": [
                 "{{base_url}}"
               ],
@@ -1782,7 +1782,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/posts/{id}/translations",
+          "name": "PUT /admin/posts/{id}/translations",
           "request": {
             "method": "PUT",
             "header": [
@@ -1796,7 +1796,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/posts/:id/translations",
+              "raw": "{{base_url}}/admin/posts/:id/translations",
               "host": [
                 "{{base_url}}"
               ],
@@ -1821,7 +1821,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/series/{id}",
+          "name": "PUT /admin/series/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -1835,7 +1835,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/series/:id",
+              "raw": "{{base_url}}/admin/series/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -1859,7 +1859,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/syndication/{id}",
+          "name": "PUT /admin/syndication/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -1873,7 +1873,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/syndication/:id",
+              "raw": "{{base_url}}/admin/syndication/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -1902,7 +1902,7 @@
       "name": "RBAC",
       "item": [
         {
-          "name": "GET /v1/admin/permissions",
+          "name": "GET /admin/permissions",
           "request": {
             "method": "GET",
             "header": [
@@ -1912,7 +1912,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/permissions",
+              "raw": "{{base_url}}/admin/permissions",
               "host": [
                 "{{base_url}}"
               ],
@@ -1925,7 +1925,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/roles",
+          "name": "GET /admin/roles",
           "request": {
             "method": "GET",
             "header": [
@@ -1935,7 +1935,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/roles",
+              "raw": "{{base_url}}/admin/roles",
               "host": [
                 "{{base_url}}"
               ],
@@ -1948,7 +1948,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/permissions",
+          "name": "POST /admin/permissions",
           "request": {
             "method": "POST",
             "header": [
@@ -1962,7 +1962,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/permissions",
+              "raw": "{{base_url}}/admin/permissions",
               "host": [
                 "{{base_url}}"
               ],
@@ -1979,7 +1979,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/roles",
+          "name": "POST /admin/roles",
           "request": {
             "method": "POST",
             "header": [
@@ -1993,7 +1993,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/roles",
+              "raw": "{{base_url}}/admin/roles",
               "host": [
                 "{{base_url}}"
               ],
@@ -2010,7 +2010,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/roles/{role_id}/permissions",
+          "name": "POST /admin/roles/{role_id}/permissions",
           "request": {
             "method": "POST",
             "header": [
@@ -2024,7 +2024,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/roles/:role_id/permissions",
+              "raw": "{{base_url}}/admin/roles/:role_id/permissions",
               "host": [
                 "{{base_url}}"
               ],
@@ -2049,7 +2049,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/users/{user_id}/roles",
+          "name": "POST /admin/users/{user_id}/roles",
           "request": {
             "method": "POST",
             "header": [
@@ -2063,7 +2063,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/users/:user_id/roles",
+              "raw": "{{base_url}}/admin/users/:user_id/roles",
               "host": [
                 "{{base_url}}"
               ],
@@ -2093,7 +2093,7 @@
       "name": "System",
       "item": [
         {
-          "name": "GET /v1/admin/ping",
+          "name": "GET /admin/ping",
           "request": {
             "method": "GET",
             "header": [
@@ -2103,7 +2103,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/ping",
+              "raw": "{{base_url}}/admin/ping",
               "host": [
                 "{{base_url}}"
               ],
@@ -2116,7 +2116,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/bootstrap/claim-admin",
+          "name": "POST /admin/bootstrap/claim-admin",
           "request": {
             "method": "POST",
             "header": [
@@ -2130,7 +2130,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/bootstrap/claim-admin",
+              "raw": "{{base_url}}/admin/bootstrap/claim-admin",
               "host": [
                 "{{base_url}}"
               ],
@@ -2153,7 +2153,7 @@
       "name": "Taxonomy",
       "item": [
         {
-          "name": "DELETE /v1/admin/categories/{id}",
+          "name": "DELETE /admin/categories/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -2163,7 +2163,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/categories/:id",
+              "raw": "{{base_url}}/admin/categories/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -2183,7 +2183,7 @@
           }
         },
         {
-          "name": "DELETE /v1/admin/tags/{id}",
+          "name": "DELETE /admin/tags/{id}",
           "request": {
             "method": "DELETE",
             "header": [
@@ -2193,7 +2193,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/tags/:id",
+              "raw": "{{base_url}}/admin/tags/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -2213,7 +2213,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/categories",
+          "name": "GET /admin/categories",
           "request": {
             "method": "GET",
             "header": [
@@ -2223,7 +2223,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/categories",
+              "raw": "{{base_url}}/admin/categories",
               "host": [
                 "{{base_url}}"
               ],
@@ -2236,7 +2236,7 @@
           }
         },
         {
-          "name": "GET /v1/admin/tags",
+          "name": "GET /admin/tags",
           "request": {
             "method": "GET",
             "header": [
@@ -2246,7 +2246,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/tags",
+              "raw": "{{base_url}}/admin/tags",
               "host": [
                 "{{base_url}}"
               ],
@@ -2259,7 +2259,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/categories",
+          "name": "POST /admin/categories",
           "request": {
             "method": "POST",
             "header": [
@@ -2273,7 +2273,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/categories",
+              "raw": "{{base_url}}/admin/categories",
               "host": [
                 "{{base_url}}"
               ],
@@ -2290,7 +2290,7 @@
           }
         },
         {
-          "name": "POST /v1/admin/tags",
+          "name": "POST /admin/tags",
           "request": {
             "method": "POST",
             "header": [
@@ -2304,7 +2304,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/tags",
+              "raw": "{{base_url}}/admin/tags",
               "host": [
                 "{{base_url}}"
               ],
@@ -2321,7 +2321,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/categories/{id}",
+          "name": "PUT /admin/categories/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -2335,7 +2335,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/categories/:id",
+              "raw": "{{base_url}}/admin/categories/:id",
               "host": [
                 "{{base_url}}"
               ],
@@ -2359,7 +2359,7 @@
           }
         },
         {
-          "name": "PUT /v1/admin/tags/{id}",
+          "name": "PUT /admin/tags/{id}",
           "request": {
             "method": "PUT",
             "header": [
@@ -2373,7 +2373,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/v1/admin/tags/:id",
+              "raw": "{{base_url}}/admin/tags/:id",
               "host": [
                 "{{base_url}}"
               ],

@@ -104,13 +104,13 @@ Use this to terminate HTTP on port 80 (or another port), serve `/uploads/` from 
    sudo nginx -t && sudo systemctl reload nginx
    ```
 
-4. **Call the API** through Nginx (example): `http://localhost:8080/v1/...` if you used `listen 8080`.
+4. **Call the API** through Nginx (example): `http://localhost:8080/...` if you used `listen 8080`.
 
 TLS on a laptop is optional; on a LAN you can keep HTTP or use `mkcert` / corporate CA. For a public hostname on Ubuntu, [DEPLOYMENT.md](../DEPLOYMENT.md) documents Certbot with Nginx.
 
 ## Optional: Elasticsearch
 
-`ELASTICSEARCH_ENABLED=true`, `ELASTICSEARCH_URLS`. With `APP_ENV` `local` or `dev`, index auto-create defaults on. `GET /v1/posts/search` → 501 if disabled. Reindex: `POST /v1/admin/posts/search/reindex` (`posts:write`).
+`ELASTICSEARCH_ENABLED=true`, `ELASTICSEARCH_URLS`. With `APP_ENV` `local` or `dev`, index auto-create defaults on. `GET /posts/search` → 501 if disabled. Reindex: `POST /admin/posts/search/reindex` (`posts:write`).
 
 ## Optional: GraphQL
 

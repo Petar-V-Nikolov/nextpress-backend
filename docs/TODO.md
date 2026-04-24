@@ -22,9 +22,9 @@
 
 ## Auth & users
 
-- [x] `POST /v1/auth/register`
-- [x] `POST /v1/auth/login`
-- [x] `POST /v1/auth/refresh`
+- [x] `POST /auth/register`
+- [x] `POST /auth/login`
+- [x] `POST /auth/refresh`
 - [x] Bcrypt password hashing
 - [x] JWT access + refresh tokens
 - [x] User persistence (GORM)
@@ -35,10 +35,10 @@
 
 - [x] Roles, permissions, user-role, role-permission schema
 - [x] Permission middleware (`RequirePermission`)
-- [x] `GET /v1/admin/ping` (`admin:ping`)
-- [x] `GET/POST /v1/admin/roles`, permissions, grant to role, assign role to user (`rbac:manage`)
+- [x] `GET /admin/ping` (`admin:ping`)
+- [x] `GET/POST /admin/roles`, permissions, grant to role, assign role to user (`rbac:manage`)
 - [x] Seeded defaults (`make seed`, `docs/SEEDING.md`)
-- [x] Optional `POST /v1/admin/bootstrap/claim-admin` (`RBAC_BOOTSTRAP_ENABLED`)
+- [x] Optional `POST /admin/bootstrap/claim-admin` (`RBAC_BOOTSTRAP_ENABLED`)
 
 ---
 
@@ -56,19 +56,19 @@
 - [x] Changelog entries on post
 - [x] Per-post syndication + global syndication admin routes
 - [x] Post translations CRUD
-- [x] Admin series CRUD (`/v1/admin/series`)
-- [x] Translation groups admin (`/v1/admin/translation-groups`)
+- [x] Admin series CRUD (`/admin/series`)
+- [x] Translation groups admin (`/admin/translation-groups`)
 - [x] Derived fields / hooks in application layer (e.g. derived fields hook)
 - [x] Scheduled publish fields on model + **background ticker** promoting due posts (`cmd/api`)
-- [x] Public `GET /v1/posts`, `GET /v1/posts/{slug}` (published)
-- [x] Public `GET /v1/posts/search` when Elasticsearch enabled
+- [x] Public `GET /posts`, `GET /posts/{slug}` (published)
+- [x] Public `GET /posts/search` when Elasticsearch enabled
 
 ---
 
 ## Pages
 
 - [x] Admin pages CRUD (`pages:read` / `pages:write`)
-- [x] Public `GET /v1/pages/{slug}`
+- [x] Public `GET /pages/{slug}`
 
 ---
 
@@ -90,14 +90,14 @@
 ## Menus
 
 - [x] Menus CRUD + items (`menus:*`)
-- [x] Public `GET /v1/menus/{slug}`
+- [x] Public `GET /menus/{slug}`
 
 ---
 
 ## Plugins
 
 - [x] `plugins` table + GORM repository
-- [x] `GET/POST /v1/admin/plugins`, `PUT /v1/admin/plugins/{id}` (`plugins:manage`)
+- [x] `GET/POST /admin/plugins`, `PUT /admin/plugins/{id}` (`plugins:manage`)
 - [x] `PostSave` hook chain registration at startup
 - [x] One **noop** hook slot per enabled plugin (chain runs; no real plugin logic)
 - [x] **Real** `BeforePostSave` / `AfterPostSave` implementations (dispatch by plugin `slug` / `config`)

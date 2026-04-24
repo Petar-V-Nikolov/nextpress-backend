@@ -50,10 +50,11 @@ Configuration: [`.env.example`](.env.example). Optional Elasticsearch, GraphQL, 
 
 ## API surface (summary)
 
-- **Auth:** `POST /v1/auth/register`, `/login`, `/refresh`
+- **Auth:** `POST /auth/register`, `/login`, `/refresh`
 - **Public:** posts, pages, menus (and search when Elasticsearch is enabled)
-- **GraphQL:** if enabled - `GRAPHQL_PATH` (default `/v1/graphql`)
-- **Admin:** `/v1/admin/*` - JWT + permissions
+- **GraphQL:** if enabled - `GRAPHQL_PATH` (default `<API_BASE_PATH>/graphql`, e.g. `/graphql` or `/v1/graphql`)
+- **Admin:** `/admin/*` - JWT + permissions
+- **Base path:** optional `API_BASE_PATH` prefix for all API routes
 
 Details: OpenAPI and source.
 

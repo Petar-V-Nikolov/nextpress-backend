@@ -258,8 +258,8 @@ UPDATE posts
 	}
 	server.ConfigureEngine(engine, logger, db, version, readinessChecks...)
 
-	// API v1 group
-	v1 := engine.Group("/v1")
+	// Register APIs under an optional base path (e.g. /v1).
+	api := engine.Group(appCfg.APIBasePath)
 	// Rate limiting is grouped by API category to avoid coupling different
 	// traffic types (public browsing vs auth vs admin writes).
 	publicMax := rateCfg.PublicMaxPerMinute
@@ -294,12 +294,12 @@ UPDATE posts
 		}
 	}
 
-	authGroup := v1.Group("")
+	authGroup := api.Group("")
 	authGroup.Use(authLimiter.Middleware("auth"))
 	authHandler.RegisterRoutes(authGroup)
 
 	// Public APIs (Phase 4): published content, no auth.
-	publicGroup := v1.Group("")
+	publicGroup := api.Group("")
 	publicGroup.Use(publicLimiter.Middleware("public"))
 	postsHandler.RegisterPublicRoutes(publicGroup)
 	pagesHandler.RegisterPublicRoutes(publicGroup)
@@ -311,7 +311,7 @@ UPDATE posts
 	}
 
 	// Admin/content APIs (Phase 3-4): protected, used by CMS/admin UI.
-	admin := v1.Group("/admin")
+	admin := api.Group("/admin")
 	// Rate limit is applied before auth so abuse without valid tokens is also
 	// throttled.
 	admin.Use(adminLimiter.Middleware("admin"), platformMiddleware.AuthRequired(jwtProvider))
@@ -404,7 +404,7 @@ UPDATE posts
 		}))
 		path := strings.TrimSpace(graphqlCfg.Path)
 		if path == "" {
-			path = "/v1/graphql"
+			path = appCfg.APIBasePath + "/graphql"
 		}
 		engine.POST(path, publicLimiter.Middleware("public"), func(c *gin.Context) {
 			gqlSrv.ServeHTTP(c.Writer, c.Request)
