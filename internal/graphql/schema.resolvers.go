@@ -10,12 +10,12 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/generated"
-	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/model"
-	authApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
-	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
-	postApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
-	taxApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/application"
+	"github.com/nextpresskit/backend/internal/graphql/generated"
+	"github.com/nextpresskit/backend/internal/graphql/model"
+	authApp "github.com/nextpresskit/backend/internal/modules/auth/application"
+	pagesApp "github.com/nextpresskit/backend/internal/modules/pages/application"
+	postApp "github.com/nextpresskit/backend/internal/modules/posts/application"
+	taxApp "github.com/nextpresskit/backend/internal/modules/taxonomy/application"
 )
 
 // Register is the resolver for the register field.

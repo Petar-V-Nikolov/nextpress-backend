@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	rbacDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/rbac/domain"
+	rbacDomain "github.com/nextpresskit/backend/internal/modules/rbac/domain"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

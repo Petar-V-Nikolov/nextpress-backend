@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	taxDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/domain"
+	taxDomain "github.com/nextpresskit/backend/internal/modules/taxonomy/domain"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

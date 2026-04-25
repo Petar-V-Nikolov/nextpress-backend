@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	pageDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/domain"
+	pageDomain "github.com/nextpresskit/backend/internal/modules/pages/domain"
 	"gorm.io/gorm"
 )
 

@@ -11,7 +11,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/Petar-V-Nikolov/nextpress-backend/pkg/seed"
+	"github.com/nextpresskit/backend/pkg/seed"
 )
 
 func main() {

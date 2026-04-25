@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/domain"
+	"github.com/nextpresskit/backend/internal/modules/user/domain"
 	"gorm.io/gorm"
 )
 

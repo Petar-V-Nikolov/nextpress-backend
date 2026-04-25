@@ -10,7 +10,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/Petar-V-Nikolov/nextpress-backend/pkg/migrate"
+	"github.com/nextpresskit/backend/pkg/migrate"
 )
 
 func main() {

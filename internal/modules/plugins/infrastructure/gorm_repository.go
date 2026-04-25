@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	pluginsDomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/domain"
+	pluginsDomain "github.com/nextpresskit/backend/internal/modules/plugins/domain"
 	"gorm.io/gorm"
 )
 

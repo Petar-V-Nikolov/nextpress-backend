@@ -1,4 +1,4 @@
-module github.com/Petar-V-Nikolov/nextpress-backend
+module github.com/nextpresskit/backend
 
 go 1.26
 

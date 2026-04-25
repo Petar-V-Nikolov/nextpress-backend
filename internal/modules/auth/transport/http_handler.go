@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
-	userdomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/domain"
-	platformmw "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
+	"github.com/nextpresskit/backend/internal/modules/auth/application"
+	userdomain "github.com/nextpresskit/backend/internal/modules/user/domain"
+	platformmw "github.com/nextpresskit/backend/internal/platform/middleware"
 )
 
 type Handler struct {

@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
+	platformMiddleware "github.com/nextpresskit/backend/internal/platform/middleware"
 )
 
 type ReadinessCheck struct {

@@ -1,11 +1,11 @@
 package graphql
 
 import (
-	authApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
-	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
-	postApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
-	taxApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/application"
-	platformES "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/elasticsearch"
+	authApp "github.com/nextpresskit/backend/internal/modules/auth/application"
+	pagesApp "github.com/nextpresskit/backend/internal/modules/pages/application"
+	postApp "github.com/nextpresskit/backend/internal/modules/posts/application"
+	taxApp "github.com/nextpresskit/backend/internal/modules/taxonomy/application"
+	platformES "github.com/nextpresskit/backend/internal/platform/elasticsearch"
 )
 
 // Resolver is the root GraphQL resolver; field resolvers live in generated companion files.

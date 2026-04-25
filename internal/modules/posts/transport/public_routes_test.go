@@ -11,10 +11,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	postsApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
-	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/ident"
-	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/model"
-	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
+	postsApp "github.com/nextpresskit/backend/internal/modules/posts/application"
+	"github.com/nextpresskit/backend/internal/modules/posts/domain/ident"
+	"github.com/nextpresskit/backend/internal/modules/posts/domain/model"
+	platformMiddleware "github.com/nextpresskit/backend/internal/platform/middleware"
 )
 
 type dummyAccessTokenParser struct{}
