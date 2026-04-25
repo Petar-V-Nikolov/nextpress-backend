@@ -20,6 +20,23 @@ func TestLoadGraphQLConfig(t *testing.T) {
 	}
 }
 
+func TestLoadGraphQLConfig_DefaultPathFromAPIBasePath(t *testing.T) {
+	t.Setenv("GRAPHQL_PATH", "")
+	t.Setenv("API_BASE_PATH", "/v1/")
+	c := LoadGraphQLConfig()
+	if c.Path != "/v1/graphql" {
+		t.Fatalf("path: got %q", c.Path)
+	}
+}
+
+func TestLoadAppConfig_NormalizesAPIBasePath(t *testing.T) {
+	t.Setenv("API_BASE_PATH", "v2/")
+	c := LoadAppConfig()
+	if c.APIBasePath != "/v2" {
+		t.Fatalf("APIBasePath: got %q", c.APIBasePath)
+	}
+}
+
 func TestLoadElasticsearchConfig_Defaults(t *testing.T) {
 	t.Setenv("ELASTICSEARCH_ENABLED", "false")
 	t.Setenv("ELASTICSEARCH_URLS", "")

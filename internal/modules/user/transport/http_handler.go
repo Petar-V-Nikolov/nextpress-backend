@@ -9,5 +9,5 @@ func NewHandler() *Handler {
 }
 
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
-	// endpoints like /v1/users will be added later
+	// endpoints like /users will be added later
 }

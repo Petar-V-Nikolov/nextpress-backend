@@ -31,11 +31,25 @@ type rateBucket struct {
 	count       int
 }
 
+type SharedFixedWindowRateLimiter struct {
+	maxRequests int
+	window      time.Duration
+	store       RateLimitCounterStore
+}
+
 func NewFixedWindowRateLimiter(maxRequests int, window time.Duration) *FixedWindowRateLimiter {
 	return &FixedWindowRateLimiter{
 		maxRequests: maxRequests,
 		window:      window,
 		buckets:     make(map[string]*rateBucket),
+	}
+}
+
+func NewSharedFixedWindowRateLimiter(maxRequests int, window time.Duration, store RateLimitCounterStore) *SharedFixedWindowRateLimiter {
+	return &SharedFixedWindowRateLimiter{
+		maxRequests: maxRequests,
+		window:      window,
+		store:       store,
 	}
 }
 
@@ -91,15 +105,52 @@ func (r *FixedWindowRateLimiter) Middleware(scope string) gin.HandlerFunc {
 			}
 			c.JSON(http.StatusTooManyRequests, gin.H{
 				"error":                  "rate_limited",
-				"retry_after_seconds":    retryAfterSeconds,
-				"rate_limit_scope":       scope,
-				"rate_limit_window_seconds": int(r.window.Seconds()),
-				"rate_limit_max":         r.maxRequests,
+				"retryAfterSeconds":      retryAfterSeconds,
+				"rateLimitScope":         scope,
+				"rateLimitWindowSeconds": int(r.window.Seconds()),
+				"rateLimitMax":           r.maxRequests,
 			})
 			c.Abort()
 			return
 		}
 
+		c.Next()
+	}
+}
+
+// Middleware creates a Gin middleware that rate limits per client IP and scope
+// with a shared external counter store (e.g. Redis).
+func (r *SharedFixedWindowRateLimiter) Middleware(scope string) gin.HandlerFunc {
+	if r.maxRequests <= 0 {
+		return func(c *gin.Context) { c.Next() }
+	}
+	return func(c *gin.Context) {
+		clientIP := clientIPFromRequest(c.Request)
+		if clientIP == "" {
+			clientIP = "unknown"
+		}
+		key := fmt.Sprintf("%s|%s", clientIP, scope)
+		count, ttl, err := r.store.IncrementWindow(c.Request.Context(), key, r.window)
+		if err != nil {
+			// Fail-open on store errors to keep request path available.
+			c.Next()
+			return
+		}
+		if count > int64(r.maxRequests) {
+			retryAfterSeconds := int(math.Ceil(ttl.Seconds()))
+			if retryAfterSeconds > 0 {
+				c.Writer.Header().Set("Retry-After", strconv.Itoa(retryAfterSeconds))
+			}
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"error":                  "rate_limited",
+				"retryAfterSeconds":      retryAfterSeconds,
+				"rateLimitScope":         scope,
+				"rateLimitWindowSeconds": int(r.window.Seconds()),
+				"rateLimitMax":           r.maxRequests,
+			})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }
@@ -128,4 +179,3 @@ func firstHost(x string) string {
 	}
 	return strings.TrimSpace(x)
 }
-

@@ -8,12 +8,74 @@ package graphql
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/generated"
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/model"
+	authApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
 	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
 	postApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
 )
+
+// Register is the resolver for the register field.
+func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthUser, error) {
+	if r.Auth == nil {
+		return nil, errors.New("auth_disabled")
+	}
+	if strings.TrimSpace(input.FirstName) == "" || strings.TrimSpace(input.LastName) == "" ||
+		strings.TrimSpace(input.Email) == "" || strings.TrimSpace(input.Password) == "" {
+		return nil, errors.New("invalid_payload")
+	}
+	u, err := r.Auth.Register(ctx, input.FirstName, input.LastName, input.Email, input.Password)
+	if err != nil {
+		return nil, err
+	}
+	return domainAuthUserToGQL(u), nil
+}
+
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthTokens, error) {
+	if r.Auth == nil {
+		return nil, errors.New("auth_disabled")
+	}
+	if strings.TrimSpace(input.Email) == "" || strings.TrimSpace(input.Password) == "" {
+		return nil, errors.New("invalid_payload")
+	}
+	u, access, refresh, err := r.Auth.Login(ctx, input.Email, input.Password)
+	if err != nil {
+		if errors.Is(err, authApp.ErrInvalidLogin) {
+			return nil, errors.New("invalid_credentials")
+		}
+		return nil, err
+	}
+	return &model.AuthTokens{
+		AccessToken:  access,
+		RefreshToken: refresh,
+		User:         domainAuthUserToGQL(u),
+	}, nil
+}
+
+// Refresh is the resolver for the refresh field.
+func (r *mutationResolver) Refresh(ctx context.Context, input model.RefreshInput) (*model.AuthTokens, error) {
+	if r.Auth == nil {
+		return nil, errors.New("auth_disabled")
+	}
+	if strings.TrimSpace(input.RefreshToken) == "" {
+		return nil, errors.New("invalid_payload")
+	}
+	u, access, refresh, err := r.Auth.Refresh(ctx, input.RefreshToken)
+	if err != nil {
+		if errors.Is(err, authApp.ErrInvalidLogin) {
+			return nil, errors.New("invalid_refresh_token")
+		}
+		return nil, err
+	}
+	return &model.AuthTokens{
+		AccessToken:  access,
+		RefreshToken: refresh,
+		User:         domainAuthUserToGQL(u),
+	}, nil
+}
 
 // Post is the resolver for the post field.
 func (r *queryResolver) Post(ctx context.Context, slug string) (*model.Post, error) {
@@ -54,6 +116,38 @@ func (r *queryResolver) Posts(ctx context.Context, limit *int, offset *int) (*mo
 	return &model.PostConnection{Posts: out}, nil
 }
 
+// SearchPosts is the resolver for the searchPosts field.
+func (r *queryResolver) SearchPosts(ctx context.Context, q string, limit *int, offset *int) (*model.PostConnection, error) {
+	if r.PostsCore == nil {
+		return &model.PostConnection{Posts: []*model.Post{}}, nil
+	}
+	if r.Search == nil {
+		return &model.PostConnection{Posts: []*model.Post{}}, nil
+	}
+
+	lim := 0
+	if limit != nil {
+		lim = *limit
+	}
+	off := 0
+	if offset != nil {
+		off = *offset
+	}
+	ids, err := r.Search.SearchPostIDs(ctx, q, lim, off)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.Post, 0, len(ids))
+	for _, id := range ids {
+		p, err := r.PostsCore.GetByID(ctx, id)
+		if err != nil || p == nil {
+			continue
+		}
+		out = append(out, domainPostToGQL(p))
+	}
+	return &model.PostConnection{Posts: out}, nil
+}
+
 // Page is the resolver for the page field.
 func (r *queryResolver) Page(ctx context.Context, slug string) (*model.Page, error) {
 	if r.Pages == nil {
@@ -69,7 +163,59 @@ func (r *queryResolver) Page(ctx context.Context, slug string) (*model.Page, err
 	return domainPageToGQL(p), nil
 }
 
+// Categories is the resolver for the categories field.
+func (r *queryResolver) Categories(ctx context.Context, limit *int, offset *int) ([]*model.Category, error) {
+	if r.Taxonomy == nil {
+		return []*model.Category{}, nil
+	}
+	lim := 0
+	if limit != nil {
+		lim = *limit
+	}
+	off := 0
+	if offset != nil {
+		off = *offset
+	}
+	list, err := r.Taxonomy.ListCategories(ctx, lim, off)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.Category, 0, len(list))
+	for i := range list {
+		out = append(out, domainCategoryToGQL(&list[i]))
+	}
+	return out, nil
+}
+
+// Tags is the resolver for the tags field.
+func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*model.Tag, error) {
+	if r.Taxonomy == nil {
+		return []*model.Tag{}, nil
+	}
+	lim := 0
+	if limit != nil {
+		lim = *limit
+	}
+	off := 0
+	if offset != nil {
+		off = *offset
+	}
+	list, err := r.Taxonomy.ListTags(ctx, lim, off)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*model.Tag, 0, len(list))
+	for i := range list {
+		out = append(out, domainTagToGQL(&list[i]))
+	}
+	return out, nil
+}
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

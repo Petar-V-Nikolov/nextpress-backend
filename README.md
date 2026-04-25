@@ -46,20 +46,31 @@ make seed
 make graphql           # after editing internal/graphql/schema.graphqls
 ```
 
-Configuration: [`.env.example`](.env.example). Optional Elasticsearch / GraphQL notes: [`docs/deployment/local.md`](docs/deployment/local.md).
+Configuration: [`.env.example`](.env.example). Optional Elasticsearch, GraphQL, Nginx, and systemd on your machine: [`docs/deployment/local.md`](docs/deployment/local.md).
 
 ## API surface (summary)
 
-- **Auth:** `POST /v1/auth/register`, `/login`, `/refresh`
-- **Public:** posts, pages, menus (and search when Elasticsearch is enabled)
-- **GraphQL:** if enabled - `GRAPHQL_PATH` (default `/v1/graphql`)
-- **Admin:** `/v1/admin/*` - JWT + permissions
+- **Auth:** `POST /auth/register`, `/login`, `/refresh`
+- **Public:** posts, pages (and search when Elasticsearch is enabled)
+- **GraphQL:** if enabled - `GRAPHQL_PATH` (default `<API_BASE_PATH>/graphql`, e.g. `/graphql` or `/v1/graphql`)
+- **Admin:** `/admin/*` - JWT + permissions
+- **Base path:** optional `API_BASE_PATH` prefix for all API routes
 
 Details: OpenAPI and source.
 
+## GraphQL vs REST split
+
+NextPress keeps REST as the primary contract and uses GraphQL as an optional read-focused API.
+
+- **REST is source-of-truth for full platform coverage:** auth, admin workflows, writes/mutations, and RBAC-controlled operations are defined in [`docs/openapi.yaml`](docs/openapi.yaml).
+- **GraphQL is optional and additive:** enabled via `GRAPHQL_ENABLED`, intended for client-friendly public content reads and selective aggregation.
+- **Current GraphQL scope:** public reads for posts/pages plus taxonomy and search queries (when Elasticsearch is enabled).
+- **Write/admin/auth behavior:** remain REST-first unless explicitly added to GraphQL with clear permission and validation rules.
+- **Backward compatibility rule:** REST paths are stable integration surface; GraphQL can evolve as an ergonomics layer without replacing REST parity guarantees.
+
 ## RBAC
 
-[`make seed`](docs/SEEDING.md) loads default roles and permissions. Assign `admin` via RBAC APIs or optional bootstrap (`RBAC_BOOTSTRAP_ENABLED`) - see [roadmap](docs/ROADMAP.md).
+[`make seed`](docs/SEEDING.md) runs all seeders: RBAC defaults, a seeded `superadmin`, and 100 deterministic records per content table for local/dev datasets.
 
 ## Repository layout
 

@@ -144,10 +144,10 @@ func TestPublicPostsRoute_ReturnsPublishedPosts(t *testing.T) {
 	h := NewHandler(core, stubPostsSubresources{}, stubSeriesAdmin{}, stubTranslationGroupsAdmin{})
 
 	router := gin.New()
-	v1 := router.Group("/v1")
-	h.RegisterPublicRoutes(v1)
+	api := router.Group("")
+	h.RegisterPublicRoutes(api)
 
-	req := httptest.NewRequest(http.MethodGet, "/v1/posts?limit=1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/posts?limit=1", nil)
 	req.RemoteAddr = "1.2.3.4:1234"
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -198,10 +198,10 @@ func TestPublicPostsSearch_Disabled(t *testing.T) {
 	core := &mockPostsCore{}
 	h := NewHandler(core, stubPostsSubresources{}, stubSeriesAdmin{}, stubTranslationGroupsAdmin{})
 	router := gin.New()
-	v1 := router.Group("/v1")
-	h.RegisterPublicRoutes(v1)
+	api := router.Group("")
+	h.RegisterPublicRoutes(api)
 
-	req := httptest.NewRequest(http.MethodGet, "/v1/posts/search?q=test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/posts/search?q=test", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	if w.Code != http.StatusNotImplemented {
@@ -230,10 +230,10 @@ func TestPublicPostsSearch_WithElasticsearch(t *testing.T) {
 	es := &mockESSearch{ids: []string{"p1"}}
 	h := NewHandlerWithOptionalSearch(core, stubPostsSubresources{}, stubSeriesAdmin{}, stubTranslationGroupsAdmin{}, es)
 	router := gin.New()
-	v1 := router.Group("/v1")
-	h.RegisterPublicRoutes(v1)
+	api := router.Group("")
+	h.RegisterPublicRoutes(api)
 
-	req := httptest.NewRequest(http.MethodGet, "/v1/posts/search?q=hello", nil)
+	req := httptest.NewRequest(http.MethodGet, "/posts/search?q=hello", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	if w.Code != http.StatusOK {
@@ -261,8 +261,8 @@ func TestAdminPostsRoute_RequiresAuth(t *testing.T) {
 	checker := mockPermissionChecker{allowed: true}
 
 	router := gin.New()
-	v1 := router.Group("/v1")
-	admin := v1.Group("/admin")
+	api := router.Group("")
+	admin := api.Group("/admin")
 	admin.Use(platformMiddleware.AuthRequired(parser))
 
 	h.RegisterRoutes(
@@ -271,7 +271,7 @@ func TestAdminPostsRoute_RequiresAuth(t *testing.T) {
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(checker, code) },
 	)
 
-	req := httptest.NewRequest(http.MethodGet, "/v1/admin/posts", nil)
+	req := httptest.NewRequest(http.MethodGet, "/admin/posts", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

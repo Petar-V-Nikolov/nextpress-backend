@@ -2,6 +2,37 @@
 
 package model
 
+type AuthTokens struct {
+	AccessToken  string    `json:"accessToken"`
+	RefreshToken string    `json:"refreshToken"`
+	User         *AuthUser `json:"user"`
+}
+
+type AuthUser struct {
+	ID        string  `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Email     string  `json:"email"`
+	Active    bool    `json:"active"`
+	CreatedAt *string `json:"createdAt,omitempty"`
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	DeletedAt *string `json:"deletedAt,omitempty"`
+}
+
+type Category struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type Mutation struct {
+}
+
 type Page struct {
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`
@@ -24,4 +55,21 @@ type PostConnection struct {
 }
 
 type Query struct {
+}
+
+type RefreshInput struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
+type RegisterInput struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+type Tag struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
 }

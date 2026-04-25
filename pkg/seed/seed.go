@@ -16,6 +16,7 @@ func Run(db *gorm.DB) error {
 		fn   func(*gorm.DB) error
 	}{
 		{"rbac_defaults", SeedRBACDefaults},
+		{"full_dataset", SeedFullDataset},
 	} {
 		log.Printf("seeding %s...", s.name)
 		if err := s.fn(db); err != nil {
@@ -25,4 +26,3 @@ func Run(db *gorm.DB) error {
 	}
 	return nil
 }
-

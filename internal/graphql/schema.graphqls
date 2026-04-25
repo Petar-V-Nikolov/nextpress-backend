@@ -19,8 +19,62 @@ type PostConnection {
   posts: [Post!]!
 }
 
+type Category {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type AuthUser {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  active: Boolean!
+  createdAt: String
+  updatedAt: String
+  deletedAt: String
+}
+
+type AuthTokens {
+  accessToken: String!
+  refreshToken: String!
+  user: AuthUser!
+}
+
+input RegisterInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input RefreshInput {
+  refreshToken: String!
+}
+
 type Query {
   post(slug: String!): Post
   posts(limit: Int, offset: Int): PostConnection!
+  searchPosts(q: String!, limit: Int, offset: Int): PostConnection!
   page(slug: String!): Page
+  categories(limit: Int, offset: Int): [Category!]!
+  tags(limit: Int, offset: Int): [Tag!]!
+}
+
+type Mutation {
+  register(input: RegisterInput!): AuthUser!
+  login(input: LoginInput!): AuthTokens!
+  refresh(input: RefreshInput!): AuthTokens!
 }

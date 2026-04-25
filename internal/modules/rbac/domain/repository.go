@@ -12,5 +12,7 @@ type Repository interface {
 	// Assignments
 	AssignRoleToUser(ctx context.Context, userID string, roleID string) error
 	GrantPermissionToRole(ctx context.Context, roleID string, permissionID string) error
+	ListRoleNamesByUserID(ctx context.Context, userID string) ([]string, error)
+	ListPermissionCodesByUserID(ctx context.Context, userID string) ([]string, error)
 }
 

@@ -27,11 +27,47 @@ components:
     tokenPair:
       type: object
       properties:
-        access_token:
+        accessToken:
           type: string
-        refresh_token:
+        refreshToken:
           type: string
-      required: [access_token, refresh_token]
+      required: [accessToken, refreshToken]
+
+    authUserPublic:
+      type: object
+      properties:
+        id: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string, format: email }
+        active: { type: boolean }
+        rbac:
+          type: object
+          properties:
+            roles:
+              type: array
+              items: { type: string }
+            permissions:
+              type: array
+              items: { type: string }
+          required: [roles, permissions]
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        deletedAt: { type: string, format: date-time, nullable: true }
+      required: [id, firstName, lastName, email, active, rbac]
+
+    authTokensWithUser:
+      type: object
+      properties:
+        tokens:
+          type: object
+          properties:
+            accessToken: { type: string }
+            refreshToken: { type: string }
+          required: [accessToken, refreshToken]
+        user:
+          $ref: "#/components/schemas/authUserPublic"
+      required: [tokens, user]
 
     post:
       type: object
@@ -144,38 +180,15 @@ components:
       type: object
       properties:
         id: { type: string }
-        author_id: { type: string }
+        authorId: { type: string }
         title: { type: string }
         slug: { type: string }
         content: { type: string }
         status: { type: string, enum: [draft, published, archived] }
-        published_at: { type: string, nullable: true }
-        created_at: { type: string }
-        updated_at: { type: string }
-      required: [id, author_id, title, slug, status, created_at, updated_at]
-
-    menu:
-      type: object
-      properties:
-        id: { type: string }
-        name: { type: string }
-        slug: { type: string }
-      required: [id, name, slug]
-
-    menuItem:
-      type: object
-      properties:
-        id: { nullable: true }
-        parent_id: { nullable: true }
-        label: { type: string }
-        item_type: { nullable: true }
-        ref_id: { nullable: true }
-        url: { nullable: true }
-        sort_order: { type: integer }
-        children:
-          type: array
-          items:
-            $ref: "#/components/schemas/menuItem"
+        publishedAt: { type: string, nullable: true }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+      required: [id, authorId, title, slug, status, createdAt, updatedAt]
 
     categoryOrTag:
       type: object
@@ -189,13 +202,13 @@ components:
       type: object
       properties:
         id: { type: string }
-        uploader_id: { type: string }
-        original_name: { type: string }
-        mime_type: { type: string }
-        size_bytes: { type: integer }
-        public_url: { type: string }
-        created_at: { type: string }
-      required: [id, uploader_id, original_name, mime_type, size_bytes, public_url, created_at]
+        uploaderId: { type: string }
+        originalName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer }
+        publicUrl: { type: string }
+        createdAt: { type: string }
+      required: [id, uploaderId, originalName, mimeType, sizeBytes, publicUrl, createdAt]
 
     plugin:
       type: object
@@ -206,9 +219,9 @@ components:
         enabled: { type: boolean }
         version: { type: string }
         config: { type: object, additionalProperties: true }
-        created_at: { type: string }
-        updated_at: { type: string }
-      required: [id, name, slug, enabled, version, config, created_at, updated_at]
+        createdAt: { type: string }
+        updatedAt: { type: string }
+      required: [id, name, slug, enabled, version, config, createdAt, updatedAt]
 
 paths:
   /health:
@@ -248,7 +261,7 @@ paths:
                   status: { type: string }
                   details: { type: string }
 
-  /v1/auth/register:
+  /auth/register:
     post:
       tags: [auth]
       requestBody:
@@ -272,10 +285,10 @@ paths:
                 type: object
                 properties:
                   id: { type: string }
-                  first_name: { type: string }
-                  last_name: { type: string }
+                  firstName: { type: string }
+                  lastName: { type: string }
                   email: { type: string }
-                required: [id, first_name, last_name, email]
+                required: [id, firstName, lastName, email]
         "400":
           description: invalid payload
           content:
@@ -283,7 +296,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/auth/login:
+  /auth/login:
     post:
       tags: [auth]
       requestBody:
@@ -298,11 +311,11 @@ paths:
               required: [email, password]
       responses:
         "200":
-          description: token pair
+          description: access and refresh tokens plus current user profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tokenPair"
+                $ref: "#/components/schemas/authTokensWithUser"
         "401":
           description: invalid credentials
           content:
@@ -310,7 +323,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/auth/refresh:
+  /auth/me:
+    get:
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      summary: Current user from access token
+      responses:
+        "200":
+          description: authenticated user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/authUserPublic"
+                required: [user]
+        "401":
+          description: missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "404":
+          description: user id in token no longer exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /auth/refresh:
     post:
       tags: [auth]
       requestBody:
@@ -324,11 +367,11 @@ paths:
               required: [refresh_token]
       responses:
         "200":
-          description: token pair
+          description: new token pair plus current user profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tokenPair"
+                $ref: "#/components/schemas/authTokensWithUser"
         "401":
           description: invalid refresh token
           content:
@@ -336,7 +379,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/posts:
+  /auth/logout:
+    post:
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token: { type: string }
+              required: [refresh_token]
+      responses:
+        "200":
+          description: logout accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                required: [message]
+        "401":
+          description: invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /posts:
     get:
       tags: [public]
       description: List published posts (no auth, RBAC not applicable)
@@ -370,12 +442,13 @@ paths:
                       $ref: "#/components/schemas/post"
                 required: [posts]
         "500":
+          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/posts/search:
+  /posts/search:
     get:
       tags: [public]
       description: Elasticsearch full-text search (requires ELASTICSEARCH_ENABLED); returns 501 with search_disabled when disabled
@@ -392,7 +465,7 @@ paths:
           schema: { type: integer, default: 0 }
       responses:
         "200":
-          description: same shape as GET /v1/posts list
+          description: same shape as GET /posts list
           content:
             application/json:
               schema:
@@ -416,12 +489,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
         "500":
+          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/posts/{slug}:
+  /posts/{slug}:
     get:
       tags: [public]
       parameters:
@@ -431,17 +505,19 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Plugins list
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
         "404":
+          description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/pages/{slug}:
+  /pages/{slug}:
     get:
       tags: [public]
       parameters:
@@ -451,46 +527,19 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Page item
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/page"
         "404":
+          description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/menus/{slug}:
-    get:
-      tags: [public]
-      parameters:
-        - in: path
-          name: slug
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: Menu tree
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menu:
-                    $ref: "#/components/schemas/menu"
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/menuItem"
-                required: [menu, items]
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /v1/admin/ping:
+  /admin/ping:
     get:
       tags: [admin]
       security:
@@ -506,17 +555,19 @@ paths:
                   ok: { type: boolean }
                 required: [ok]
         "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
         "403":
+          description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts:
+  /admin/posts:
     get:
       tags: [admin]
       security:
@@ -540,6 +591,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Categories list
           content:
             application/json:
               schema:
@@ -568,17 +620,19 @@ paths:
               required: [title, slug]
       responses:
         "201":
+          description: Post created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
         "400":
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts/search/reindex:
+  /admin/posts/search/reindex:
     post:
       tags: [admin]
       security:
@@ -595,11 +649,13 @@ paths:
                   reindexed: { type: integer }
                 required: [reindexed]
         "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
         "403":
+          description: Forbidden
           content:
             application/json:
               schema:
@@ -611,12 +667,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
         "500":
+          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts/{id}:
+  /admin/posts/{id}:
     get:
       tags: [admin]
       security:
@@ -629,11 +686,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Post item
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
         "404":
+          description: Not found
           content:
             application/json:
               schema:
@@ -662,16 +721,19 @@ paths:
               required: [title, slug, content, status]
       responses:
         "200":
+          description: Post updated
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
         "400":
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
         "404":
+          description: Not found
           content:
             application/json:
               schema:
@@ -694,6 +756,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Post deleted
           content:
             application/json:
               schema:
@@ -702,12 +765,12 @@ paths:
                   ok: { type: boolean }
                 required: [ok]
 
-  /v1/admin/posts/{id}/categories:
+  /admin/posts/{id}/categories:
     put:
       tags: [admin]
       security:
         - bearerAuth: []
-      description: Requires `posts:write`. Default response is `{ok: true}`. Use query `expand=post` to return the full post object (same shape as GET /v1/admin/posts/{id}).
+      description: "Requires `posts:write`. Default response is `{ok: true}`. Use query `expand=post` to return the full post object (same shape as GET /admin/posts/{id})."
       parameters:
         - in: path
           name: id
@@ -717,7 +780,7 @@ paths:
           name: expand
           required: false
           schema: { type: string, enum: [post] }
-          description: If `post`, response body is the full post instead of `{ok: true}`.
+          description: "If `post`, response body is the full post instead of `{ok: true}`."
       requestBody:
         required: true
         content:
@@ -731,7 +794,7 @@ paths:
               required: [ids]
       responses:
         "200":
-          description: Either `{ok: true}` or full post when `expand=post`.
+          description: "Either `{ok: true}` or full post when `expand=post`."
           content:
             application/json:
               schema:
@@ -742,12 +805,12 @@ paths:
                     required: [ok]
                   - $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/tags:
+  /admin/posts/{id}/tags:
     put:
       tags: [admin]
       security:
         - bearerAuth: []
-      description: Requires `posts:write`. Default `{ok: true}`; optional `expand=post` returns full post.
+      description: "Requires `posts:write`. Default `{ok: true}`; optional `expand=post` returns full post."
       parameters:
         - in: path
           name: id
@@ -770,7 +833,7 @@ paths:
               required: [ids]
       responses:
         "200":
-          description: Either `{ok: true}` or full post when `expand=post`.
+          description: "Either `{ok: true}` or full post when `expand=post`."
           content:
             application/json:
               schema:
@@ -781,7 +844,7 @@ paths:
                     required: [ok]
                   - $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/metrics:
+  /admin/posts/{id}/metrics:
     put:
       tags: [admin]
       security:
@@ -805,12 +868,38 @@ paths:
               required: [metrics]
       responses:
         "200":
+          description: Post with updated metrics
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
+    get:
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      description: Requires `posts:read`. Returns metrics row if present.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Metrics payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics: { type: object, nullable: true, additionalProperties: true }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/posts/{id}/primary-category:
+  /admin/posts/{id}/primary-category:
     put:
       tags: [admin]
       security:
@@ -831,37 +920,13 @@ paths:
                 categoryId: { type: string, nullable: true }
       responses:
         "200":
+          description: Post with updated primary category
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/metrics:
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `posts:read`. Returns metrics row if present.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  metrics: { type: object, nullable: true, additionalProperties: true }
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /v1/admin/posts/{id}/seo:
+  /admin/posts/{id}/seo:
     get:
       tags: [admin]
       security:
@@ -874,6 +939,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: SEO payload
           content:
             application/json:
               schema:
@@ -899,6 +965,7 @@ paths:
               additionalProperties: true
       responses:
         "200":
+          description: Post with updated SEO
           content:
             application/json:
               schema:
@@ -915,12 +982,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Post with removed SEO
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/featured-image:
+  /admin/posts/{id}/featured-image:
     put:
       tags: [admin]
       security:
@@ -940,12 +1008,13 @@ paths:
               additionalProperties: true
       responses:
         "200":
+          description: Post with updated featured image
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/series-link:
+  /admin/posts/{id}/series-link:
     put:
       tags: [admin]
       security:
@@ -967,12 +1036,13 @@ paths:
                 partLabel: { type: string, nullable: true }
       responses:
         "200":
+          description: Post with updated series link
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/coauthors:
+  /admin/posts/{id}/coauthors:
     get:
       tags: [admin]
       security:
@@ -985,6 +1055,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Coauthors list
           content:
             application/json:
               schema:
@@ -1018,12 +1089,13 @@ paths:
               required: [userIds]
       responses:
         "200":
+          description: Post with updated coauthors
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/gallery:
+  /admin/posts/{id}/gallery:
     post:
       tags: [admin]
       security:
@@ -1048,6 +1120,7 @@ paths:
               required: [mediaId]
       responses:
         "201":
+          description: Gallery item created
           content:
             application/json:
               schema:
@@ -1057,7 +1130,7 @@ paths:
                   post:
                     $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/gallery/{itemId}:
+  /admin/posts/{id}/gallery/{itemId}:
     put:
       tags: [admin]
       security:
@@ -1080,6 +1153,7 @@ paths:
               additionalProperties: true
       responses:
         "200":
+          description: Gallery item updated
           content:
             application/json:
               schema:
@@ -1099,12 +1173,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Gallery item deleted
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/changelog:
+  /admin/posts/{id}/changelog:
     post:
       tags: [admin]
       security:
@@ -1127,6 +1202,7 @@ paths:
               required: [note]
       responses:
         "201":
+          description: Changelog entry created
           content:
             application/json:
               schema:
@@ -1136,7 +1212,7 @@ paths:
                   post:
                     $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/changelog/{changelogId}:
+  /admin/posts/{id}/changelog/{changelogId}:
     delete:
       tags: [admin]
       security:
@@ -1152,12 +1228,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Changelog entry deleted
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/syndication:
+  /admin/posts/{id}/syndication:
     post:
       tags: [admin]
       security:
@@ -1180,6 +1257,7 @@ paths:
               required: [platform, url]
       responses:
         "201":
+          description: Syndication entry created
           content:
             application/json:
               schema:
@@ -1189,7 +1267,7 @@ paths:
                   post:
                     $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/syndication/{syndicationId}:
+  /admin/posts/{id}/syndication/{syndicationId}:
     put:
       tags: [admin]
       security:
@@ -1211,6 +1289,7 @@ paths:
               additionalProperties: true
       responses:
         "200":
+          description: Syndication entry updated
           content:
             application/json:
               schema:
@@ -1230,12 +1309,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Syndication entry deleted
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/posts/{id}/translations:
+  /admin/posts/{id}/translations:
     put:
       tags: [admin]
       security:
@@ -1258,6 +1338,7 @@ paths:
               required: [locale]
       responses:
         "200":
+          description: Translation link updated
           content:
             application/json:
               schema:
@@ -1278,12 +1359,13 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Translation link removed
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/post"
 
-  /v1/admin/syndication/{id}:
+  /admin/syndication/{id}:
     put:
       tags: [admin]
       security:
@@ -1302,6 +1384,7 @@ paths:
               additionalProperties: true
       responses:
         "200":
+          description: Syndication updated
           content:
             application/json:
               schema:
@@ -1319,6 +1402,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Syndication deleted
           content:
             application/json:
               schema:
@@ -1326,7 +1410,7 @@ paths:
                 properties:
                   ok: { type: boolean }
 
-  /v1/admin/series:
+  /admin/series:
     get:
       tags: [admin]
       security:
@@ -1334,6 +1418,7 @@ paths:
       description: Requires `posts:read`
       responses:
         "200":
+          description: Series list
           content:
             application/json:
               schema:
@@ -1361,13 +1446,14 @@ paths:
               required: [title, slug]
       responses:
         "201":
+          description: Series created
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: true
 
-  /v1/admin/series/{id}:
+  /admin/series/{id}:
     get:
       tags: [admin]
       security:
@@ -1379,12 +1465,14 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Series item
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: true
         "404":
+          description: Not found
           content:
             application/json:
               schema:
@@ -1408,6 +1496,7 @@ paths:
                 slug: { type: string }
       responses:
         "200":
+          description: Series updated
           content:
             application/json:
               schema:
@@ -1431,6 +1520,7 @@ paths:
             enum: [series]
       responses:
         "200":
+          description: Series deleted
           content:
             application/json:
               schema:
@@ -1442,12 +1532,13 @@ paths:
                     additionalProperties: true
                 required: [ok]
         "404":
+          description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/translation-groups:
+  /admin/translation-groups:
     post:
       tags: [admin]
       security:
@@ -1462,6 +1553,7 @@ paths:
                 id: { type: string, nullable: true }
       responses:
         "201":
+          description: Translation group created
           content:
             application/json:
               schema:
@@ -1469,12 +1561,13 @@ paths:
                 properties:
                   id: { type: string }
         "409":
+          description: Conflict
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/translation-groups/{id}:
+  /admin/translation-groups/{id}:
     get:
       tags: [admin]
       security:
@@ -1487,6 +1580,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Translation group item
           content:
             application/json:
               schema:
@@ -1494,6 +1588,7 @@ paths:
                 properties:
                   id: { type: string }
         "404":
+          description: Not found
           content:
             application/json:
               schema:
@@ -1509,6 +1604,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Translation group deleted
           content:
             application/json:
               schema:
@@ -1516,7 +1612,7 @@ paths:
                 properties:
                   ok: { type: boolean }
 
-  /v1/admin/pages:
+  /admin/pages:
     get:
       tags: [admin]
       security:
@@ -1524,6 +1620,7 @@ paths:
       description: Requires `pages:read`
       responses:
         "200":
+          description: Pages list
           content:
             application/json:
               schema:
@@ -1552,12 +1649,13 @@ paths:
               required: [title, slug]
       responses:
         "201":
+          description: Page created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/page"
 
-  /v1/admin/pages/{id}:
+  /admin/pages/{id}:
     get:
       tags: [admin]
       security:
@@ -1570,6 +1668,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Page item
           content:
             application/json:
               schema:
@@ -1579,12 +1678,28 @@ paths:
       security:
         - bearerAuth: []
       description: Requires `pages:write`
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Page updated
     delete:
       tags: [admin]
       security:
         - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Page deleted
 
-  /v1/admin/categories:
+  /admin/categories:
     get:
       tags: [admin]
       security:
@@ -1592,6 +1707,7 @@ paths:
       description: Requires `categories:read`
       responses:
         "200":
+          description: Categories list
           content:
             application/json:
               schema:
@@ -1607,39 +1723,70 @@ paths:
       security:
         - bearerAuth: []
       description: Requires `categories:write`
-  /v1/admin/categories/{id}:
+      responses:
+        "200":
+          description: Category created
+  /admin/categories/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
     put:
       tags: [admin]
       security:
         - bearerAuth: []
       description: Requires `categories:write`
+      responses:
+        "200":
+          description: Category updated
     delete:
       tags: [admin]
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: Category deleted
 
-  /v1/admin/tags:
+  /admin/tags:
     get:
       tags: [admin]
       security:
         - bearerAuth: []
       description: Requires `tags:read`
+      responses:
+        "200":
+          description: Tags list
     post:
       tags: [admin]
       security:
         - bearerAuth: []
       description: Requires `tags:write`
-  /v1/admin/tags/{id}:
+      responses:
+        "200":
+          description: Tag created
+  /admin/tags/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
     put:
       tags: [admin]
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: Tag updated
     delete:
       tags: [admin]
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: Tag deleted
 
-  /v1/admin/media:
+  /admin/media:
     get:
       tags: [admin]
       security:
@@ -1647,6 +1794,7 @@ paths:
       description: Requires `media:read`
       responses:
         "200":
+          description: Media list
           content:
             application/json:
               schema:
@@ -1675,12 +1823,13 @@ paths:
               required: [file]
       responses:
         "201":
+          description: Media uploaded
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/media"
 
-  /v1/admin/media/{id}:
+  /admin/media/{id}:
     get:
       tags: [admin]
       security:
@@ -1693,69 +1842,18 @@ paths:
           schema: { type: string }
       responses:
         "200":
+          description: Media item
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/media"
 
-  /v1/admin/menus:
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:read`
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menus:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/menu"
-                required: [menus]
-    post:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:write`
-
-  /v1/admin/menus/{id}:
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:read`
-    put:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:write`
-    delete:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-
-  /v1/admin/menus/{id}/items:
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:read`
-    put:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:write`
-
-  /v1/admin/bootstrap/claim-admin:
+  /admin/bootstrap/claim-admin:
     post:
       tags: [admin]
       description: |
         One-time RBAC bootstrap endpoint. Exists only when `RBAC_BOOTSTRAP_ENABLED=true`.
-        It is in the `/v1/admin/*` group, so it always requires a valid access token,
+        It is in the `/admin/*` group, so it always requires a valid access token,
         and it assigns the seeded admin role to the current user.
       security:
         - bearerAuth: []
@@ -1765,41 +1863,70 @@ paths:
         "409":
           description: bootstrap already completed
         "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/admin/roles:
+  /admin/roles:
     get:
       tags: [admin]
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: Roles list
     post:
       tags: [admin]
       security:
         - bearerAuth: []
-  /v1/admin/permissions:
+      responses:
+        "200":
+          description: Role created
+  /admin/permissions:
     get:
       tags: [admin]
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: Permissions list
     post:
       tags: [admin]
       security:
         - bearerAuth: []
-  /v1/admin/roles/{role_id}/permissions:
+      responses:
+        "200":
+          description: Permission created
+  /admin/roles/{role_id}/permissions:
+    parameters:
+      - in: path
+        name: role_id
+        required: true
+        schema: { type: string }
     post:
       tags: [admin]
       security:
         - bearerAuth: []
-  /v1/admin/users/{user_id}/roles:
+      responses:
+        "200":
+          description: Permissions assigned to role
+  /admin/users/{user_id}/roles:
+    parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema: { type: string }
     post:
       tags: [admin]
       security:
         - bearerAuth: []
+      responses:
+        "200":
+          description: Roles assigned to user
 
-  /v1/admin/plugins:
+  /admin/plugins:
     get:
       tags: [admin]
       security:
@@ -1807,6 +1934,7 @@ paths:
       description: Requires `plugins:manage`
       responses:
         "200":
+          description: Plugins list
           content:
             application/json:
               schema:
@@ -1839,12 +1967,13 @@ paths:
               required: [name, slug]
       responses:
         "201":
+          description: Plugin created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/plugin"
 
-  /v1/admin/plugins/{id}:
+  /admin/plugins/{id}:
     put:
       tags: [admin]
       security:
@@ -1869,6 +1998,7 @@ paths:
                   additionalProperties: true
       responses:
         "200":
+          description: Plugin updated
           content:
             application/json:
               schema:

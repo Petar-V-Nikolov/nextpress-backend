@@ -22,9 +22,9 @@
 
 ## Auth & users
 
-- [x] `POST /v1/auth/register`
-- [x] `POST /v1/auth/login`
-- [x] `POST /v1/auth/refresh`
+- [x] `POST /auth/register`
+- [x] `POST /auth/login`
+- [x] `POST /auth/refresh`
 - [x] Bcrypt password hashing
 - [x] JWT access + refresh tokens
 - [x] User persistence (GORM)
@@ -35,10 +35,10 @@
 
 - [x] Roles, permissions, user-role, role-permission schema
 - [x] Permission middleware (`RequirePermission`)
-- [x] `GET /v1/admin/ping` (`admin:ping`)
-- [x] `GET/POST /v1/admin/roles`, permissions, grant to role, assign role to user (`rbac:manage`)
+- [x] `GET /admin/ping` (`admin:ping`)
+- [x] `GET/POST /admin/roles`, permissions, grant to role, assign role to user (`rbac:manage`)
 - [x] Seeded defaults (`make seed`, `docs/SEEDING.md`)
-- [x] Optional `POST /v1/admin/bootstrap/claim-admin` (`RBAC_BOOTSTRAP_ENABLED`)
+- [x] Optional `POST /admin/bootstrap/claim-admin` (`RBAC_BOOTSTRAP_ENABLED`)
 
 ---
 
@@ -56,19 +56,19 @@
 - [x] Changelog entries on post
 - [x] Per-post syndication + global syndication admin routes
 - [x] Post translations CRUD
-- [x] Admin series CRUD (`/v1/admin/series`)
-- [x] Translation groups admin (`/v1/admin/translation-groups`)
+- [x] Admin series CRUD (`/admin/series`)
+- [x] Translation groups admin (`/admin/translation-groups`)
 - [x] Derived fields / hooks in application layer (e.g. derived fields hook)
 - [x] Scheduled publish fields on model + **background ticker** promoting due posts (`cmd/api`)
-- [x] Public `GET /v1/posts`, `GET /v1/posts/{slug}` (published)
-- [x] Public `GET /v1/posts/search` when Elasticsearch enabled
+- [x] Public `GET /posts`, `GET /posts/{slug}` (published)
+- [x] Public `GET /posts/search` when Elasticsearch enabled
 
 ---
 
 ## Pages
 
 - [x] Admin pages CRUD (`pages:read` / `pages:write`)
-- [x] Public `GET /v1/pages/{slug}`
+- [x] Public `GET /pages/{slug}`
 
 ---
 
@@ -87,21 +87,14 @@
 
 ---
 
-## Menus
-
-- [x] Menus CRUD + items (`menus:*`)
-- [x] Public `GET /v1/menus/{slug}`
-
----
-
 ## Plugins
 
 - [x] `plugins` table + GORM repository
-- [x] `GET/POST /v1/admin/plugins`, `PUT /v1/admin/plugins/{id}` (`plugins:manage`)
+- [x] `GET/POST /admin/plugins`, `PUT /admin/plugins/{id}` (`plugins:manage`)
 - [x] `PostSave` hook chain registration at startup
 - [x] One **noop** hook slot per enabled plugin (chain runs; no real plugin logic)
-- [ ] **Real** `BeforePostSave` / `AfterPostSave` implementations (dispatch by plugin `slug` / `config`)
-- [ ] Document and implement **error / transaction policy** (fail post save vs log-and-continue)
+- [x] **Real** `BeforePostSave` / `AfterPostSave` implementations (dispatch by plugin `slug` / `config`)
+- [x] Document and implement **error / transaction policy** (fail post save vs log-and-continue)
 
 ---
 
@@ -110,7 +103,7 @@
 - [x] Client config + env vars (`.env.example`)
 - [x] Posts index + public search + admin reindex when enabled
 - [x] Indexing on save / scheduled publish path (when ES on)
-- [ ] Operational runbook: index templates, upgrades, multi-cluster (beyond current docs)
+- [x] Operational runbook: index templates, upgrades, multi-cluster (beyond current docs)
 
 ---
 
@@ -118,8 +111,10 @@
 
 - [x] gqlgen wiring; `post`, `posts`, `page(slug)` queries
 - [x] Playground when `APP_ENV` local/dev and flag on
-- [ ] **Parity** with REST: categories, tags, menus, search, mutations, auth, admin types - as you define scope
-- [ ] Document intended GraphQL vs REST split in [`README.md`](README.md) (docs index) or an ADR
+- [x] Public read parity slice: `categories`, `tags`, `searchPosts(q)` queries
+- [x] Auth mutation parity slice: `register`, `login`, `refresh`
+- [ ] **Parity** with REST: categories, tags, search, mutations, auth, admin types - as you define scope
+- [x] Document intended GraphQL vs REST split in [`README.md`](README.md) (docs index) or an ADR
 
 ---
 
@@ -130,20 +125,26 @@
 - [x] Plugins hooks unit test
 - [x] Posts derived-fields hook test
 - [x] Config tests (GraphQL / ES-related)
-- [ ] **Unit tests** for: `auth`, `rbac`, `user`, `pages`, `taxonomy`, `media`, `menus`, `plugins` transport/application (most modules)
-- [ ] **Integration tests** with real Postgres (docker or CI service)
-- [ ] **CI workflow** (GitHub Actions or other): `go test`, `go vet`, optional `golangci-lint`
-- [ ] **OpenAPI** validation / drift check vs router (optional tooling)
+- [x] Auth application service unit tests (register/login/refresh paths)
+- [x] RBAC application service unit tests (roles/permissions/assignments)
+- [x] Pages application service unit tests (create/update validation paths)
+- [x] Taxonomy application service unit tests (category/tag create/update paths)
+- [x] Plugins application service unit tests (register/update validation paths)
+- [x] Media application service unit tests (upload/get/list validation paths)
+- [ ] **Unit tests** for: `auth`, `rbac`, `user`, `pages`, `taxonomy`, `media`, `plugins` transport/application (most modules)
+- [x] **Integration tests** with real Postgres (docker or CI service)
+- [x] **CI workflow** (GitHub Actions or other): `go test`, `go vet`, optional `golangci-lint`
+- [x] **OpenAPI** validation / drift check vs router (optional tooling)
 
 ---
 
 ## Operations & scale
 
 - [x] Single-instance rate limits
-- [ ] **Shared** rate-limit store (e.g. **Redis**) for horizontal scale
-- [ ] **Metrics** (Prometheus/OpenTelemetry) beyond logs
-- [ ] **Health** variants (deep checks: DB, ES) - refine if needed
-- [ ] **Version** string in logs/binary aligned with tags/releases (`cmd/api` currently embeds a static label)
+- [x] **Shared** rate-limit store (e.g. **Redis**) for horizontal scale
+- [x] **Metrics** (Prometheus/OpenTelemetry) beyond logs
+- [x] **Health** variants (deep checks: DB, ES) - refine if needed
+- [x] **Version** string in logs/binary aligned with tags/releases (`cmd/api` currently embeds a static label)
 
 ---
 
@@ -165,16 +166,16 @@
 
 ## Security & hardening (ongoing)
 
-- [ ] Periodic dependency / CVE review (`go mod`, govulncheck)
-- [ ] Security headers, CORS policy documented per deployment
-- [ ] Rate-limit tuning and abuse-case tests
-- [ ] JWT key rotation story (if beyond single `JWT_SECRET`)
+- [x] Periodic dependency / CVE review (`go mod`, govulncheck)
+- [x] Security headers, CORS policy documented per deployment
+- [x] Rate-limit tuning and abuse-case tests
+- [x] JWT key rotation story (if beyond single `JWT_SECRET`)
 
 ---
 
 ## Documentation
 
 - [x] Root `README`, `docs/README`, `CONTRIBUTING`, `DEPLOYMENT`, `SEEDING`, `local.md`, `ROADMAP`, this file
-- [ ] **CHANGELOG** or release notes process (optional)
-- [ ] **ADR** folder for big decisions (optional)
+- [x] **CHANGELOG** or release notes process (optional)
+- [x] **ADR** folder for big decisions (optional)
 

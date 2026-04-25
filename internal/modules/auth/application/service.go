@@ -21,19 +21,35 @@ type PasswordHasher interface {
 	CheckPassword(hash, plain string) error
 }
 
+type RBACReader interface {
+	ListRoleNamesByUserID(ctx context.Context, userID string) ([]string, error)
+	ListPermissionCodesByUserID(ctx context.Context, userID string) ([]string, error)
+}
+
+type UserRelations struct {
+	RoleNames       []string
+	PermissionCodes []string
+}
+
 type Service struct {
-	users  userDomain.Repository
+	users userDomain.Repository
 	tokens TokenProvider
 	hasher PasswordHasher
+	rbac RBACReader
 }
 
 func NewService(users userDomain.Repository, tokens TokenProvider, hasher PasswordHasher) *Service {
 	return &Service{users: users, tokens: tokens, hasher: hasher}
 }
 
+func (s *Service) SetRBACReader(rbac RBACReader) {
+	s.rbac = rbac
+}
+
 var (
 	ErrEmailTaken   = errors.New("email already in use")
 	ErrInvalidLogin = errors.New("invalid email or password")
+	ErrUserNotFound = errors.New("user not found")
 )
 
 func (s *Service) Register(ctx context.Context, firstName, lastName, email, password string) (*userDomain.User, error) {
@@ -66,47 +82,96 @@ func (s *Service) Register(ctx context.Context, firstName, lastName, email, pass
 	return u, nil
 }
 
-func (s *Service) Login(ctx context.Context, email, password string) (access, refresh string, err error) {
+func (s *Service) Login(ctx context.Context, email, password string) (*userDomain.User, string, string, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 
 	u, err := s.users.FindByEmail(email)
 	if err != nil {
-		return "", "", err
+		return nil, "", "", err
 	}
 	if u == nil {
-		return "", "", ErrInvalidLogin
+		return nil, "", "", ErrInvalidLogin
 	}
 
 	if err := s.hasher.CheckPassword(u.Password, password); err != nil {
-		return "", "", ErrInvalidLogin
+		return nil, "", "", ErrInvalidLogin
 	}
 
-	access, err = s.tokens.GenerateAccessToken(string(u.ID))
+	access, err := s.tokens.GenerateAccessToken(string(u.ID))
 	if err != nil {
-		return "", "", err
+		return nil, "", "", err
 	}
-	refresh, err = s.tokens.GenerateRefreshToken(string(u.ID))
+	refresh, err := s.tokens.GenerateRefreshToken(string(u.ID))
 	if err != nil {
-		return "", "", err
+		return nil, "", "", err
 	}
-	return access, refresh, nil
+	return u, access, refresh, nil
 }
 
-func (s *Service) Refresh(ctx context.Context, refreshToken string) (access, refresh string, err error) {
+func (s *Service) Refresh(ctx context.Context, refreshToken string) (*userDomain.User, string, string, error) {
 	userID, err := s.tokens.ParseRefreshToken(refreshToken)
 	if err != nil {
-		return "", "", ErrInvalidLogin
+		return nil, "", "", ErrInvalidLogin
 	}
 
-	access, err = s.tokens.GenerateAccessToken(userID)
+	u, err := s.users.FindByID(userDomain.UserID(userID))
 	if err != nil {
-		return "", "", err
+		return nil, "", "", err
 	}
-	refresh, err = s.tokens.GenerateRefreshToken(userID)
+	if u == nil {
+		return nil, "", "", ErrInvalidLogin
+	}
+
+	access, err := s.tokens.GenerateAccessToken(userID)
 	if err != nil {
-		return "", "", err
+		return nil, "", "", err
 	}
-	return access, refresh, nil
+	refresh, err := s.tokens.GenerateRefreshToken(userID)
+	if err != nil {
+		return nil, "", "", err
+	}
+	return u, access, refresh, nil
+}
+
+func (s *Service) Me(ctx context.Context, userID string) (*userDomain.User, error) {
+	u, err := s.users.FindByID(userDomain.UserID(userID))
+	if err != nil {
+		return nil, err
+	}
+	if u == nil {
+		return nil, ErrUserNotFound
+	}
+	return u, nil
+}
+
+func (s *Service) Relations(ctx context.Context, userID string) (UserRelations, error) {
+	if s.rbac == nil {
+		return UserRelations{
+			RoleNames:       []string{},
+			PermissionCodes: []string{},
+		}, nil
+	}
+
+	roleNames, err := s.rbac.ListRoleNamesByUserID(ctx, userID)
+	if err != nil {
+		return UserRelations{}, err
+	}
+	permissionCodes, err := s.rbac.ListPermissionCodesByUserID(ctx, userID)
+	if err != nil {
+		return UserRelations{}, err
+	}
+	return UserRelations{
+		RoleNames:       roleNames,
+		PermissionCodes: permissionCodes,
+	}, nil
+}
+
+func (s *Service) Logout(ctx context.Context, refreshToken string) error {
+	_, err := s.tokens.ParseRefreshToken(refreshToken)
+	if err != nil {
+		return ErrInvalidLogin
+	}
+	return nil
 }
 
 func generateUserID() string {

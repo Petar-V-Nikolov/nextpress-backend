@@ -12,6 +12,7 @@ import (
 	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/config"
@@ -29,9 +30,6 @@ import (
 	mediaApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/application"
 	mediaInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/infrastructure"
 	mediaTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/transport"
-	menusApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/application"
-	menusInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/infrastructure"
-	menusTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/transport"
 	pluginsApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/application"
 	pluginsInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/infrastructure"
 	pluginsTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/transport"
@@ -51,6 +49,8 @@ import (
 	userInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/infrastructure"
 )
 
+var version = "dev"
+
 func main() {
 	// Use a dedicated context for the lifetime of the application; this makes it
 	// straightforward to propagate graceful shutdown signals to all subsystems.
@@ -69,7 +69,7 @@ func main() {
 	}(baseLogger)
 
 	logger.Infow("starting nextpress-backend",
-		"version", "0.1.0-phase2",
+		"version", version,
 	)
 
 	// Load environment variables (from .env if present) and app configuration
@@ -106,7 +106,8 @@ func main() {
 	passwordHasher := authInfra.NewBcryptHasher(0)
 	jwtProvider := authInfra.NewJWTProvider(jwtCfg.Secret, jwtCfg.AccessTTL, jwtCfg.RefreshTTL)
 	authService := authApp.NewService(userRepo, jwtProvider, passwordHasher)
-	authHandler := authTransport.NewHandler(authService)
+	authService.SetRBACReader(rbacInfra.NewGormRepository(db))
+	authHandler := authTransport.NewHandler(authService, platformMiddleware.AuthRequired(jwtProvider))
 	permissionChecker := rbacInfra.NewGormPermissionChecker(db)
 	rbacRepo := rbacInfra.NewGormRepository(db)
 	rbacService := rbacApp.NewService(rbacRepo)
@@ -232,9 +233,6 @@ UPDATE posts
 	mediaStorage := mediaInfra.NewLocalStorage(mediaCfg.StorageDir, mediaCfg.PublicBaseURL, mediaCfg.MaxUploadBytes)
 	mediaService := mediaApp.NewService(mediaRepo, mediaStorage)
 	mediaHandler := mediaTransport.NewHandler(mediaService)
-	menusRepo := menusInfra.NewGormRepository(db)
-	menusService := menusApp.NewService(menusRepo)
-	menusHandler := menusTransport.NewHandler(menusService)
 
 	pluginsService := pluginsApp.NewService(pluginsRepo)
 	pluginsHandler := pluginsTransport.NewHandler(pluginsService)
@@ -244,10 +242,19 @@ UPDATE posts
 	engine := gin.New()
 	// Allow multipart uploads up to configured size (defaults to 10MB).
 	engine.MaxMultipartMemory = mediaCfg.MaxUploadBytes
-	server.ConfigureEngine(engine, logger, db)
+	readinessChecks := make([]server.ReadinessCheck, 0, 1)
+	if postsIdx != nil {
+		readinessChecks = append(readinessChecks, server.ReadinessCheck{
+			Name: "elasticsearch",
+			Check: func(ctx context.Context) error {
+				return postsIdx.Ready(ctx)
+			},
+		})
+	}
+	server.ConfigureEngine(engine, logger, db, version, readinessChecks...)
 
-	// API v1 group
-	v1 := engine.Group("/v1")
+	// Register APIs under an optional base path (e.g. /v1).
+	api := engine.Group(appCfg.APIBasePath)
 	// Rate limiting is grouped by API category to avoid coupling different
 	// traffic types (public browsing vs auth vs admin writes).
 	publicMax := rateCfg.PublicMaxPerMinute
@@ -259,20 +266,38 @@ UPDATE posts
 		adminMax = 0
 	}
 
-	publicLimiter := platformMiddleware.NewFixedWindowRateLimiter(publicMax, rateCfg.Window)
-	authLimiter := platformMiddleware.NewFixedWindowRateLimiter(authMax, rateCfg.Window)
-	adminLimiter := platformMiddleware.NewFixedWindowRateLimiter(adminMax, rateCfg.Window)
+	type rateLimiter interface {
+		Middleware(scope string) gin.HandlerFunc
+	}
+	var publicLimiter rateLimiter = platformMiddleware.NewFixedWindowRateLimiter(publicMax, rateCfg.Window)
+	var authLimiter rateLimiter = platformMiddleware.NewFixedWindowRateLimiter(authMax, rateCfg.Window)
+	var adminLimiter rateLimiter = platformMiddleware.NewFixedWindowRateLimiter(adminMax, rateCfg.Window)
+	if rateCfg.RedisEnabled && strings.TrimSpace(rateCfg.RedisAddr) != "" {
+		redisClient := redis.NewClient(&redis.Options{
+			Addr:     rateCfg.RedisAddr,
+			Password: rateCfg.RedisPassword,
+			DB:       rateCfg.RedisDB,
+		})
+		if err := redisClient.Ping(ctx).Err(); err != nil {
+			logger.Warnw("shared rate limit store unavailable; using in-memory limiter", "error", err)
+		} else {
+			counterStore := platformMiddleware.NewRedisCounterStore(redisClient, rateCfg.RedisPrefix)
+			publicLimiter = platformMiddleware.NewSharedFixedWindowRateLimiter(publicMax, rateCfg.Window, counterStore)
+			authLimiter = platformMiddleware.NewSharedFixedWindowRateLimiter(authMax, rateCfg.Window, counterStore)
+			adminLimiter = platformMiddleware.NewSharedFixedWindowRateLimiter(adminMax, rateCfg.Window, counterStore)
+			logger.Infow("shared rate limiting enabled", "backend", "redis")
+		}
+	}
 
-	authGroup := v1.Group("")
+	authGroup := api.Group("")
 	authGroup.Use(authLimiter.Middleware("auth"))
 	authHandler.RegisterRoutes(authGroup)
 
 	// Public APIs (Phase 4): published content, no auth.
-	publicGroup := v1.Group("")
+	publicGroup := api.Group("")
 	publicGroup.Use(publicLimiter.Middleware("public"))
 	postsHandler.RegisterPublicRoutes(publicGroup)
 	pagesHandler.RegisterPublicRoutes(publicGroup)
-	menusHandler.RegisterPublicRoutes(publicGroup)
 
 	// Serve uploads in local/dev mode. In production, prefer Nginx for static files.
 	if mediaCfg.PublicBaseURL != "" && mediaCfg.PublicBaseURL[0] == '/' {
@@ -280,7 +305,7 @@ UPDATE posts
 	}
 
 	// Admin/content APIs (Phase 3-4): protected, used by CMS/admin UI.
-	admin := v1.Group("/admin")
+	admin := api.Group("/admin")
 	// Rate limit is applied before auth so abuse without valid tokens is also
 	// throttled.
 	admin.Use(adminLimiter.Middleware("admin"), platformMiddleware.AuthRequired(jwtProvider))
@@ -305,12 +330,6 @@ UPDATE posts
 		platformMiddleware.AuthRequired(jwtProvider),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
-	menusHandler.RegisterRoutes(
-		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
-
 	pluginsHandler.RegisterRoutes(
 		admin,
 		platformMiddleware.AuthRequired(jwtProvider),
@@ -363,13 +382,16 @@ UPDATE posts
 	if graphqlCfg.Enabled {
 		gqlSrv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 			Resolvers: &gqlapi.Resolver{
+				Auth:      authService,
 				PostsCore: postsService.CorePostsService,
 				Pages:     pagesService,
+				Taxonomy:  taxService,
+				Search:    postsIdx,
 			},
 		}))
 		path := strings.TrimSpace(graphqlCfg.Path)
 		if path == "" {
-			path = "/v1/graphql"
+			path = appCfg.APIBasePath + "/graphql"
 		}
 		engine.POST(path, publicLimiter.Middleware("public"), func(c *gin.Context) {
 			gqlSrv.ServeHTTP(c.Writer, c.Request)

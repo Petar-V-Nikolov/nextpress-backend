@@ -1,52 +1,62 @@
 # Database seeding
 
-**How-to** - run seeders and understand default RBAC data.
+`make seed` runs the full seeding pipeline and is safe to run repeatedly.
 
-Seeders load **reference data** (especially RBAC). They are **idempotent**: natural keys use `ON CONFLICT DO NOTHING` (or equivalent) so repeat runs do not duplicate roles, permissions, etc.
+## What `make seed` does
+
+1. Seeds RBAC defaults (`pkg/seed/rbac_defaults.go`) - baseline `admin` role and core permissions.
+2. Seeds a deterministic full dataset (`pkg/seed/full_dataset.go`) with **100 records per table** for local/dev use.
+3. Seeds a `superadmin` account and links it to both `superadmin` and `admin` roles.
+
+All seeders are idempotent (`ON CONFLICT ...`) so reruns update/keep existing deterministic rows instead of duplicating them.
 
 ## Prerequisites
 
-1. Migrations applied: `make migrate-up`.
-2. `.env` contains valid `DB_*` (same as `cmd/migrate` / `cmd/seed`).
+1. Apply migrations: `make migrate-up`
+2. Ensure `.env` has valid `DB_*` values
 
-## Run
+## Run seeders
 
 ```bash
 make seed
-# or: go run ./cmd/seed
-# or: make seed-build && ./bin/seed
+# or:
+go run ./cmd/seed
+# or:
+make seed-build && ./bin/seed
 ```
 
-## RBAC defaults
+## Superadmin credentials
 
-Source: `pkg/seed/rbac_defaults.go`.
+Configure in `.env` (defaults shown in `.env.example`):
 
-### Role
+```bash
+SEED_SUPERADMIN_EMAIL=superadmin@nextpress.local
+SEED_SUPERADMIN_PASSWORD=SuperAdmin123!
+```
 
-| Name | Notes |
-|------|--------|
-| `admin` | Fixed UUID `00000000-0000-0000-0000-000000000001` |
+The seeded superadmin user is deterministic and updated on reruns (same identity, latest configured credentials).
 
-### Permissions (granted to `admin`)
+## Tables seeded with 100 rows
 
-| Code | Typical use |
-|------|-------------|
-| `admin:ping` | `GET /v1/admin/ping` |
-| `rbac:manage` | Role/permission APIs, user-role assignment |
-| `posts:read` / `posts:write` | Posts and post-taxonomy links |
-| `pages:read` / `pages:write` | Pages |
-| `categories:read` / `categories:write` | Categories |
-| `tags:read` / `tags:write` | Tags |
-| `media:read` / `media:write` | Media |
-| `menus:read` / `menus:write` | Menus and items |
-| `plugins:manage` | Plugin admin endpoints |
-
-After seeding, assign `admin` to a user via RBAC APIs or optional bootstrap - see [`ROADMAP.md`](ROADMAP.md) (RBAC).
+- `users` (includes `superadmin` as one of the 100)
+- `roles`
+- `permissions` (100 total with RBAC defaults + generated permissions)
+- `role_permissions`
+- `user_roles`
+- `posts`, `pages`
+- `categories`, `tags`
+- `media`
+- `plugins`
+- `post_categories`, `post_tags`
+- `post_seo`, `post_metrics`
+- `series`, `post_series`
+- `post_coauthors`, `post_gallery_items`, `post_changelog`, `post_syndication`
+- `translation_groups`, `post_translations`
 
 ## Deploy
 
-`RUN_SEED_ON_DEPLOY=true` in `.env` runs `./bin/seed` during `scripts/deploy`.
+Set `RUN_SEED_ON_DEPLOY=true` in `.env` to execute `./bin/seed` during `scripts/deploy`.
 
 ---
 
-**See also:** [Documentation index](README.md) · [Deployment](DEPLOYMENT.md) · [TODO](TODO.md) (**Auth & users** / **RBAC** sections)
+**See also:** [Documentation index](README.md) · [Deployment](DEPLOYMENT.md) · [TODO](TODO.md)

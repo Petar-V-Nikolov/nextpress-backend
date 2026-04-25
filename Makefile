@@ -7,14 +7,16 @@
 BINARY_NAME   := server
 MIGRATE_BINARY := migrate
 SEED_BINARY   := seed
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 # migrate-steps: direction (up = apply N, down = roll back N)
 MIGRATE_CMD ?= up
 
 .PHONY: help all build run clean \
-	test test-coverage tidy deps graphql \
+	test test-coverage test-integration tidy deps graphql \
 	seed seed-build \
-	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh
+	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh \
+	security-check
 
 ## help: List targets and short descriptions
 help:
@@ -30,7 +32,7 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p bin
-	go build -o bin/$(BINARY_NAME) ./cmd/api
+	go build -ldflags "-X main.version=$(VERSION)" -o bin/$(BINARY_NAME) ./cmd/api
 	@echo "Done."
 
 ## run: Start the API with go run (loads .env from cwd if present)
@@ -93,6 +95,10 @@ test:
 test-coverage:
 	go test -cover ./...
 
+## test-integration: Run integration tests that require real services (Postgres)
+test-integration:
+	go test -tags=integration -v ./internal/platform/database
+
 ## tidy: go mod tidy
 tidy:
 	go mod tidy
@@ -100,6 +106,10 @@ tidy:
 ## deps: go mod download
 deps:
 	go mod download
+
+## security-check: Run dependency vulnerability scan (govulncheck)
+security-check:
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 ## graphql: Regenerate gqlgen code from internal/graphql/schema.graphqls
 graphql:

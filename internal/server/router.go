@@ -1,33 +1,66 @@
 package server
 
 import (
+	"context"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	platformMiddleware "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
 )
 
+type ReadinessCheck struct {
+	Name  string
+	Check func(context.Context) error
+}
+
+var (
+	httpRequestsTotal = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "nextpress_http_requests_total",
+			Help: "Total HTTP requests handled by NextPress.",
+		},
+		[]string{"method", "route", "status"},
+	)
+	httpRequestDuration = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "nextpress_http_request_duration_seconds",
+			Help:    "HTTP request duration in seconds.",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"method", "route", "status"},
+	)
+)
+
 // ConfigureEngine applies global middleware and registers all top-level routes.
 // Feature modules will later plug into the provided router via dedicated
 // registration functions to keep boundaries clear.
-func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
+func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB, appVersion string, checks ...ReadinessCheck) {
 	// In production you typically want to disable Gin's debug output and rely
 	// on structured logging instead.
 	gin.SetMode(gin.ReleaseMode)
 
 	// Global middleware stack. We keep this minimal in Phase 1 and will extend
 	// it (e.g. for authentication, request IDs, metrics) in later phases.
+	engine.Use(cors.New(buildCORSConfig()))
 	engine.Use(gin.Recovery())
 	engine.Use(platformMiddleware.RequestIDMiddleware())
 	engine.Use(requestLoggingMiddleware(log))
+	engine.Use(metricsMiddleware())
+	engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	engine.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
+			"status":  "ok",
+			"version": appVersion,
 		})
 	})
 
@@ -55,8 +88,30 @@ func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
 			return
 		}
 
+		for _, check := range checks {
+			if check.Check == nil {
+				continue
+			}
+			ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+			err := check.Check(ctx)
+			cancel()
+			if err != nil {
+				log.Warnw("readiness check failed",
+					"component", check.Name,
+					"error", err,
+				)
+				c.JSON(http.StatusServiceUnavailable, gin.H{
+					"status":    "not ready",
+					"component": check.Name,
+					"details":   "dependency check failed",
+				})
+				return
+			}
+		}
+
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ready",
+			"status":  "ready",
+			"version": appVersion,
 		})
 	})
 
@@ -65,6 +120,7 @@ func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB) {
 	engine.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"service": "nextpress-backend",
+			"version": appVersion,
 		})
 	})
 }
@@ -103,6 +159,23 @@ func requestLoggingMiddleware(log *zap.SugaredLogger) gin.HandlerFunc {
 			"user_id", userID,
 			"latency_ms", latencyMs,
 		)
+	}
+}
+
+func metricsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+
+		route := c.FullPath()
+		if route == "" {
+			route = "unmatched"
+		}
+		status := strconv.Itoa(c.Writer.Status())
+		method := c.Request.Method
+
+		httpRequestsTotal.WithLabelValues(method, route, status).Inc()
+		httpRequestDuration.WithLabelValues(method, route, status).Observe(time.Since(start).Seconds())
 	}
 }
 
