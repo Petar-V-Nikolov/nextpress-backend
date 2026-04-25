@@ -12,7 +12,7 @@ import (
 
 const (
 	seedRows               = 100
-	seedDefaultPermissions = 15
+	seedDefaultPermissions = 13
 
 	superadminRoleName = "superadmin"
 	superadminUserID   = "00000000-0000-0000-0100-000000000001"
@@ -59,12 +59,6 @@ func SeedFullDataset(db *gorm.DB) error {
 			return err
 		}
 		if err := seedPages(tx); err != nil {
-			return err
-		}
-		if err := seedMenus(tx); err != nil {
-			return err
-		}
-		if err := seedMenuItems(tx); err != nil {
 			return err
 		}
 		if err := seedPlugins(tx); err != nil {
@@ -228,8 +222,6 @@ func seedRolePermissions(tx *gorm.DB) error {
 		"tags:write",
 		"media:read",
 		"media:write",
-		"menus:read",
-		"menus:write",
 		"plugins:manage",
 	}
 
@@ -448,63 +440,6 @@ func seedPages(tx *gorm.DB) error {
 			publishedAt,
 		).Error; err != nil {
 			return fmt.Errorf("pages row %d: %w", i, err)
-		}
-	}
-	return nil
-}
-
-func seedMenus(tx *gorm.DB) error {
-	for i := 1; i <= seedRows; i++ {
-		if err := tx.Exec(
-			`INSERT INTO menus (id, name, slug)
-			 VALUES (?, ?, ?)
-			 ON CONFLICT (slug) DO UPDATE
-			 SET name = EXCLUDED.name, updated_at = NOW()`,
-			seedUUID(0x0900, i), fmt.Sprintf("Menu %03d", i), fmt.Sprintf("menu-%03d", i),
-		).Error; err != nil {
-			return fmt.Errorf("menus row %d: %w", i, err)
-		}
-	}
-	return nil
-}
-
-func seedMenuItems(tx *gorm.DB) error {
-	for i := 1; i <= seedRows; i++ {
-		itemType := "url"
-		var refID any
-		var url any = fmt.Sprintf("https://example.local/seed/menu-%03d", i)
-
-		if i%3 == 1 {
-			itemType = "page"
-			refID = seedUUID(0x0800, i)
-			url = nil
-		} else if i%3 == 2 {
-			itemType = "post"
-			refID = seedUUID(0x0700, i)
-			url = nil
-		}
-
-		if err := tx.Exec(
-			`INSERT INTO menu_items (id, menu_id, parent_id, label, item_type, ref_id, url, sort_order)
-			 VALUES (?, ?, NULL, ?, ?, ?, ?, ?)
-			 ON CONFLICT (id) DO UPDATE
-			 SET menu_id = EXCLUDED.menu_id,
-			     parent_id = EXCLUDED.parent_id,
-			     label = EXCLUDED.label,
-			     item_type = EXCLUDED.item_type,
-			     ref_id = EXCLUDED.ref_id,
-			     url = EXCLUDED.url,
-			     sort_order = EXCLUDED.sort_order,
-			     updated_at = NOW()`,
-			seedUUID(0x0a00, i),
-			seedUUID(0x0900, i),
-			fmt.Sprintf("Menu Item %03d", i),
-			itemType,
-			refID,
-			url,
-			i,
-		).Error; err != nil {
-			return fmt.Errorf("menu_items row %d: %w", i, err)
 		}
 	}
 	return nil

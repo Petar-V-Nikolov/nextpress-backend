@@ -30,9 +30,6 @@ import (
 	mediaApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/application"
 	mediaInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/infrastructure"
 	mediaTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/media/transport"
-	menusApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/application"
-	menusInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/infrastructure"
-	menusTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/transport"
 	pluginsApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/application"
 	pluginsInfra "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/infrastructure"
 	pluginsTransport "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/plugins/transport"
@@ -235,9 +232,6 @@ UPDATE posts
 	mediaStorage := mediaInfra.NewLocalStorage(mediaCfg.StorageDir, mediaCfg.PublicBaseURL, mediaCfg.MaxUploadBytes)
 	mediaService := mediaApp.NewService(mediaRepo, mediaStorage)
 	mediaHandler := mediaTransport.NewHandler(mediaService)
-	menusRepo := menusInfra.NewGormRepository(db)
-	menusService := menusApp.NewService(menusRepo)
-	menusHandler := menusTransport.NewHandler(menusService)
 
 	pluginsService := pluginsApp.NewService(pluginsRepo)
 	pluginsHandler := pluginsTransport.NewHandler(pluginsService)
@@ -303,7 +297,6 @@ UPDATE posts
 	publicGroup.Use(publicLimiter.Middleware("public"))
 	postsHandler.RegisterPublicRoutes(publicGroup)
 	pagesHandler.RegisterPublicRoutes(publicGroup)
-	menusHandler.RegisterPublicRoutes(publicGroup)
 
 	// Serve uploads in local/dev mode. In production, prefer Nginx for static files.
 	if mediaCfg.PublicBaseURL != "" && mediaCfg.PublicBaseURL[0] == '/' {
@@ -336,12 +329,6 @@ UPDATE posts
 		platformMiddleware.AuthRequired(jwtProvider),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
-	menusHandler.RegisterRoutes(
-		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
-		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
-	)
-
 	pluginsHandler.RegisterRoutes(
 		admin,
 		platformMiddleware.AuthRequired(jwtProvider),
@@ -398,7 +385,6 @@ UPDATE posts
 				PostsCore: postsService.CorePostsService,
 				Pages:     pagesService,
 				Taxonomy:  taxService,
-				Menus:     menusService,
 				Search:    postsIdx,
 			},
 		}))

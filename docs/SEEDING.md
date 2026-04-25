@@ -46,7 +46,6 @@ The seeded superadmin user is deterministic and updated on reruns (same identity
 - `posts`, `pages`
 - `categories`, `tags`
 - `media`
-- `menus`, `menu_items`
 - `plugins`
 - `post_categories`, `post_tags`
 - `post_seo`, `post_metrics`

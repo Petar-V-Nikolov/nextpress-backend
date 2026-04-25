@@ -87,13 +87,6 @@
 
 ---
 
-## Menus
-
-- [x] Menus CRUD + items (`menus:*`)
-- [x] Public `GET /menus/{slug}`
-
----
-
 ## Plugins
 
 - [x] `plugins` table + GORM repository
@@ -118,9 +111,9 @@
 
 - [x] gqlgen wiring; `post`, `posts`, `page(slug)` queries
 - [x] Playground when `APP_ENV` local/dev and flag on
-- [x] Public read parity slice: `categories`, `tags`, `menu(slug)`, `searchPosts(q)` queries
+- [x] Public read parity slice: `categories`, `tags`, `searchPosts(q)` queries
 - [x] Auth mutation parity slice: `register`, `login`, `refresh`
-- [ ] **Parity** with REST: categories, tags, menus, search, mutations, auth, admin types - as you define scope
+- [ ] **Parity** with REST: categories, tags, search, mutations, auth, admin types - as you define scope
 - [x] Document intended GraphQL vs REST split in [`README.md`](README.md) (docs index) or an ADR
 
 ---
@@ -136,10 +129,9 @@
 - [x] RBAC application service unit tests (roles/permissions/assignments)
 - [x] Pages application service unit tests (create/update validation paths)
 - [x] Taxonomy application service unit tests (category/tag create/update paths)
-- [x] Menus application service unit tests (menu/item validation paths)
 - [x] Plugins application service unit tests (register/update validation paths)
 - [x] Media application service unit tests (upload/get/list validation paths)
-- [ ] **Unit tests** for: `auth`, `rbac`, `user`, `pages`, `taxonomy`, `media`, `menus`, `plugins` transport/application (most modules)
+- [ ] **Unit tests** for: `auth`, `rbac`, `user`, `pages`, `taxonomy`, `media`, `plugins` transport/application (most modules)
 - [x] **Integration tests** with real Postgres (docker or CI service)
 - [x] **CI workflow** (GitHub Actions or other): `go test`, `go vet`, optional `golangci-lint`
 - [x] **OpenAPI** validation / drift check vs router (optional tooling)

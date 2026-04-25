@@ -51,7 +51,7 @@ Configuration: [`.env.example`](.env.example). Optional Elasticsearch, GraphQL, 
 ## API surface (summary)
 
 - **Auth:** `POST /auth/register`, `/login`, `/refresh`
-- **Public:** posts, pages, menus (and search when Elasticsearch is enabled)
+- **Public:** posts, pages (and search when Elasticsearch is enabled)
 - **GraphQL:** if enabled - `GRAPHQL_PATH` (default `<API_BASE_PATH>/graphql`, e.g. `/graphql` or `/v1/graphql`)
 - **Admin:** `/admin/*` - JWT + permissions
 - **Base path:** optional `API_BASE_PATH` prefix for all API routes
@@ -64,7 +64,7 @@ NextPress keeps REST as the primary contract and uses GraphQL as an optional rea
 
 - **REST is source-of-truth for full platform coverage:** auth, admin workflows, writes/mutations, and RBAC-controlled operations are defined in [`docs/openapi.yaml`](docs/openapi.yaml).
 - **GraphQL is optional and additive:** enabled via `GRAPHQL_ENABLED`, intended for client-friendly public content reads and selective aggregation.
-- **Current GraphQL scope:** public reads for posts/pages plus taxonomy, menus, and search queries (when Elasticsearch is enabled).
+- **Current GraphQL scope:** public reads for posts/pages plus taxonomy and search queries (when Elasticsearch is enabled).
 - **Write/admin/auth behavior:** remain REST-first unless explicitly added to GraphQL with clear permission and validation rules.
 - **Backward compatibility rule:** REST paths are stable integration surface; GraphQL can evolve as an ergonomics layer without replacing REST parity guarantees.
 

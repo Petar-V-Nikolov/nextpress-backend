@@ -154,29 +154,6 @@ components:
         updatedAt: { type: string }
       required: [id, authorId, title, slug, status, createdAt, updatedAt]
 
-    menu:
-      type: object
-      properties:
-        id: { type: string }
-        name: { type: string }
-        slug: { type: string }
-      required: [id, name, slug]
-
-    menuItem:
-      type: object
-      properties:
-        id: { nullable: true }
-        parentId: { nullable: true }
-        label: { type: string }
-        itemType: { nullable: true }
-        refId: { nullable: true }
-        url: { nullable: true }
-        sortOrder: { type: integer }
-        children:
-          type: array
-          items:
-            $ref: "#/components/schemas/menuItem"
-
     categoryOrTag:
       type: object
       properties:
@@ -460,36 +437,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/page"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /menus/{slug}:
-    get:
-      tags: [public]
-      parameters:
-        - in: path
-          name: slug
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: Menu tree
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menu:
-                    $ref: "#/components/schemas/menu"
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/menuItem"
-                required: [menu, items]
         "404":
           description: Not found
           content:
@@ -1805,87 +1752,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/media"
-
-  /admin/menus:
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:read`
-      responses:
-        "200":
-          description: Menus list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menus:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/menu"
-                required: [menus]
-    post:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:write`
-      responses:
-        "200":
-          description: Menu created
-
-  /admin/menus/{id}:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema: { type: string }
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:read`
-      responses:
-        "200":
-          description: Menu item
-    put:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:write`
-      responses:
-        "200":
-          description: Menu updated
-    delete:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Menu deleted
-
-  /admin/menus/{id}/items:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema: { type: string }
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:read`
-      responses:
-        "200":
-          description: Menu items list
-    put:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-      description: Requires `menus:write`
-      responses:
-        "200":
-          description: Menu items updated
 
   /admin/bootstrap/claim-admin:
     post:

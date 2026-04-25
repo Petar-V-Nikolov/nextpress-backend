@@ -8,8 +8,8 @@ The API is split into two major groups:
 
 | Type | Base URL | Auth | Use case |
 |------|----------|------|----------|
-| **Public/Auth** | `{{base_url}}` | Public routes: none. Auth routes: none. | Health/readiness checks, auth (`/auth/*`), and public content routes (`/posts/*`, `/pages/*`, `/menus/*`). |
-| **Admin** | `{{base_url}}` | JWT (`Authorization: Bearer {{admin_access_token}}`) | CMS and management routes under `/admin/*`: posts, pages, taxonomy, media, menus, RBAC, plugin management, and bootstrap/admin checks. |
+| **Public/Auth** | `{{base_url}}` | Public routes: none. Auth routes: none. | Health/readiness checks, auth (`/auth/*`), and public content routes (`/posts/*`, `/pages/*`). |
+| **Admin** | `{{base_url}}` | JWT (`Authorization: Bearer {{admin_access_token}}`) | CMS and management routes under `/admin/*`: posts, pages, taxonomy, media, RBAC, plugin management, and bootstrap/admin checks. |
 
 ## Collections
 

@@ -13,7 +13,6 @@ import (
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/generated"
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/model"
 	authApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
-	menuApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/application"
 	pagesApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/application"
 	postApp "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/application"
 )
@@ -208,21 +207,6 @@ func (r *queryResolver) Tags(ctx context.Context, limit *int, offset *int) ([]*m
 		out = append(out, domainTagToGQL(&list[i]))
 	}
 	return out, nil
-}
-
-// Menu is the resolver for the menu field.
-func (r *queryResolver) Menu(ctx context.Context, slug string) (*model.Menu, error) {
-	if r.Menus == nil {
-		return nil, nil
-	}
-	menu, items, err := r.Menus.PublicGetMenuBySlug(ctx, slug)
-	if err != nil {
-		if errors.Is(err, menuApp.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return domainMenuToGQL(menu, items), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

@@ -5,7 +5,6 @@ import (
 
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/graphql/model"
 	userdomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/domain"
-	menudomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/menus/domain"
 	pagedomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/pages/domain"
 	domainmodel "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/posts/domain/model"
 	taxdomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/taxonomy/domain"
@@ -72,42 +71,6 @@ func domainTagToGQL(t *taxdomain.Tag) *model.Tag {
 		ID:   string(t.ID),
 		Name: t.Name,
 		Slug: t.Slug,
-	}
-}
-
-func domainMenuItemToGQL(i *menudomain.MenuItem) *model.MenuItem {
-	if i == nil {
-		return nil
-	}
-	var parentID *string
-	if i.ParentID != nil {
-		v := string(*i.ParentID)
-		parentID = &v
-	}
-	return &model.MenuItem{
-		ID:       string(i.ID),
-		ParentID: parentID,
-		Label:    i.Label,
-		ItemType: string(i.ItemType),
-		RefID:    i.RefID,
-		URL:      i.URL,
-		SortOrder: i.SortOrder,
-	}
-}
-
-func domainMenuToGQL(m *menudomain.Menu, items []menudomain.MenuItem) *model.Menu {
-	if m == nil {
-		return nil
-	}
-	out := make([]*model.MenuItem, 0, len(items))
-	for i := range items {
-		out = append(out, domainMenuItemToGQL(&items[i]))
-	}
-	return &model.Menu{
-		ID:    string(m.ID),
-		Name:  m.Name,
-		Slug:  m.Slug,
-		Items: out,
 	}
 }
 

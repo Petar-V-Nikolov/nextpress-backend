@@ -109,35 +109,6 @@
       ]
     },
     {
-      "name": "Menus",
-      "item": [
-        {
-          "name": "GET /menus/{slug}",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/menus/:slug",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "v1",
-                "menus",
-                ":slug"
-              ],
-              "variable": [
-                {
-                  "key": "slug",
-                  "value": "example-slug"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
       "name": "Pages",
       "item": [
         {

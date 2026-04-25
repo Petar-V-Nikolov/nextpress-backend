@@ -25,23 +25,6 @@ type LoginInput struct {
 	Password string `json:"password"`
 }
 
-type Menu struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Slug  string      `json:"slug"`
-	Items []*MenuItem `json:"items"`
-}
-
-type MenuItem struct {
-	ID        string  `json:"id"`
-	ParentID  *string `json:"parentId,omitempty"`
-	Label     string  `json:"label"`
-	ItemType  string  `json:"itemType"`
-	RefID     *string `json:"refId,omitempty"`
-	URL       *string `json:"url,omitempty"`
-	SortOrder int     `json:"sortOrder"`
-}
-
 type Mutation struct {
 }
 
