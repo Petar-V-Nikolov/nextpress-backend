@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -424,6 +426,9 @@ UPDATE posts
 	// signals and coordinate a controlled shutdown sequence.
 	go func() {
 		if err := srv.Start(); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return
+			}
 			logger.Fatalw("http server exited with error",
 				"error", err,
 			)

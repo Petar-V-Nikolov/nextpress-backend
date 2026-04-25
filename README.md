@@ -39,21 +39,34 @@ make run
 
 The development server runs on `http://localhost:9090`.
 
-## Scripts
+To run without `Ctrl+C` terminal interrupt status noise, use background mode:
 
 ```bash
-make run
-make build
-make test
-make test-coverage
-make migrate-up
-make migrate-down
-make migrate-version
-make seed
-make graphql
-make security-check
-make db-fresh
+make start
+make stop
 ```
+
+## Scripts
+
+Common development commands:
+
+```text
+make run              Start the API in the foreground with go run.
+make start            Start the API in the background and write logs to .tmp/nextpress-api.log.
+make stop             Stop the background API started with make start.
+make build            Build the API binary into bin/server.
+make test             Run the full test suite with verbose output.
+make test-coverage    Run tests with coverage summary.
+make migrate-up       Apply all pending database migrations.
+make migrate-down     Roll back one database migration.
+make migrate-version  Print the current migration version and dirty flag.
+make seed             Run database seeders.
+make graphql          Regenerate gqlgen code from the GraphQL schema.
+make security-check   Run dependency vulnerability scanning with govulncheck.
+make db-fresh         Drop and recreate the database schema by rerunning migrations.
+```
+
+Run `make help` for the complete command reference.
 
 ## Frontend Integration
 
