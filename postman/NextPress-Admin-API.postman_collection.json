@@ -25,7 +25,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "media"
               ]
@@ -48,7 +47,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "media",
                 ":id"
@@ -78,7 +76,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "media"
               ]
@@ -116,7 +113,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "pages",
                 ":id"
@@ -146,7 +142,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "pages"
               ]
@@ -169,7 +164,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "pages",
                 ":id"
@@ -203,7 +197,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "pages"
               ]
@@ -234,7 +227,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "pages",
                 ":id"
@@ -273,7 +265,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "plugins"
               ]
@@ -300,7 +291,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "plugins"
               ]
@@ -331,7 +321,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "plugins",
                 ":id"
@@ -370,7 +359,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id"
@@ -400,7 +388,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -436,7 +423,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -472,7 +458,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -503,7 +488,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -539,7 +523,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -570,7 +553,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "series",
                 ":id"
@@ -600,7 +582,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "syndication",
                 ":id"
@@ -630,7 +611,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "translation-groups",
                 ":id"
@@ -660,7 +640,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts"
               ]
@@ -683,7 +662,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id"
@@ -713,7 +691,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -744,7 +721,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -775,7 +751,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -806,7 +781,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "series"
               ]
@@ -829,7 +803,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "series",
                 ":id"
@@ -859,7 +832,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "translation-groups",
                 ":id"
@@ -893,7 +865,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts"
               ]
@@ -924,7 +895,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 "search",
@@ -957,7 +927,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -996,7 +965,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1035,7 +1003,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1074,7 +1041,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "series"
               ]
@@ -1105,7 +1071,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "translation-groups"
               ]
@@ -1136,7 +1101,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id"
@@ -1174,7 +1138,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1213,7 +1176,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1252,7 +1214,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1291,7 +1252,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1335,7 +1295,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1374,7 +1333,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1413,7 +1371,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1452,7 +1409,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1491,7 +1447,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1535,7 +1490,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1574,7 +1528,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "posts",
                 ":id",
@@ -1613,7 +1566,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "series",
                 ":id"
@@ -1651,7 +1603,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "syndication",
                 ":id"
@@ -1690,7 +1641,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "permissions"
               ]
@@ -1713,7 +1663,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "roles"
               ]
@@ -1740,7 +1689,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "permissions"
               ]
@@ -1771,7 +1719,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "roles"
               ]
@@ -1802,7 +1749,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "roles",
                 ":role_id",
@@ -1841,7 +1787,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "users",
                 ":user_id",
@@ -1881,7 +1826,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "ping"
               ]
@@ -1908,7 +1852,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "bootstrap",
                 "claim-admin"
@@ -1941,7 +1884,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "categories",
                 ":id"
@@ -1971,7 +1913,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "tags",
                 ":id"
@@ -2001,7 +1942,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "categories"
               ]
@@ -2024,7 +1964,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "tags"
               ]
@@ -2051,7 +1990,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "categories"
               ]
@@ -2082,7 +2020,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "tags"
               ]
@@ -2113,7 +2050,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "categories",
                 ":id"
@@ -2151,7 +2087,6 @@
                 "{{base_url}}"
               ],
               "path": [
-                "v1",
                 "admin",
                 "tags",
                 ":id"
