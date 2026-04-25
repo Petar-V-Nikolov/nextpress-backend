@@ -121,3 +121,34 @@ func (r *GormRepository) GrantPermissionToRole(ctx context.Context, roleID strin
 		Error
 }
 
+func (r *GormRepository) ListRoleNamesByUserID(ctx context.Context, userID string) ([]string, error) {
+	var names []string
+	err := r.db.WithContext(ctx).
+		Table("roles AS r").
+		Select("r.name").
+		Joins("JOIN user_roles AS ur ON ur.role_id = r.id").
+		Where("ur.user_id = ?", userID).
+		Order("r.name ASC").
+		Pluck("r.name", &names).Error
+	if err != nil {
+		return nil, err
+	}
+	return names, nil
+}
+
+func (r *GormRepository) ListPermissionCodesByUserID(ctx context.Context, userID string) ([]string, error) {
+	var codes []string
+	err := r.db.WithContext(ctx).
+		Table("permissions AS p").
+		Select("DISTINCT p.code").
+		Joins("JOIN role_permissions AS rp ON rp.permission_id = p.id").
+		Joins("JOIN user_roles AS ur ON ur.role_id = rp.role_id").
+		Where("ur.user_id = ?", userID).
+		Order("p.code ASC").
+		Pluck("p.code", &codes).Error
+	if err != nil {
+		return nil, err
+	}
+	return codes, nil
+}
+

@@ -36,11 +36,16 @@ type AuthUser {
   firstName: String!
   lastName: String!
   email: String!
+  active: Boolean!
+  createdAt: String
+  updatedAt: String
+  deletedAt: String
 }
 
 type AuthTokens {
   accessToken: String!
   refreshToken: String!
+  user: AuthUser!
 }
 
 input RegisterInput {

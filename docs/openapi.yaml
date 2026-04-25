@@ -33,6 +33,42 @@ components:
           type: string
       required: [accessToken, refreshToken]
 
+    authUserPublic:
+      type: object
+      properties:
+        id: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string, format: email }
+        active: { type: boolean }
+        rbac:
+          type: object
+          properties:
+            roles:
+              type: array
+              items: { type: string }
+            permissions:
+              type: array
+              items: { type: string }
+          required: [roles, permissions]
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        deletedAt: { type: string, format: date-time, nullable: true }
+      required: [id, firstName, lastName, email, active, rbac]
+
+    authTokensWithUser:
+      type: object
+      properties:
+        tokens:
+          type: object
+          properties:
+            accessToken: { type: string }
+            refreshToken: { type: string }
+          required: [accessToken, refreshToken]
+        user:
+          $ref: "#/components/schemas/authUserPublic"
+      required: [tokens, user]
+
     post:
       type: object
       properties:
@@ -275,13 +311,43 @@ paths:
               required: [email, password]
       responses:
         "200":
-          description: token pair
+          description: access and refresh tokens plus current user profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tokenPair"
+                $ref: "#/components/schemas/authTokensWithUser"
         "401":
           description: invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /auth/me:
+    get:
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      summary: Current user from access token
+      responses:
+        "200":
+          description: authenticated user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/authUserPublic"
+                required: [user]
+        "401":
+          description: missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "404":
+          description: user id in token no longer exists
           content:
             application/json:
               schema:
@@ -301,11 +367,11 @@ paths:
               required: [refresh_token]
       responses:
         "200":
-          description: token pair
+          description: new token pair plus current user profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tokenPair"
+                $ref: "#/components/schemas/authTokensWithUser"
         "401":
           description: invalid refresh token
           content:

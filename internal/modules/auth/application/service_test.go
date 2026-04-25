@@ -10,10 +10,23 @@ import (
 
 type userRepoStub struct {
 	byEmail map[string]*userDomain.User
+	byID    map[string]*userDomain.User
 	created *userDomain.User
 }
 
-func (s *userRepoStub) FindByID(_ userDomain.UserID) (*userDomain.User, error) { return nil, nil }
+func (s *userRepoStub) FindByID(id userDomain.UserID) (*userDomain.User, error) {
+	if s.byID != nil {
+		if u, ok := s.byID[string(id)]; ok {
+			return u, nil
+		}
+	}
+	for _, u := range s.byEmail {
+		if u != nil && u.ID == id {
+			return u, nil
+		}
+	}
+	return nil, nil
+}
 func (s *userRepoStub) FindByEmail(email string) (*userDomain.User, error) {
 	return s.byEmail[email], nil
 }
@@ -104,9 +117,12 @@ func TestLogin_Success(t *testing.T) {
 	}
 	svc := NewService(repo, tokenStub{}, hasherStub{})
 
-	access, refresh, err := svc.Login(context.Background(), "user@example.com", "password123")
+	u, access, refresh, err := svc.Login(context.Background(), "user@example.com", "password123")
 	if err != nil {
 		t.Fatalf("unexpected login error: %v", err)
+	}
+	if u == nil || string(u.ID) != "u1" {
+		t.Fatalf("expected user u1, got %+v", u)
 	}
 	if access == "" || refresh == "" {
 		t.Fatalf("expected tokens, got access=%q refresh=%q", access, refresh)
@@ -117,7 +133,7 @@ func TestLogin_InvalidCredentials(t *testing.T) {
 	repo := &userRepoStub{byEmail: map[string]*userDomain.User{}}
 	svc := NewService(repo, tokenStub{}, hasherStub{})
 
-	_, _, err := svc.Login(context.Background(), "missing@example.com", "password123")
+	_, _, _, err := svc.Login(context.Background(), "missing@example.com", "password123")
 	if !errors.Is(err, ErrInvalidLogin) {
 		t.Fatalf("expected ErrInvalidLogin for missing user, got %v", err)
 	}
@@ -126,9 +142,52 @@ func TestLogin_InvalidCredentials(t *testing.T) {
 func TestRefresh_InvalidToken(t *testing.T) {
 	svc := NewService(&userRepoStub{}, tokenStub{parseRefreshErr: errors.New("bad token")}, hasherStub{})
 
-	_, _, err := svc.Refresh(context.Background(), "bad")
+	_, _, _, err := svc.Refresh(context.Background(), "bad")
 	if !errors.Is(err, ErrInvalidLogin) {
 		t.Fatalf("expected ErrInvalidLogin for invalid refresh, got %v", err)
+	}
+}
+
+func TestRefresh_Success(t *testing.T) {
+	repo := &userRepoStub{
+		byID: map[string]*userDomain.User{
+			"u1": {ID: "u1", Email: "user@example.com", Password: "hash"},
+		},
+	}
+	svc := NewService(repo, tokenStub{parseRefreshUser: "u1"}, hasherStub{})
+
+	u, access, refresh, err := svc.Refresh(context.Background(), "any")
+	if err != nil {
+		t.Fatalf("unexpected refresh error: %v", err)
+	}
+	if u == nil || access == "" || refresh == "" {
+		t.Fatalf("expected user and tokens, got u=%v access=%q refresh=%q", u, access, refresh)
+	}
+}
+
+func TestMe_Success(t *testing.T) {
+	repo := &userRepoStub{
+		byID: map[string]*userDomain.User{
+			"u1": {ID: "u1", Email: "a@b.com", FirstName: "A", LastName: "B"},
+		},
+	}
+	svc := NewService(repo, tokenStub{}, hasherStub{})
+
+	u, err := svc.Me(context.Background(), "u1")
+	if err != nil {
+		t.Fatalf("unexpected me error: %v", err)
+	}
+	if u == nil || u.Email != "a@b.com" {
+		t.Fatalf("unexpected user %+v", u)
+	}
+}
+
+func TestMe_NotFound(t *testing.T) {
+	svc := NewService(&userRepoStub{}, tokenStub{}, hasherStub{})
+
+	_, err := svc.Me(context.Background(), "missing-id")
+	if !errors.Is(err, ErrUserNotFound) {
+		t.Fatalf("expected ErrUserNotFound, got %v", err)
 	}
 }
 

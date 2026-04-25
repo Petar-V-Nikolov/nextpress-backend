@@ -41,7 +41,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 	if strings.TrimSpace(input.Email) == "" || strings.TrimSpace(input.Password) == "" {
 		return nil, errors.New("invalid_payload")
 	}
-	access, refresh, err := r.Auth.Login(ctx, input.Email, input.Password)
+	u, access, refresh, err := r.Auth.Login(ctx, input.Email, input.Password)
 	if err != nil {
 		if errors.Is(err, authApp.ErrInvalidLogin) {
 			return nil, errors.New("invalid_credentials")
@@ -51,6 +51,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 	return &model.AuthTokens{
 		AccessToken:  access,
 		RefreshToken: refresh,
+		User:         domainAuthUserToGQL(u),
 	}, nil
 }
 
@@ -62,7 +63,7 @@ func (r *mutationResolver) Refresh(ctx context.Context, input model.RefreshInput
 	if strings.TrimSpace(input.RefreshToken) == "" {
 		return nil, errors.New("invalid_payload")
 	}
-	access, refresh, err := r.Auth.Refresh(ctx, input.RefreshToken)
+	u, access, refresh, err := r.Auth.Refresh(ctx, input.RefreshToken)
 	if err != nil {
 		if errors.Is(err, authApp.ErrInvalidLogin) {
 			return nil, errors.New("invalid_refresh_token")
@@ -72,6 +73,7 @@ func (r *mutationResolver) Refresh(ctx context.Context, input model.RefreshInput
 	return &model.AuthTokens{
 		AccessToken:  access,
 		RefreshToken: refresh,
+		User:         domainAuthUserToGQL(u),
 	}, nil
 }
 

@@ -1,19 +1,24 @@
 package transport
 
 import (
+	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/auth/application"
+	userdomain "github.com/Petar-V-Nikolov/nextpress-backend/internal/modules/user/domain"
+	platformmw "github.com/Petar-V-Nikolov/nextpress-backend/internal/platform/middleware"
 )
 
 type Handler struct {
-	svc *application.Service
+	svc            *application.Service
+	authMiddleware gin.HandlerFunc
 }
 
-func NewHandler(svc *application.Service) *Handler {
-	return &Handler{svc: svc}
+func NewHandler(svc *application.Service, authMiddleware gin.HandlerFunc) *Handler {
+	return &Handler{svc: svc, authMiddleware: authMiddleware}
 }
 
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
@@ -22,6 +27,7 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	g.POST("/login", h.login)
 	g.POST("/refresh", h.refresh)
 	g.POST("/logout", h.logout)
+	g.GET("/me", h.authMiddleware, h.me)
 }
 
 type registerRequest struct {
@@ -64,15 +70,23 @@ func (h *Handler) login(c *gin.Context) {
 		return
 	}
 
-	access, refresh, err := h.svc.Login(c.Request.Context(), req.Email, req.Password)
+	u, access, refresh, err := h.svc.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_credentials"})
 		return
 	}
+	relations, err := h.svc.Relations(c.Request.Context(), string(u.ID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"accessToken":  access,
-		"refreshToken": refresh,
+		"tokens": gin.H{
+			"accessToken":  access,
+			"refreshToken": refresh,
+		},
+		"user": userToJSON(u, relations),
 	})
 }
 
@@ -87,15 +101,23 @@ func (h *Handler) refresh(c *gin.Context) {
 		return
 	}
 
-	access, refresh, err := h.svc.Refresh(c.Request.Context(), req.RefreshToken)
+	u, access, refresh, err := h.svc.Refresh(c.Request.Context(), req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_refresh_token"})
 		return
 	}
+	relations, err := h.svc.Relations(c.Request.Context(), string(u.ID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"accessToken":  access,
-		"refreshToken": refresh,
+		"tokens": gin.H{
+			"accessToken":  access,
+			"refreshToken": refresh,
+		},
+		"user": userToJSON(u, relations),
 	})
 }
 
@@ -116,4 +138,62 @@ func (h *Handler) logout(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Signed out."})
+}
+
+func (h *Handler) me(c *gin.Context) {
+	v, ok := c.Get(platformmw.ContextUserIDKey)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_or_expired_token"})
+		return
+	}
+	uid, _ := v.(string)
+	if uid == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_or_expired_token"})
+		return
+	}
+
+	u, err := h.svc.Me(c.Request.Context(), uid)
+	if err != nil {
+		if errors.Is(err, application.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user_not_found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+
+	relations, err := h.svc.Relations(c.Request.Context(), string(u.ID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal_error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": userToJSON(u, relations)})
+}
+
+func userToJSON(u *userdomain.User, relations application.UserRelations) gin.H {
+	if u == nil {
+		return nil
+	}
+	out := gin.H{
+		"id":        string(u.ID),
+		"firstName": u.FirstName,
+		"lastName":  u.LastName,
+		"email":     u.Email,
+		"active":    u.Active,
+		"rbac": gin.H{
+			"roles":       relations.RoleNames,
+			"permissions": relations.PermissionCodes,
+		},
+	}
+	if !u.CreatedAt.IsZero() {
+		out["createdAt"] = u.CreatedAt.UTC().Format(time.RFC3339Nano)
+	}
+	if !u.UpdatedAt.IsZero() {
+		out["updatedAt"] = u.UpdatedAt.UTC().Format(time.RFC3339Nano)
+	}
+	if u.DeletedAt != nil && !u.DeletedAt.IsZero() {
+		out["deletedAt"] = u.DeletedAt.UTC().Format(time.RFC3339Nano)
+	}
+	return out
 }

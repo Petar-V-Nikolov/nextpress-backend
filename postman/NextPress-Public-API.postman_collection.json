@@ -41,6 +41,8 @@
                 "exec": [
                   "if (pm.response.code >= 200 && pm.response.code < 300) {",
                   "    var data = pm.response.json();",
+                  "    if (data.tokens && data.tokens.accessToken) pm.environment.set(\"access_token\", data.tokens.accessToken);",
+                  "    if (data.tokens && data.tokens.refreshToken) pm.environment.set(\"refresh_token\", data.tokens.refreshToken);",
                   "    if (data.access_token) pm.environment.set(\"access_token\", data.access_token);",
                   "    if (data.refresh_token) pm.environment.set(\"refresh_token\", data.refresh_token);",
                   "    if (data.accessToken) pm.environment.set(\"access_token\", data.accessToken);",
@@ -50,6 +52,28 @@
               }
             }
           ]
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
         },
         {
           "name": "POST /auth/refresh",

@@ -38,13 +38,18 @@ type ComplexityRoot struct {
 	AuthTokens struct {
 		AccessToken  func(childComplexity int) int
 		RefreshToken func(childComplexity int) int
+		User         func(childComplexity int) int
 	}
 
 	AuthUser struct {
+		Active    func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
 		Email     func(childComplexity int) int
 		FirstName func(childComplexity int) int
 		ID        func(childComplexity int) int
 		LastName  func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	Category struct {
@@ -136,7 +141,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.AuthTokens.RefreshToken(childComplexity), true
+	case "AuthTokens.user":
+		if e.ComplexityRoot.AuthTokens.User == nil {
+			break
+		}
 
+		return e.ComplexityRoot.AuthTokens.User(childComplexity), true
+
+	case "AuthUser.active":
+		if e.ComplexityRoot.AuthUser.Active == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthUser.Active(childComplexity), true
+	case "AuthUser.createdAt":
+		if e.ComplexityRoot.AuthUser.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthUser.CreatedAt(childComplexity), true
+	case "AuthUser.deletedAt":
+		if e.ComplexityRoot.AuthUser.DeletedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthUser.DeletedAt(childComplexity), true
 	case "AuthUser.email":
 		if e.ComplexityRoot.AuthUser.Email == nil {
 			break
@@ -161,6 +190,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.AuthUser.LastName(childComplexity), true
+	case "AuthUser.updatedAt":
+		if e.ComplexityRoot.AuthUser.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthUser.UpdatedAt(childComplexity), true
 
 	case "Category.id":
 		if e.ComplexityRoot.Category.ID == nil {
@@ -501,11 +536,16 @@ type AuthUser {
   firstName: String!
   lastName: String!
   email: String!
+  active: Boolean!
+  createdAt: String
+  updatedAt: String
+  deletedAt: String
 }
 
 type AuthTokens {
   accessToken: String!
   refreshToken: String!
+  user: AuthUser!
 }
 
 input RegisterInput {
@@ -791,6 +831,53 @@ func (ec *executionContext) fieldContext_AuthTokens_refreshToken(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _AuthTokens_user(ctx context.Context, field graphql.CollectedField, obj *model.AuthTokens) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthTokens_user,
+		func(ctx context.Context) (any, error) {
+			return obj.User, nil
+		},
+		nil,
+		ec.marshalNAuthUser2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthTokens_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthTokens",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_AuthUser_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_AuthUser_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_AuthUser_lastName(ctx, field)
+			case "email":
+				return ec.fieldContext_AuthUser_email(ctx, field)
+			case "active":
+				return ec.fieldContext_AuthUser_active(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_AuthUser_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_AuthUser_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_AuthUser_deletedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AuthUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AuthUser_id(ctx context.Context, field graphql.CollectedField, obj *model.AuthUser) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -895,6 +982,122 @@ func (ec *executionContext) _AuthUser_email(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_AuthUser_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthUser_active(ctx context.Context, field graphql.CollectedField, obj *model.AuthUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthUser_active,
+		func(ctx context.Context) (any, error) {
+			return obj.Active, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthUser_active(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthUser_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.AuthUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthUser_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthUser_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthUser_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.AuthUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthUser_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthUser_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthUser_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.AuthUser) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthUser_deletedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.DeletedAt, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthUser_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "AuthUser",
 		Field:      field,
@@ -1027,6 +1230,14 @@ func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, 
 				return ec.fieldContext_AuthUser_lastName(ctx, field)
 			case "email":
 				return ec.fieldContext_AuthUser_email(ctx, field)
+			case "active":
+				return ec.fieldContext_AuthUser_active(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_AuthUser_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_AuthUser_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_AuthUser_deletedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthUser", field.Name)
 		},
@@ -1074,6 +1285,8 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 				return ec.fieldContext_AuthTokens_accessToken(ctx, field)
 			case "refreshToken":
 				return ec.fieldContext_AuthTokens_refreshToken(ctx, field)
+			case "user":
+				return ec.fieldContext_AuthTokens_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthTokens", field.Name)
 		},
@@ -1121,6 +1334,8 @@ func (ec *executionContext) fieldContext_Mutation_refresh(ctx context.Context, f
 				return ec.fieldContext_AuthTokens_accessToken(ctx, field)
 			case "refreshToken":
 				return ec.fieldContext_AuthTokens_refreshToken(ctx, field)
+			case "user":
+				return ec.fieldContext_AuthTokens_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthTokens", field.Name)
 		},
@@ -3585,6 +3800,11 @@ func (ec *executionContext) _AuthTokens(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "user":
+			out.Values[i] = ec._AuthTokens_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3639,6 +3859,17 @@ func (ec *executionContext) _AuthUser(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "active":
+			out.Values[i] = ec._AuthUser_active(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._AuthUser_createdAt(ctx, field, obj)
+		case "updatedAt":
+			out.Values[i] = ec._AuthUser_updatedAt(ctx, field, obj)
+		case "deletedAt":
+			out.Values[i] = ec._AuthUser_deletedAt(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

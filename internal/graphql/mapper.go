@@ -78,10 +78,24 @@ func domainAuthUserToGQL(u *userdomain.User) *model.AuthUser {
 	if u == nil {
 		return nil
 	}
-	return &model.AuthUser{
+	out := &model.AuthUser{
 		ID:        string(u.ID),
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
 		Email:     u.Email,
+		Active:    u.Active,
 	}
+	if !u.CreatedAt.IsZero() {
+		s := u.CreatedAt.UTC().Format(time.RFC3339Nano)
+		out.CreatedAt = &s
+	}
+	if !u.UpdatedAt.IsZero() {
+		s := u.UpdatedAt.UTC().Format(time.RFC3339Nano)
+		out.UpdatedAt = &s
+	}
+	if u.DeletedAt != nil && !u.DeletedAt.IsZero() {
+		s := u.DeletedAt.UTC().Format(time.RFC3339Nano)
+		out.DeletedAt = &s
+	}
+	return out
 }

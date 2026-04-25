@@ -45,6 +45,12 @@ func (s *repoStub) GrantPermissionToRole(_ context.Context, _, _ string) error {
 	s.grantCalled = true
 	return nil
 }
+func (s *repoStub) ListRoleNamesByUserID(_ context.Context, _ string) ([]string, error) {
+	return nil, nil
+}
+func (s *repoStub) ListPermissionCodesByUserID(_ context.Context, _ string) ([]string, error) {
+	return nil, nil
+}
 
 func TestCreateRole_Valid(t *testing.T) {
 	repo := &repoStub{}
