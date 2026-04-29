@@ -6,6 +6,8 @@ import (
 	postApp "github.com/nextpresskit/backend/internal/modules/posts/application"
 	taxApp "github.com/nextpresskit/backend/internal/modules/taxonomy/application"
 	platformES "github.com/nextpresskit/backend/internal/platform/elasticsearch"
+
+	"github.com/nextpresskit/backend/internal/config"
 )
 
 // Resolver is the root GraphQL resolver; field resolvers live in generated companion files.
@@ -16,4 +18,6 @@ type Resolver struct {
 	Pages     *pagesApp.Service
 	Taxonomy  *taxApp.Service
 	Search    *platformES.PostsIndex
+
+	JWT config.JWTConfig
 }

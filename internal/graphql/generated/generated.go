@@ -625,8 +625,8 @@ type AuthUser {
 }
 
 type AuthTokens {
-  accessToken: String!
-  refreshToken: String!
+  accessToken: String
+  refreshToken: String
   user: AuthUser!
 }
 
@@ -643,7 +643,7 @@ input LoginInput {
 }
 
 input RefreshInput {
-  refreshToken: String!
+  refreshToken: String
 }
 
 input CreateCategoryInput {
@@ -699,7 +699,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateCategoryInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCreateCategoryInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateCategoryInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCreateCategoryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -710,7 +710,7 @@ func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_createTag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTagInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCreateTagInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTagInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCreateTagInput)
 	if err != nil {
 		return nil, err
 	}
@@ -743,7 +743,7 @@ func (ec *executionContext) field_Mutation_deleteTag_args(ctx context.Context, r
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLoginInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐLoginInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLoginInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐLoginInput)
 	if err != nil {
 		return nil, err
 	}
@@ -754,7 +754,7 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Mutation_refresh_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRefreshInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐRefreshInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRefreshInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐRefreshInput)
 	if err != nil {
 		return nil, err
 	}
@@ -765,7 +765,7 @@ func (ec *executionContext) field_Mutation_refresh_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_register_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRegisterInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐRegisterInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRegisterInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐRegisterInput)
 	if err != nil {
 		return nil, err
 	}
@@ -776,7 +776,7 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 func (ec *executionContext) field_Mutation_updateCategory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateCategoryInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateCategoryInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateCategoryInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateCategoryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -787,7 +787,7 @@ func (ec *executionContext) field_Mutation_updateCategory_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_updateTag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTagInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateTagInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTagInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateTagInput)
 	if err != nil {
 		return nil, err
 	}
@@ -959,9 +959,9 @@ func (ec *executionContext) _AuthTokens_accessToken(ctx context.Context, field g
 			return obj.AccessToken, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalOString2ᚖstring,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -988,9 +988,9 @@ func (ec *executionContext) _AuthTokens_refreshToken(ctx context.Context, field 
 			return obj.RefreshToken, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalOString2ᚖstring,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -1017,7 +1017,7 @@ func (ec *executionContext) _AuthTokens_user(ctx context.Context, field graphql.
 			return obj.User, nil
 		},
 		nil,
-		ec.marshalNAuthUser2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser,
+		ec.marshalNAuthUser2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser,
 		true,
 		true,
 	)
@@ -1384,7 +1384,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 			return ec.Resolvers.Mutation().Register(ctx, fc.Args["input"].(model.RegisterInput))
 		},
 		nil,
-		ec.marshalNAuthUser2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser,
+		ec.marshalNAuthUser2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser,
 		true,
 		true,
 	)
@@ -1443,7 +1443,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 			return ec.Resolvers.Mutation().Login(ctx, fc.Args["input"].(model.LoginInput))
 		},
 		nil,
-		ec.marshalNAuthTokens2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens,
+		ec.marshalNAuthTokens2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens,
 		true,
 		true,
 	)
@@ -1492,7 +1492,7 @@ func (ec *executionContext) _Mutation_refresh(ctx context.Context, field graphql
 			return ec.Resolvers.Mutation().Refresh(ctx, fc.Args["input"].(model.RefreshInput))
 		},
 		nil,
-		ec.marshalNAuthTokens2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens,
+		ec.marshalNAuthTokens2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens,
 		true,
 		true,
 	)
@@ -1541,7 +1541,7 @@ func (ec *executionContext) _Mutation_createCategory(ctx context.Context, field 
 			return ec.Resolvers.Mutation().CreateCategory(ctx, fc.Args["input"].(model.CreateCategoryInput))
 		},
 		nil,
-		ec.marshalNCategory2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategory,
+		ec.marshalNCategory2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategory,
 		true,
 		true,
 	)
@@ -1590,7 +1590,7 @@ func (ec *executionContext) _Mutation_updateCategory(ctx context.Context, field 
 			return ec.Resolvers.Mutation().UpdateCategory(ctx, fc.Args["input"].(model.UpdateCategoryInput))
 		},
 		nil,
-		ec.marshalNCategory2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategory,
+		ec.marshalNCategory2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategory,
 		true,
 		true,
 	)
@@ -1680,7 +1680,7 @@ func (ec *executionContext) _Mutation_createTag(ctx context.Context, field graph
 			return ec.Resolvers.Mutation().CreateTag(ctx, fc.Args["input"].(model.CreateTagInput))
 		},
 		nil,
-		ec.marshalNTag2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTag,
+		ec.marshalNTag2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTag,
 		true,
 		true,
 	)
@@ -1729,7 +1729,7 @@ func (ec *executionContext) _Mutation_updateTag(ctx context.Context, field graph
 			return ec.Resolvers.Mutation().UpdateTag(ctx, fc.Args["input"].(model.UpdateTagInput))
 		},
 		nil,
-		ec.marshalNTag2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTag,
+		ec.marshalNTag2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTag,
 		true,
 		true,
 	)
@@ -2137,7 +2137,7 @@ func (ec *executionContext) _PostConnection_posts(ctx context.Context, field gra
 			return obj.Posts, nil
 		},
 		nil,
-		ec.marshalNPost2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPostᚄ,
+		ec.marshalNPost2ᚕᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPostᚄ,
 		true,
 		true,
 	)
@@ -2181,7 +2181,7 @@ func (ec *executionContext) _Query_post(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.Query().Post(ctx, fc.Args["slug"].(string))
 		},
 		nil,
-		ec.marshalOPost2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPost,
+		ec.marshalOPost2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPost,
 		true,
 		false,
 	)
@@ -2236,7 +2236,7 @@ func (ec *executionContext) _Query_posts(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.Query().Posts(ctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
 		},
 		nil,
-		ec.marshalNPostConnection2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection,
+		ec.marshalNPostConnection2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection,
 		true,
 		true,
 	)
@@ -2281,7 +2281,7 @@ func (ec *executionContext) _Query_searchPosts(ctx context.Context, field graphq
 			return ec.Resolvers.Query().SearchPosts(ctx, fc.Args["q"].(string), fc.Args["limit"].(*int), fc.Args["offset"].(*int))
 		},
 		nil,
-		ec.marshalNPostConnection2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection,
+		ec.marshalNPostConnection2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection,
 		true,
 		true,
 	)
@@ -2326,7 +2326,7 @@ func (ec *executionContext) _Query_page(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.Query().Page(ctx, fc.Args["slug"].(string))
 		},
 		nil,
-		ec.marshalOPage2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPage,
+		ec.marshalOPage2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPage,
 		true,
 		false,
 	)
@@ -2379,7 +2379,7 @@ func (ec *executionContext) _Query_categories(ctx context.Context, field graphql
 			return ec.Resolvers.Query().Categories(ctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
 		},
 		nil,
-		ec.marshalNCategory2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategoryᚄ,
+		ec.marshalNCategory2ᚕᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategoryᚄ,
 		true,
 		true,
 	)
@@ -2428,7 +2428,7 @@ func (ec *executionContext) _Query_tags(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.Query().Tags(ctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
 		},
 		nil,
-		ec.marshalNTag2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTagᚄ,
+		ec.marshalNTag2ᚕᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTagᚄ,
 		true,
 		true,
 	)
@@ -4238,7 +4238,7 @@ func (ec *executionContext) unmarshalInputRefreshInput(ctx context.Context, obj 
 		switch k {
 		case "refreshToken":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4408,14 +4408,8 @@ func (ec *executionContext) _AuthTokens(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = graphql.MarshalString("AuthTokens")
 		case "accessToken":
 			out.Values[i] = ec._AuthTokens_accessToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "refreshToken":
 			out.Values[i] = ec._AuthTokens_refreshToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "user":
 			out.Values[i] = ec._AuthTokens_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5376,11 +5370,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAuthTokens2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v model.AuthTokens) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthTokens2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v model.AuthTokens) graphql.Marshaler {
 	return ec._AuthTokens(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthTokens2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v *model.AuthTokens) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthTokens2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v *model.AuthTokens) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -5390,11 +5384,11 @@ func (ec *executionContext) marshalNAuthTokens2ᚖgithubᚗcomᚋPetarᚑVᚑNik
 	return ec._AuthTokens(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAuthUser2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser(ctx context.Context, sel ast.SelectionSet, v model.AuthUser) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthUser2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser(ctx context.Context, sel ast.SelectionSet, v model.AuthUser) graphql.Marshaler {
 	return ec._AuthUser(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthUser2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser(ctx context.Context, sel ast.SelectionSet, v *model.AuthUser) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthUser2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐAuthUser(ctx context.Context, sel ast.SelectionSet, v *model.AuthUser) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -5420,15 +5414,15 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCategory2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v model.Category) graphql.Marshaler {
+func (ec *executionContext) marshalNCategory2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v model.Category) graphql.Marshaler {
 	return ec._Category(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCategory2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Category) graphql.Marshaler {
+func (ec *executionContext) marshalNCategory2ᚕᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Category) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNCategory2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategory(ctx, sel, v[i])
+		return ec.marshalNCategory2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategory(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -5440,7 +5434,7 @@ func (ec *executionContext) marshalNCategory2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNi
 	return ret
 }
 
-func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v *model.Category) graphql.Marshaler {
+func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v *model.Category) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -5450,12 +5444,12 @@ func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋPetarᚑVᚑNikol
 	return ec._Category(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCreateCategoryInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCreateCategoryInput(ctx context.Context, v any) (model.CreateCategoryInput, error) {
+func (ec *executionContext) unmarshalNCreateCategoryInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCreateCategoryInput(ctx context.Context, v any) (model.CreateCategoryInput, error) {
 	res, err := ec.unmarshalInputCreateCategoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateTagInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐCreateTagInput(ctx context.Context, v any) (model.CreateTagInput, error) {
+func (ec *executionContext) unmarshalNCreateTagInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐCreateTagInput(ctx context.Context, v any) (model.CreateTagInput, error) {
 	res, err := ec.unmarshalInputCreateTagInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -5476,16 +5470,16 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐLoginInput(ctx context.Context, v any) (model.LoginInput, error) {
+func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐLoginInput(ctx context.Context, v any) (model.LoginInput, error) {
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNPost2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPost2ᚕᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNPost2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPost(ctx, sel, v[i])
+		return ec.marshalNPost2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPost(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -5497,7 +5491,7 @@ func (ec *executionContext) marshalNPost2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolo
 	return ret
 }
 
-func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -5507,11 +5501,11 @@ func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋPetarᚑVᚑNikolov�
 	return ec._Post(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPostConnection2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection(ctx context.Context, sel ast.SelectionSet, v model.PostConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNPostConnection2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection(ctx context.Context, sel ast.SelectionSet, v model.PostConnection) graphql.Marshaler {
 	return ec._PostConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPostConnection2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection(ctx context.Context, sel ast.SelectionSet, v *model.PostConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNPostConnection2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPostConnection(ctx context.Context, sel ast.SelectionSet, v *model.PostConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -5521,12 +5515,12 @@ func (ec *executionContext) marshalNPostConnection2ᚖgithubᚗcomᚋPetarᚑV�
 	return ec._PostConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRefreshInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐRefreshInput(ctx context.Context, v any) (model.RefreshInput, error) {
+func (ec *executionContext) unmarshalNRefreshInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐRefreshInput(ctx context.Context, v any) (model.RefreshInput, error) {
 	res, err := ec.unmarshalInputRefreshInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐRegisterInput(ctx context.Context, v any) (model.RegisterInput, error) {
+func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐRegisterInput(ctx context.Context, v any) (model.RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -5547,15 +5541,15 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTag2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTag(ctx context.Context, sel ast.SelectionSet, v model.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTag(ctx context.Context, sel ast.SelectionSet, v model.Tag) graphql.Marshaler {
 	return ec._Tag(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTagᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTagᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Tag) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTag2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTag(ctx, sel, v[i])
+		return ec.marshalNTag2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTag(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -5567,7 +5561,7 @@ func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋPetarᚑVᚑNikolov
 	return ret
 }
 
-func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐTag(ctx context.Context, sel ast.SelectionSet, v *model.Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐTag(ctx context.Context, sel ast.SelectionSet, v *model.Tag) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -5577,12 +5571,12 @@ func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋ
 	return ec._Tag(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUpdateCategoryInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateCategoryInput(ctx context.Context, v any) (model.UpdateCategoryInput, error) {
+func (ec *executionContext) unmarshalNUpdateCategoryInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateCategoryInput(ctx context.Context, v any) (model.UpdateCategoryInput, error) {
 	res, err := ec.unmarshalInputUpdateCategoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateTagInput2githubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateTagInput(ctx context.Context, v any) (model.UpdateTagInput, error) {
+func (ec *executionContext) unmarshalNUpdateTagInput2githubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐUpdateTagInput(ctx context.Context, v any) (model.UpdateTagInput, error) {
 	res, err := ec.unmarshalInputUpdateTagInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -5776,14 +5770,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOPage2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPage(ctx context.Context, sel ast.SelectionSet, v *model.Page) graphql.Marshaler {
+func (ec *executionContext) marshalOPage2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPage(ctx context.Context, sel ast.SelectionSet, v *model.Page) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Page(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋPetarᚑVᚑNikolovᚋnextpressᚑbackendᚋinternalᚋgraphqlᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋnextpresskitᚋbackendᚋinternalᚋgraphqlᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

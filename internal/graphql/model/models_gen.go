@@ -3,8 +3,8 @@
 package model
 
 type AuthTokens struct {
-	AccessToken  string    `json:"accessToken"`
-	RefreshToken string    `json:"refreshToken"`
+	AccessToken  *string   `json:"accessToken,omitempty"`
+	RefreshToken *string   `json:"refreshToken,omitempty"`
 	User         *AuthUser `json:"user"`
 }
 
@@ -68,7 +68,7 @@ type Query struct {
 }
 
 type RefreshInput struct {
-	RefreshToken string `json:"refreshToken"`
+	RefreshToken *string `json:"refreshToken,omitempty"`
 }
 
 type RegisterInput struct {

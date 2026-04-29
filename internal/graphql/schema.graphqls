@@ -43,8 +43,8 @@ type AuthUser {
 }
 
 type AuthTokens {
-  accessToken: String!
-  refreshToken: String!
+  accessToken: String
+  refreshToken: String
   user: AuthUser!
 }
 
@@ -61,7 +61,7 @@ input LoginInput {
 }
 
 input RefreshInput {
-  refreshToken: String!
+  refreshToken: String
 }
 
 input CreateCategoryInput {

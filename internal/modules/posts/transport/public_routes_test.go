@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/nextpresskit/backend/internal/config"
 	postsApp "github.com/nextpresskit/backend/internal/modules/posts/application"
 	"github.com/nextpresskit/backend/internal/modules/posts/domain/ident"
 	"github.com/nextpresskit/backend/internal/modules/posts/domain/model"
@@ -259,15 +260,16 @@ func TestAdminPostsRoute_RequiresAuth(t *testing.T) {
 
 	parser := dummyAccessTokenParser{}
 	checker := mockPermissionChecker{allowed: true}
+	jwtCfg := config.JWTConfig{AuthSource: "header", AccessCookieName: "access_token"}
 
 	router := gin.New()
 	api := router.Group("")
 	admin := api.Group("/admin")
-	admin.Use(platformMiddleware.AuthRequired(parser))
+	admin.Use(platformMiddleware.AuthRequired(parser, jwtCfg))
 
 	h.RegisterRoutes(
 		admin,
-		platformMiddleware.AuthRequired(parser),
+		platformMiddleware.AuthRequired(parser, jwtCfg),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(checker, code) },
 	)
 

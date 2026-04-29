@@ -109,7 +109,7 @@ func main() {
 	jwtProvider := authInfra.NewJWTProvider(jwtCfg.Secret, jwtCfg.AccessTTL, jwtCfg.RefreshTTL)
 	authService := authApp.NewService(userRepo, jwtProvider, passwordHasher)
 	authService.SetRBACReader(rbacInfra.NewGormRepository(db))
-	authHandler := authTransport.NewHandler(authService, platformMiddleware.AuthRequired(jwtProvider))
+	authHandler := authTransport.NewHandler(authService, platformMiddleware.AuthRequired(jwtProvider, jwtCfg), jwtCfg)
 	permissionChecker := rbacInfra.NewGormPermissionChecker(db)
 	rbacRepo := rbacInfra.NewGormRepository(db)
 	rbacService := rbacApp.NewService(rbacRepo)
@@ -310,31 +310,31 @@ UPDATE posts
 	admin := api.Group("/admin")
 	// Rate limit is applied before auth so abuse without valid tokens is also
 	// throttled.
-	admin.Use(adminLimiter.Middleware("admin"), platformMiddleware.AuthRequired(jwtProvider))
+	admin.Use(adminLimiter.Middleware("admin"), platformMiddleware.AuthRequired(jwtProvider, jwtCfg))
 
 	postsHandler.RegisterRoutes(
 		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
+		platformMiddleware.AuthRequired(jwtProvider, jwtCfg),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 	pagesHandler.RegisterRoutes(
 		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
+		platformMiddleware.AuthRequired(jwtProvider, jwtCfg),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 	taxHandler.RegisterRoutes(
 		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
+		platformMiddleware.AuthRequired(jwtProvider, jwtCfg),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 	mediaHandler.RegisterRoutes(
 		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
+		platformMiddleware.AuthRequired(jwtProvider, jwtCfg),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 	pluginsHandler.RegisterRoutes(
 		admin,
-		platformMiddleware.AuthRequired(jwtProvider),
+		platformMiddleware.AuthRequired(jwtProvider, jwtCfg),
 		func(code string) gin.HandlerFunc { return platformMiddleware.RequirePermission(permissionChecker, code) },
 	)
 
@@ -389,6 +389,7 @@ UPDATE posts
 				Pages:     pagesService,
 				Taxonomy:  taxService,
 				Search:    postsIdx,
+				JWT:       jwtCfg,
 			},
 		}))
 		path := strings.TrimSpace(graphqlCfg.Path)
@@ -396,9 +397,11 @@ UPDATE posts
 			path = appCfg.APIBasePath + "/graphql"
 		}
 		engine.POST(path, publicLimiter.Middleware("public"), func(c *gin.Context) {
+			c.Request = c.Request.WithContext(gqlapi.WithGinContext(c.Request.Context(), c))
 			gqlSrv.ServeHTTP(c.Writer, c.Request)
 		})
 		engine.GET(path, publicLimiter.Middleware("public"), func(c *gin.Context) {
+			c.Request = c.Request.WithContext(gqlapi.WithGinContext(c.Request.Context(), c))
 			gqlSrv.ServeHTTP(c.Writer, c.Request)
 		})
 		envLower := strings.ToLower(strings.TrimSpace(appCfg.Env))

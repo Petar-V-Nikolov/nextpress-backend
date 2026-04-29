@@ -16,6 +16,7 @@ import (
 	pagesApp "github.com/nextpresskit/backend/internal/modules/pages/application"
 	postApp "github.com/nextpresskit/backend/internal/modules/posts/application"
 	taxApp "github.com/nextpresskit/backend/internal/modules/taxonomy/application"
+	"github.com/nextpresskit/backend/internal/platform/jwtcookie"
 )
 
 // Register is the resolver for the register field.
@@ -49,9 +50,23 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 		}
 		return nil, err
 	}
+
+	if strings.EqualFold(r.JWT.AuthSource, "cookie") {
+		if ginCtx, ok := GinContextFrom(ctx); ok {
+			jwtcookie.SetAuthCookies(ginCtx.Writer, access, refresh, r.JWT)
+		}
+		return &model.AuthTokens{
+			AccessToken:  nil,
+			RefreshToken: nil,
+			User:         domainAuthUserToGQL(u),
+		}, nil
+	}
+
+	accessCopy := access
+	refreshCopy := refresh
 	return &model.AuthTokens{
-		AccessToken:  access,
-		RefreshToken: refresh,
+		AccessToken:  &accessCopy,
+		RefreshToken: &refreshCopy,
 		User:         domainAuthUserToGQL(u),
 	}, nil
 }
@@ -61,19 +76,48 @@ func (r *mutationResolver) Refresh(ctx context.Context, input model.RefreshInput
 	if r.Auth == nil {
 		return nil, errors.New("auth_disabled")
 	}
-	if strings.TrimSpace(input.RefreshToken) == "" {
+	// In cookie mode, we read refresh token from HttpOnly cookies.
+	if strings.EqualFold(r.JWT.AuthSource, "cookie") {
+		if ginCtx, ok := GinContextFrom(ctx); ok {
+			if v, ok := jwtcookie.GetCookieValue(ginCtx.Request, r.JWT.RefreshCookieName); ok {
+				u, access, refresh, err := r.Auth.Refresh(ctx, v)
+				if err != nil {
+					if errors.Is(err, authApp.ErrInvalidLogin) {
+						return nil, errors.New("invalid_refresh_token")
+					}
+					return nil, err
+				}
+				jwtcookie.SetAuthCookies(ginCtx.Writer, access, refresh, r.JWT)
+				return &model.AuthTokens{
+					AccessToken:  nil,
+					RefreshToken: nil,
+					User:         domainAuthUserToGQL(u),
+				}, nil
+			}
+		}
+		return nil, errors.New("invalid_refresh_token")
+	}
+
+	refreshToken := strings.TrimSpace("")
+	if input.RefreshToken != nil {
+		refreshToken = strings.TrimSpace(*input.RefreshToken)
+	}
+	if refreshToken == "" {
 		return nil, errors.New("invalid_payload")
 	}
-	u, access, refresh, err := r.Auth.Refresh(ctx, input.RefreshToken)
+
+	u, access, refresh, err := r.Auth.Refresh(ctx, refreshToken)
 	if err != nil {
 		if errors.Is(err, authApp.ErrInvalidLogin) {
 			return nil, errors.New("invalid_refresh_token")
 		}
 		return nil, err
 	}
+	accessCopy := access
+	refreshCopy := refresh
 	return &model.AuthTokens{
-		AccessToken:  access,
-		RefreshToken: refresh,
+		AccessToken:  &accessCopy,
+		RefreshToken: &refreshCopy,
 		User:         domainAuthUserToGQL(u),
 	}, nil
 }
