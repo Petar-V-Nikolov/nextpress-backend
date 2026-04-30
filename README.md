@@ -27,47 +27,57 @@ The goal of this project is to give developers a strong starting point they can 
 
 ## Getting Started
 
-Install dependencies and run the app locally:
+You need **Go** (see `go.mod`) and **PostgreSQL** reachable with the credentials in `.env`.
+
+### Linux / macOS / Git Bash (same commands)
+
+One-shot local bootstrap (modules, `.env` if missing, binaries, migrate, seed), then run the API:
 
 ```bash
-cp .env.example .env
-make deps
-make migrate-up
-make seed
+./scripts/nextpress setup
+./scripts/nextpress run
+```
+
+Or with **Make** (thin wrappers around the same scripts):
+
+```bash
+make setup
 make run
 ```
 
-The development server runs on `http://localhost:9090`. For **HTTPS** locally (recommended when testing default **cookie** auth in the browser) or **Ubuntu/macOS** setup detail, see [docs/deployment/local.md](docs/deployment/local.md) and [docs/deployment/macos.md](docs/deployment/macos.md).
+The API listens on **`APP_PORT`** (default **9090**). Foreground `run` frees the port first if a previous **same-repo** `bin/server` or `go run ./cmd/api` is still listening; **systemd** units named `nextpress-backend@*` are detected and not killed (stop them with `systemctl`).
 
-To run without `Ctrl+C` terminal interrupt status noise, use background mode:
+### Windows (PowerShell)
 
-```bash
-make start
-make stop
+From the repo root:
+
+```powershell
+.\scripts\nextpress.ps1 setup
+.\scripts\nextpress.ps1 run
 ```
 
-## Scripts
+Interactive Nginx snippet wizard: `make deploy-ps` or `.\scripts\nextpress.ps1 deploy`. Full Linux server flows remain in `make deploy` / `bash scripts/deploy`.
 
-Common development commands:
+### HTTPS / Nginx locally
 
-```text
-make run              Start the API in the foreground with go run.
-make start            Start the API in the background and write logs to .tmp/nextpress-api.log.
-make stop             Stop the background API started with make start.
-make build            Build the API binary into bin/server.
-make test             Run the full test suite with verbose output.
-make test-coverage    Run tests with coverage summary.
-make migrate-up       Apply all pending database migrations.
-make migrate-down     Roll back one database migration.
-make migrate-version  Print the current migration version and dirty flag.
-make seed             Run database seeders.
-make graphql          Regenerate gqlgen code from the GraphQL schema.
-make security-check   Run dependency vulnerability scanning with govulncheck.
-make db-fresh         Drop and recreate the database schema by rerunning migrations.
-make deploy           Interactive deploy wizard: Nginx/TLS/systemd snippets and optional release (see docs/DEPLOYMENT.md).
-```
+For **HTTPS** (cookie auth in the browser) and reverse-proxy setup, see [docs/deployment/local.md](docs/deployment/local.md) and [docs/deployment/macos.md](docs/deployment/macos.md). Use **`make deploy`** (bash) or **`make deploy-ps`** (PowerShell) to generate configs under `deploy/generated/`.
 
-Run `make help` for the complete command reference.
+Background mode (Unix): `make start` / `make stop` or `./scripts/nextpress start` / `stop`.
+
+## Commands (summary)
+
+| Area | Unix CLI | Make | Windows PowerShell |
+|------|----------|------|----------------------|
+| Bootstrap | `./scripts/nextpress setup` | `make setup` | `.\scripts\nextpress.ps1 setup` |
+| Modules + `.env` | `./scripts/nextpress install` | `make install` | `.\scripts\nextpress.ps1 install` |
+| Build API only | `./scripts/nextpress build` | `make build` | `.\scripts\nextpress.ps1 build` |
+| Build API + migrate + seed tools | `./scripts/nextpress build-all` | `make build-all` | `.\scripts\nextpress.ps1 build-all` |
+| Migrate / seed | `./scripts/nextpress migrate-up` / `seed` | `make migrate-up` / `make seed` | same subcommands on `nextpress.ps1` |
+| Run API | `./scripts/nextpress run` | `make run` | `.\scripts\nextpress.ps1 run` |
+| CI-style checks | `./scripts/nextpress checks` | `make checks` | `.\scripts\nextpress.ps1 checks` |
+| Deploy wizard | `./scripts/nextpress deploy` | `make deploy` | `make deploy-ps` or `nextpress.ps1 deploy` |
+
+Run **`./scripts/nextpress help`** or **`make help`** for the full list.
 
 ## Frontend Integration
 

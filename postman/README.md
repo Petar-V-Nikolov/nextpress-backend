@@ -31,16 +31,16 @@ Set this on each imported environment (`NextPress-*.postman_environment.json`).
 
 ## Environments
 
-Use one environment per target. Both collections rely on `{{base_url}}`.
+Use one environment per target. Both collections rely on `{{base_url}}`. **`POST /auth/login`** in the Public collection uses `{{superadmin_email}}` and `{{superadmin_password}}`, which default to the seed superadmin (`SEED_SUPERADMIN_EMAIL` / `SEED_SUPERADMIN_PASSWORD` in `.env.example`). Override per environment (required for real staging/production accounts).
 
 | Environment | File | Use case | `base_url` |
 |-------------|------|----------|------------|
-| **NextPressKit - Local** | `NextPress-Local.postman_environment.json` | Local development (`APP_PORT=9090` by default) | `http://localhost:9090` |
+| **NextPressKit - Local** | `NextPress-Local.postman_environment.json` | Local Nginx + TLS (`make deploy`, `nextpresskit.local` in `/etc/hosts`) | `https://nextpresskit.local` |
 | **NextPressKit - Dev** | `NextPress-Dev.postman_environment.json` | Dev deployment | `https://api-dev.example.com` |
 | **NextPressKit - Staging** | `NextPress-Staging.postman_environment.json` | Staging deployment | `https://api-staging.example.com` |
 | **NextPressKit - Production** | `NextPress-Production.postman_environment.json` | Production deployment | `https://api.example.com` |
 
-> Replace the dev/staging/production `base_url` values with your actual domains.
+> Replace the dev/staging/production `base_url` values with your actual domains. For **direct** `go run` / `make run` without Nginx, set local `base_url` to `http://127.0.0.1:9090` (or your `APP_PORT`).
 
 ### Setup
 

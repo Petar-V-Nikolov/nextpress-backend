@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "nextpress-admin-api",
     "name": "NextPressKit Admin API",
-    "description": "Protected admin endpoints under /admin.\n\nAuth: set environment `jwt_auth_source` to `cookie` (default) or `header`. Cookie mode relies on Postman's cookie jar after `POST /auth/login` from the Public collection (same `base_url`). Header mode sends `Authorization: Bearer {{admin_access_token}}` from the collection pre-request script (run login in header mode to populate tokens).",
+    "description": "Protected admin endpoints under /admin.\n\nAuth: set environment `jwt_auth_source` to `cookie` (default) or `header`. Cookie mode relies on Postman's cookie jar after `POST /auth/login` from the Public collection (same `base_url`; login body uses `{{superadmin_email}}` / `{{superadmin_password}}`). Header mode sends `Authorization: Bearer {{admin_access_token}}` from the collection pre-request script (run login in header mode to populate tokens).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [

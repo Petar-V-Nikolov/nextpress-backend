@@ -1,9 +1,9 @@
-# NextPressKit backend - developer tasks
+# NextPressKit backend — developer tasks
 #
+# Cross-platform CLI: ./scripts/nextpress (Linux/macOS/Git Bash) or .\scripts\nextpress.ps1 (Windows).
 # Requires: Go (see go.mod), PostgreSQL for migrate/seed/run.
-# Config: copy .env.example to .env (DB_*, JWT_*, etc.).
+# Config: copy .env.example to .env (or: make install / nextpress install).
 
-# Binaries written under bin/
 BINARY_NAME   := server
 MIGRATE_BINARY := migrate
 SEED_BINARY   := seed
@@ -11,178 +11,143 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 API_PID_FILE ?= .tmp/nextpress-api.pid
 API_LOG_FILE ?= .tmp/nextpress-api.log
 
-# migrate-steps: direction (up = apply N, down = roll back N)
 MIGRATE_CMD ?= up
 
-.PHONY: help all build run start stop clean \
+.PHONY: help all build build-all install setup run start stop clean \
 	test test-coverage test-integration tidy deps graphql \
 	seed seed-build \
 	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh \
-	security-check deploy
-
-## deploy: Interactive deploy wizard (Nginx, TLS, systemd snippets, optional git/build/migrate); Windows: scripts/deploy.ps1
-deploy:
-	@bash scripts/deploy
+	security-check deploy deploy-ps checks
 
 ## help: List targets and short descriptions
 help:
-	@echo "Usage: make [target]"
+	@echo "Usage: make [target]   — or: ./scripts/nextpress <command>"
+	@echo ""
+	@echo "Common:"
+	@echo "  make install   Go modules + .env from .env.example if missing"
+	@echo "  make setup     install + build-all + migrate-up + seed"
+	@echo "  make run       Foreground API"
+	@echo "  make deploy    Interactive Nginx/TLS wizard (Linux/macOS bash)"
+	@echo "  make deploy-ps Interactive deploy (Windows PowerShell)"
 	@echo ""
 	@echo "Targets:"
 	@sed -n 's/^##//p' $(MAKEFILE_LIST) | column -t -s ':' | sed -e 's/^/  /'
 
-## all: Same as build
+## install: go mod download; create .env from .env.example if missing
+install:
+	@bash scripts/nextpress install
+
+## setup: One-shot local bootstrap (install + build-all + migrate-up + seed)
+setup: install build-all migrate-up seed
+	@echo "Setup done."
+
+## all: Alias of build
 all: build
 
 ## build: Produce bin/server from cmd/api
 build:
-	@echo "Building $(BINARY_NAME)..."
-	@mkdir -p bin
-	go build -ldflags "-X main.version=$(VERSION)" -o bin/$(BINARY_NAME) ./cmd/api
-	@echo "Done."
+	@bash scripts/nextpress build
 
-## run: Start the API with go run (loads .env from cwd if present)
+## build-all: Build bin/server, bin/migrate, bin/seed
+build-all:
+	@bash scripts/nextpress build-all
+
+## run: Start the API in the foreground (go run)
 run:
-	@port="$$(awk -F= '/^APP_PORT=/{print $$2; exit}' .env 2>/dev/null | tr -d '[:space:]')"; \
-	if [ -z "$$port" ]; then port=9090; fi; \
-	if ss -ltn "( sport = :$$port )" | awk 'NR>1 { found=1 } END { exit found ? 0 : 1 }'; then \
-		echo "Port $$port is already in use. Stop the running process or change APP_PORT in .env."; \
-		exit 0; \
-	fi; \
-	interrupted=0; trap 'interrupted=1' INT; \
-	go run ./cmd/api; status=$$?; \
-	if [ $$interrupted -eq 1 ] || [ $$status -eq 130 ]; then exit 0; fi; \
-	if [ $$status -ne 0 ]; then \
-		echo "run finished with exit code $$status"; \
-	fi; \
-	exit 0
+	@bash scripts/dev-run.sh
 
-## start: Start the API in background (recommended for local dev)
+## start: Start the API in the background (logs: .tmp/nextpress-api.log)
 start:
-	@mkdir -p "$$(dirname "$(API_PID_FILE)")"; \
-	if [ -f "$(API_PID_FILE)" ]; then \
-		pid="$$(cat "$(API_PID_FILE)")"; \
-		if kill -0 "$$pid" 2>/dev/null; then \
-			echo "API already running (pid=$$pid)."; \
-			exit 0; \
-		fi; \
-		rm -f "$(API_PID_FILE)"; \
-	fi; \
-	port="$$(awk -F= '/^APP_PORT=/{print $$2; exit}' .env 2>/dev/null | tr -d '[:space:]')"; \
-	if [ -z "$$port" ]; then port=9090; fi; \
-	if ss -ltn "( sport = :$$port )" | awk 'NR>1 { found=1 } END { exit found ? 0 : 1 }'; then \
-		echo "Port $$port is already in use. Stop the running process or change APP_PORT in .env."; \
-		exit 0; \
-	fi; \
-	nohup go run ./cmd/api > "$(API_LOG_FILE)" 2>&1 & echo $$! > "$(API_PID_FILE)"; \
-	sleep 1; \
-	pid="$$(cat "$(API_PID_FILE)")"; \
-	if kill -0 "$$pid" 2>/dev/null; then \
-		echo "API started in background (pid=$$pid)."; \
-		echo "Logs: $(API_LOG_FILE)"; \
-	else \
-		echo "API failed to start. See $(API_LOG_FILE)"; \
-		rm -f "$(API_PID_FILE)"; \
-	fi
+	@bash scripts/dev-start.sh
 
-## stop: Stop the background API started with start
+## stop: Stop background API + soft-clear same-repo listeners on APP_PORT
 stop:
-	@if [ ! -f "$(API_PID_FILE)" ]; then \
-		echo "API is not running (no pid file)."; \
-		exit 0; \
-	fi; \
-	pid="$$(cat "$(API_PID_FILE)")"; \
-	if ! kill -0 "$$pid" 2>/dev/null; then \
-		echo "API is not running (stale pid file)."; \
-		rm -f "$(API_PID_FILE)"; \
-		exit 0; \
-	fi; \
-	kill -TERM "$$pid"; \
-	for _ in 1 2 3 4 5 6 7 8 9 10; do \
-		if ! kill -0 "$$pid" 2>/dev/null; then \
-			rm -f "$(API_PID_FILE)"; \
-			echo "API stopped."; \
-			exit 0; \
-		fi; \
-		sleep 1; \
-	done; \
-	echo "API did not stop in time; sending SIGKILL."; \
-	kill -KILL "$$pid" 2>/dev/null || true; \
-	rm -f "$(API_PID_FILE)"; \
-	echo "API stopped."
+	@bash scripts/dev-stop.sh
 
 ## clean: Remove bin/ and go clean
 clean:
-	rm -rf bin/
-	go clean
+	@bash scripts/nextpress clean
 
-# --- Database: seed -----------------------------------------------------------
+## deploy: Interactive deploy wizard (Nginx, TLS, systemd); Windows: make deploy-ps
+deploy:
+	@bash scripts/deploy
 
-## seed: Run seeders (go run ./cmd/seed)
+## deploy-ps: Interactive deploy wizard (PowerShell; run from repo root on Windows)
+deploy-ps:
+	@if command -v pwsh >/dev/null 2>&1; then \
+		pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/deploy.ps1; \
+	elif command -v powershell.exe >/dev/null 2>&1; then \
+		powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/deploy.ps1; \
+	else \
+		echo "Install PowerShell 7+ (pwsh) or use Git Bash: make deploy" >&2; \
+		exit 1; \
+	fi
+
+## seed: Run seeders
 seed:
-	go run ./cmd/seed
+	@bash scripts/nextpress seed
 
-## seed-build: Build bin/seed
+## seed-build: Build bin/seed only
 seed-build:
 	@echo "Building $(SEED_BINARY)..."
 	@mkdir -p bin
 	go build -o bin/$(SEED_BINARY) ./cmd/seed
 	@echo "Done."
 
-# --- Database: migrations (migrations/, cmd/migrate) ---------------------------
-
 ## migrate-up: Apply all pending migrations
 migrate-up:
-	go run ./cmd/migrate -command=up
+	@bash scripts/nextpress migrate-up
 
-## migrate-down: Roll back one migration (-steps=1; omitting steps would roll back all)
+## migrate-down: Roll back one migration
 migrate-down:
-	go run ./cmd/migrate -command=down -steps=1
+	@bash scripts/nextpress migrate-down
 
 ## migrate-steps: Apply or roll back STEPS migrations (MIGRATE_CMD=up|down)
 migrate-steps:
 	@test -n "$(STEPS)" || (echo >&2 "Usage: make migrate-steps STEPS=n [MIGRATE_CMD=up|down]"; exit 1)
-	go run ./cmd/migrate -command=$(MIGRATE_CMD) -steps=$(STEPS)
+	@bash scripts/nextpress migrate-steps "$(STEPS)"
 
-## migrate-version: Print current schema version / dirty flag
+## migrate-version: Print current migration version
 migrate-version:
-	go run ./cmd/migrate -command=version
+	@bash scripts/nextpress migrate-version
 
 ## migrate-drop: Drop all tables (interactive confirm)
 migrate-drop:
-	@echo "WARNING: This drops all tables in the configured database."
-	@read -p "Type y to continue: " confirm && [ "$${confirm:-N}" = y ]
-	go run ./cmd/migrate -command=drop
+	@bash scripts/nextpress migrate-drop
 
 ## db-fresh: migrate-drop then migrate-up (destructive)
-db-fresh: migrate-drop migrate-up
+db-fresh:
+	@bash scripts/nextpress db-fresh
 
-# --- Tests and modules ---------------------------------------------------------
-
-## test: Run all tests with verbose output
+## test: Run all tests (verbose)
 test:
-	go test -v ./...
+	@bash scripts/nextpress test
 
 ## test-coverage: Run tests with coverage summary
 test-coverage:
-	go test -cover ./...
+	@bash scripts/nextpress test-coverage
 
-## test-integration: Run integration tests that require real services (Postgres)
+## test-integration: Integration tests (Postgres; set DB_* or skipped)
 test-integration:
-	go test -tags=integration -v ./internal/platform/database
+	@bash scripts/nextpress test-integration
 
 ## tidy: go mod tidy
 tidy:
-	go mod tidy
+	@bash scripts/nextpress tidy
 
-## deps: go mod download
+## deps: go mod download (modules only; no .env)
 deps:
+	@command -v go >/dev/null 2>&1 || { echo "Go not found" >&2; exit 1; }
 	go mod download
 
-## security-check: Run dependency vulnerability scan (govulncheck)
+## security-check: govulncheck
 security-check:
-	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+	@bash scripts/nextpress security-check
 
-## graphql: Regenerate gqlgen code from internal/graphql/schema.graphqls
+## checks: CI-style suite (see scripts/nextpress checks)
+checks:
+	@bash scripts/nextpress checks
+
+## graphql: Regenerate gqlgen code
 graphql:
-	go run github.com/99designs/gqlgen generate
+	@bash scripts/nextpress graphql

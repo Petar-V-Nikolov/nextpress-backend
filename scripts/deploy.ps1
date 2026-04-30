@@ -74,7 +74,7 @@ switch ($tier) {
     "production" { $defaultDomain = "api.example.com"; $defaultPort = "9090" }
     "staging" { $defaultDomain = "api-staging.example.com"; $defaultPort = "9091" }
     "dev" { $defaultDomain = "api-dev.example.com"; $defaultPort = "9092" }
-    "local" { $defaultDomain = "localhost"; $defaultPort = "9090" }
+    "local" { $defaultDomain = "nextpresskit.local"; $defaultPort = "9090" }
 }
 
 $genConfig = Prompt-Yn $true "Generate Nginx config files?"

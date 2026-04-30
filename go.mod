@@ -2,6 +2,8 @@ module github.com/nextpresskit/backend
 
 go 1.26
 
+toolchain go1.26.2
+
 require (
 	github.com/99designs/gqlgen v0.17.89
 	github.com/elastic/go-elasticsearch/v8 v8.19.3

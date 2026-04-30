@@ -4,7 +4,7 @@ How this folder is organised (aligned with [Diátaxis](https://diataxis.fr/): tu
 
 | Type | Document | Purpose |
 |------|----------|---------|
-| **Tutorial** | [Root `README.md`](../README.md) | Fast path: clone, configure, run locally. |
+| **Tutorial** | [Root `README.md`](../README.md) | Fast path: `./scripts/nextpress setup`, `make setup`, or `.\scripts\nextpress.ps1 setup`. |
 | **How-to** | [Deployment (servers)](DEPLOYMENT.md) | Ubuntu, Nginx, systemd, HTTPS (Certbot), interactive `scripts/deploy`. |
 | **How-to** | [Local development](deployment/local.md) | Laptop setup, HTTPS with mkcert, optional Nginx/systemd, ES/GraphQL, tests. |
 | **How-to** | [Local development (macOS)](deployment/macos.md) | Homebrew, paths, mkcert, Nginx on Mac. |
