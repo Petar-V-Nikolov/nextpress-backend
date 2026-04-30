@@ -13,7 +13,7 @@ set -euo pipefail
 port="${1:?usage: dev-free-api-port.sh <port> <repo_root> [soft]}"
 workdir="${2:?usage: dev-free-api-port.sh <port> <repo_root> [soft]}"
 soft="${3:-}"
-workdir="$(cd "$workdir" && pwd)"
+workdir="$(cd "$workdir" && pwd -P 2>/dev/null || pwd)"
 binserver="$workdir/bin/server"
 kernel="$(uname -s 2>/dev/null || echo unknown)"
 
@@ -32,7 +32,14 @@ port_busy_linux() {
 }
 
 listener_pids_linux() {
-  ss -ltn "( sport = :$port )" 2>/dev/null | sed -n 's/.*pid=\([0-9][0-9]*\).*/\1/p' | sort -u
+  # ss often omits pid= without root; lsof usually still lists the listener for your own processes.
+  local from_ss from_lsof
+  from_ss="$(ss -ltn "( sport = :$port )" 2>/dev/null | sed -n 's/.*pid=\([0-9][0-9]*\).*/\1/p' | sort -u)"
+  from_lsof=""
+  if command -v lsof >/dev/null 2>&1; then
+    from_lsof="$(lsof -nP -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null | sort -u)"
+  fi
+  printf '%s\n%s\n' "$from_ss" "$from_lsof" | awk 'NF' | sort -u
 }
 
 is_nextpress_dev_api_linux() {
@@ -40,12 +47,15 @@ is_nextpress_dev_api_linux() {
   [[ "$pid" =~ ^[0-9]+$ ]] || return 1
   [[ -r "/proc/$pid/cmdline" ]] || return 1
   local exe=""
-  exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null || true)"
+  exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null || readlink "/proc/$pid/exe" 2>/dev/null || true)"
+  # Rebuilt binary while process runs: kernel appends " (deleted)" to /proc/PID/exe text.
+  exe="${exe% (deleted)}"
   if [[ -n "$exe" && "$exe" == "$binserver" ]]; then
     return 0
   fi
   local cl=""
   cl="$(tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null || true)"
+  [[ "$cl" == *"$workdir/bin/server"* ]] && return 0
   [[ "$cl" == *"$workdir/cmd/api"* ]] && return 0
   [[ "$cl" == *./cmd/api* ]] && [[ "$cl" == *go\ run* ]] && return 0
   return 1
