@@ -47,7 +47,7 @@ docs/README.md  (this page) ─►  map of every doc
 
 Import [`openapi.yaml`](openapi.yaml) into Postman, Stoplight, or your gateway. It documents **Bearer** and **cookie** JWT security for protected routes. Regenerate GraphQL code after schema edits: `make graphql`.
 
-Ready-made collections: [`postman/`](../postman) (see [`postman/README.md`](../postman/README.md) for `jwt_auth_source` / cookie jar vs header mode). Refresh environment JSON from `.env.example` / `.env`: `./scripts/nextpresskit postman-sync` or `make postman-sync` (optional `--dry-run`; tier URLs: `POSTMAN_*_BASE_URL`).
+Ready-made collections: [`postman-templates/`](../postman-templates) (see [`postman-templates/README.md`](../postman-templates/README.md) for `jwt_auth_source` / cookie jar vs header mode). Local gitignored `postman/`: `./scripts/nextpresskit postman-sync` or `make postman-sync` (optional `--dry-run`; tier URLs: `POSTMAN_*_BASE_URL`).
 
 ## Config templates
 

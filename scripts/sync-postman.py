@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Rewrite Postman environment JSON from .env.example + .env + process env.
 
+Repo templates live in postman-templates/ (tracked). A gitignored postman/ directory
+is created on demand: any missing *.json (and README.md) is copied from templates first.
+
 Collections under postman/ only use {{base_url}} and env vars; they are not modified.
 
 Tier base URLs (first match wins):
@@ -20,11 +23,13 @@ import argparse
 import json
 import os
 import re
+import shutil
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 POSTMAN_DIR = ROOT / "postman"
+TEMPLATE_DIR = ROOT / "postman-templates"
 
 ENV_KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$")
 
@@ -139,6 +144,32 @@ def sync_file(path: Path, cfg: dict[str, str], *, dry_run: bool, clear_tokens: b
     return changes
 
 
+def ensure_postman_from_templates() -> int:
+    """Copy missing JSON and README from postman-templates/ into gitignored postman/."""
+    if not TEMPLATE_DIR.is_dir():
+        print(f"Missing directory: {TEMPLATE_DIR}", file=sys.stderr)
+        return 1
+    templates = list(TEMPLATE_DIR.glob("*.json"))
+    if not templates:
+        print(f"No *.json in {TEMPLATE_DIR}", file=sys.stderr)
+        return 1
+    POSTMAN_DIR.mkdir(parents=True, exist_ok=True)
+    copied = 0
+    for src in sorted(templates):
+        dest = POSTMAN_DIR / src.name
+        if not dest.exists():
+            shutil.copy2(src, dest)
+            copied += 1
+    readme_src = TEMPLATE_DIR / "README.md"
+    readme_dest = POSTMAN_DIR / "README.md"
+    if readme_src.is_file() and not readme_dest.exists():
+        shutil.copy2(readme_src, readme_dest)
+        copied += 1
+    if copied:
+        print(f"Seeded postman/ from postman-templates/ ({copied} new file(s)).")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument(
@@ -150,11 +181,14 @@ def main() -> int:
     clear_tokens = os.environ.get("POSTMAN_CLEAR_TOKENS", "").strip() in ("1", "true", "yes")
 
     os.chdir(ROOT)
+    rc = ensure_postman_from_templates()
+    if rc != 0:
+        return rc
     cfg = merged_config()
 
     env_files = sorted(POSTMAN_DIR.glob("*.postman_environment.json"))
     if not env_files:
-        print("No Postman environment files in postman/", file=sys.stderr)
+        print("No Postman environment files in postman/ after seeding.", file=sys.stderr)
         return 1
 
     all_changes: list[str] = []

@@ -160,6 +160,6 @@ checks:
 graphql:
 	@bash scripts/nextpresskit graphql
 
-## postman-sync: Refresh Postman environment JSON from .env.example + .env (optional POSTMAN_* URLs)
+## postman-sync: Seed postman/ from postman-templates/; refresh env JSON from .env.example + .env (optional POSTMAN_* URLs)
 postman-sync:
 	@bash scripts/nextpresskit postman-sync

@@ -82,7 +82,7 @@ Background mode (Unix): `make start` / `make stop` or `./scripts/nextpresskit st
 
 Run **`./scripts/nextpresskit help`** or **`make help`** for the full list.
 
-Postman collections live under [`postman/`](postman/). Refresh checked-in environment JSON from `.env.example` / `.env` with **`./scripts/nextpresskit postman-sync`** (optional: `--dry-run`, or tier overrides like `POSTMAN_DEV_BASE_URL=…`). See [`postman/README.md`](postman/README.md).
+Postman templates are tracked under [`postman-templates/`](postman-templates/). Run **`./scripts/nextpresskit postman-sync`** to create a gitignored [`postman/`](postman/) workspace (copy missing JSON from templates, then apply `.env.example` / `.env`). Options: `--dry-run`, tier overrides like `POSTMAN_DEV_BASE_URL=…`. Details: [`postman-templates/README.md`](postman-templates/README.md).
 
 ## Frontend Integration
 

@@ -1,6 +1,6 @@
 # Postman - NextPressKit API
 
-Postman collections and environments for the NextPressKit backend.
+Canonical collection and environment JSON lives in this **`postman-templates/`** folder (tracked in git). The **`postman/`** directory at the repo root is **gitignored**: run **`postman-sync`** to copy any missing files from here into `postman/`, then apply values from `.env.example` / `.env`.
 
 ## Route groups (Public/Auth and Admin)
 
@@ -44,7 +44,7 @@ Use one environment per target. Both collections rely on `{{base_url}}`. **`POST
 
 ### Sync from repo env files
 
-Regenerate the checked-in environment JSON from `.env.example` and `.env` (and optional shell overrides):
+Refresh **`postman/*.postman_environment.json`** from `.env.example` and `.env` (and optional shell overrides). On a fresh clone, this also creates **`postman/`** from these templates when needed:
 
 ```bash
 ./scripts/nextpresskit postman-sync
@@ -61,12 +61,13 @@ Collections are not rewritten (requests use `{{base_url}}` only).
 
 ### Setup
 
-1. Import the two collections and the four environment files into Postman.
-2. Select one environment. (Browser apps: set **`CORS_ORIGINS`** on the API to your frontend origin and use `credentials: 'include'`. Postman itself ignores CORS but still stores response cookies per host.)
-3. Run **`POST /auth/login`** from the Public collection.
+1. Run **`postman-sync`** once so **`postman/`** contains the JSON (then import from that folder).
+2. Import the two collections and the four environment files into Postman.
+3. Select one environment. (Browser apps: set **`CORS_ORIGINS`** on the API to your frontend origin and use `credentials: 'include'`. Postman itself ignores CORS but still stores response cookies per host.)
+4. Run **`POST /auth/login`** from the Public collection.
    - **`jwt_auth_source=cookie`:** cookies are stored automatically; response body is `{ "user": … }` only. Then run Admin requests against the same `base_url`.
    - **`jwt_auth_source=header`:** the login tests store `access_token`, `refresh_token`, and **`admin_access_token`** (copy of access) for the Admin collection script.
-4. For **cookie mode**, no manual copy step is required. For **header mode**, use `admin_access_token` (already synced after login from the updated collection tests).
+5. For **cookie mode**, no manual copy step is required. For **header mode**, use `admin_access_token` (already synced after login from the updated collection tests).
 
 ### Notes
 

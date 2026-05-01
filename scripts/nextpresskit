@@ -36,7 +36,7 @@ Commands:
   deploy              Interactive Nginx/TLS wizard (bash scripts/deploy)
   deploy-apply-nginx  Non-interactive: write Nginx config + install on Linux (see scripts/deploy apply-nginx --help)
   checks            CI-style: test, vet, integration, OpenAPI, govulncheck
-  postman-sync      Refresh postman/*.postman_environment.json from .env.example + .env (Python 3)
+  postman-sync      Seed gitignored postman/ from postman-templates/ if needed; refresh env JSON from .env (Python 3)
   test | test-coverage | test-integration
   security-check | graphql | clean
 

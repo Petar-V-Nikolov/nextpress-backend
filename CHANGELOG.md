@@ -14,7 +14,7 @@ Format:
 - OpenAPI: `cookieAuth` security scheme, auth response and cookie documentation, optional refresh/logout bodies.
 
 ### Changed
-- Documentation: root `README`, `docs/README`, `docs/SECURITY`, `docs/DEPLOYMENT`, `docs/deployment/local`, and `postman/README` updated for HttpOnly JWT cookies and `JWT_AUTH_SOURCE`.
+- Documentation: root `README`, `docs/README`, `docs/SECURITY`, `docs/DEPLOYMENT`, `docs/deployment/local`, and `postman-templates/README` updated for HttpOnly JWT cookies and `JWT_AUTH_SOURCE`.
 
 ### Fixed
 - (fill in during development)

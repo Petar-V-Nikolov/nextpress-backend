@@ -47,6 +47,11 @@ logs/
 *.log
 
 # =========================
+# Postman (local workspace; seed from postman-templates/ via postman-sync)
+# =========================
+postman/
+
+# =========================
 # Generated deploy configs (scripts/deploy)
 # =========================
 deploy/generated/

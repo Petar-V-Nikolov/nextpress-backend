@@ -42,7 +42,7 @@ Cross-site browser flows (SPA on a different origin than the API) require:
 
 **HTTPS at the browser:** those defaults mean the browser must reach the API over **`https://`** (Nginx + Let’s Encrypt on servers, or **mkcert** locally) for cookies to work in cross-site flows. See [deployment/local.md](deployment/local.md) (local HTTPS, HTTP-only dev options) and [DEPLOYMENT.md § TLS](DEPLOYMENT.md#4-tls-https).
 
-Postman and other non-browser clients can use **cookie mode** (cookie jar after login) or **header mode**; see [`postman/README.md`](../postman/README.md).
+Postman and other non-browser clients can use **cookie mode** (cookie jar after login) or **header mode**; see [`postman-templates/README.md`](../postman-templates/README.md).
 
 ## Rate-limit tuning and abuse tests
 
