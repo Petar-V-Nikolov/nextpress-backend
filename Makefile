@@ -28,6 +28,8 @@ help:
 	@echo "Common:"
 	@echo "  make install   Go modules + .env from .env.example if missing"
 	@echo "  make setup     install + build-all + migrate-up + seed"
+	@echo "  make migrate-up / seed   Sync DB schema, then demo data"
+	@echo "  make db-fresh  Dev reset: empty public + migrate-up (add make seed after if you want data)"
 	@echo "  make run       Foreground API"
 	@echo "  make deploy       Interactive Nginx/TLS wizard (Linux/macOS bash)"
 	@echo "  make deploy-nginx Non-interactive Nginx install (scripts/deploy apply-nginx)"
@@ -102,24 +104,24 @@ seed-build:
 	go build -o bin/$(SEED_BINARY) ./cmd/seed
 	@echo "Done."
 
-## migrate-up: Apply all pending migrations
+## migrate-up: GORM AutoMigrate via internal/platform/dbmigrate (module persistence)
 migrate-up:
 	@bash scripts/nextpresskit migrate-up
 
-## migrate-down: Roll back one migration
+## migrate-down: Removed (fails with guidance); use db-fresh for dev reset
 migrate-down:
 	@bash scripts/nextpresskit migrate-down
 
-## migrate-steps: Apply or roll back STEPS migrations (MIGRATE_CMD=up|down)
+## migrate-steps: Removed (fails with guidance)
 migrate-steps:
-	@test -n "$(STEPS)" || (echo >&2 "Usage: make migrate-steps STEPS=n [MIGRATE_CMD=up|down]"; exit 1)
+	@test -n "$(STEPS)" || (echo >&2 "Usage: make migrate-steps STEPS=n (removed; see docs/COMMANDS.md)"; exit 1)
 	@bash scripts/nextpresskit migrate-steps "$(STEPS)"
 
-## migrate-version: Print current migration version
+## migrate-version: Prints notice (no version table with AutoMigrate)
 migrate-version:
 	@bash scripts/nextpresskit migrate-version
 
-## migrate-drop: Drop all tables (interactive confirm)
+## migrate-drop: Drop all public tables (interactive; sets ALLOW_SCHEMA_DROP)
 migrate-drop:
 	@bash scripts/nextpresskit migrate-drop
 

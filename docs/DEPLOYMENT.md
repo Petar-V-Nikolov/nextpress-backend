@@ -1,8 +1,8 @@
 # Deployment
 
-[← Documentation index](README.md) · [Quick start (run locally)](../README.md#getting-started) · [Command reference](COMMANDS.md)
+[← Documentation index](README.md) · [Quick start (run locally)](../README.md#quick-start) · [Command reference](COMMANDS.md)
 
-How to run **NextPressKit** on **Ubuntu** behind **Nginx** and **systemd**, using **`scripts/deploy`**. For development on your own machine (foreground `make run` or optional local Nginx/systemd), see [Local development](deployment/local.md) and [macOS](deployment/macos.md).
+How to run NextPressKit on Ubuntu behind Nginx and systemd, using `scripts/deploy`. For development on your own machine (foreground `make run` or optional local Nginx/systemd), see [Local development](deployment/local.md) and [macOS](deployment/macos.md).
 
 ## Quick command meanings
 
@@ -10,11 +10,13 @@ How to run **NextPressKit** on **Ubuntu** behind **Nginx** and **systemd**, usin
 - `make deploy`: convenience wrapper around the same deploy wizard.
 - `./scripts/nextpresskit deploy`: same deploy flow through the unified command runner.
 
-This deploy flow does **not** replace local bootstrap. For a fresh local clone, use `./scripts/nextpresskit setup` first.
+This deploy flow does not replace local bootstrap. For a fresh local clone, use `./scripts/nextpresskit setup` first.
+
+Database: after deploy, run migrate-up so the live schema matches the code. seed is optional (often used on staging, rarely on production). db-fresh is for local machines only, not production. See [COMMANDS.md](COMMANDS.md#database-and-seed-data) and [SEEDING.md](SEEDING.md).
 
 ## Already running the project?
 
-Existing clones keep working: HTTP Nginx configs, `APP_PORT`, and `scripts/deploy` are unchanged. **HTTPS is an optional upgrade** (Let’s Encrypt below). If you add TLS, update **`CORS_ORIGINS`** and client base URLs to `https://` where applicable. Local HTTPS with mkcert is in [deployment/local.md](deployment/local.md).
+Existing clones keep working: HTTP Nginx configs, `APP_PORT`, and `scripts/deploy` are unchanged. HTTPS is optional (Let’s Encrypt below). If you add TLS, update `CORS_ORIGINS` and client base URLs to `https://` where applicable. Local HTTPS with mkcert is in [deployment/local.md](deployment/local.md).
 
 ## Contents
 
@@ -41,7 +43,7 @@ The wizard asks for **tier** (production / staging / dev / local), whether to **
 
 On **Linux**, you can opt in to **`sudo`** copy into `/etc/nginx` and reload Nginx. You can optionally run **`certbot --nginx`** when TLS mode is Let’s Encrypt.
 
-Finally, you can run the **release pipeline** on the current machine: **git** fetch/checkout/pull for the mapped branch (`production` → `main`, etc.), **`go build`** (`bin/server`, `bin/migrate`, `bin/seed`), **migrations**, optional **seed** (or when `RUN_SEED_ON_DEPLOY=true`), and **systemd restart** if the unit exists.
+The wizard can also run a **release** step on this machine: update git to the right branch, **`go build`**, **`bin/migrate -command=up`**, optionally **`bin/seed`** if you use `RUN_SEED_ON_DEPLOY` ([SEEDING.md](SEEDING.md)), then restart systemd if configured. That flow does **not** include **`db-fresh`** (dev only—[COMMANDS.md](COMMANDS.md#database-and-seed-data)).
 
 You can still use the checked-in files under `deploy/nginx/` and `deploy/systemd/`; the wizard is optional.
 

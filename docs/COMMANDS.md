@@ -1,8 +1,8 @@
 # Commands Guide
 
-Clear, practical command reference for day-to-day work in this repository.
+What to run, in plain language. Use either `./scripts/nextpresskit` or `make`; they run the same workflows.
 
-[← Documentation index](README.md) · [Quick start](../README.md#getting-started) · [Contributing checks](../CONTRIBUTING.md#before-you-open-a-pr)
+[← Documentation index](README.md) · [Quick start](../README.md#quick-start) · [Contributing checks](../CONTRIBUTING.md#before-you-open-a-pr)
 
 ## Command families
 
@@ -19,8 +19,9 @@ Use whichever family matches your environment. The behavior is intentionally ali
 | Set up a fresh clone | `./scripts/nextpresskit setup` |
 | Run the API now | `./scripts/nextpresskit run` |
 | Run checks before PR | `./scripts/nextpresskit checks` |
-| Apply DB changes | `./scripts/nextpresskit migrate-up` |
-| Seed local data | `./scripts/nextpresskit seed` |
+| Create or update database tables | `./scripts/nextpresskit migrate-up` |
+| Load demo data (run after migrate) | `./scripts/nextpresskit seed` |
+| Start over on a dev database | `./scripts/nextpresskit db-fresh`, then `seed` (see [Database and seed data](#database-and-seed-data)) |
 | Generate deploy config | `./scripts/nextpresskit deploy` or `make deploy` |
 | Sync Postman env files | `./scripts/nextpresskit postman-sync` |
 
@@ -66,16 +67,37 @@ Windows equivalents:
 | `./scripts/nextpresskit start` | Runs API in background (Unix). |
 | `./scripts/nextpresskit stop` | Stops background API (Unix). |
 
+<a id="database-and-seed-data"></a>
+
 ## Database and seed data
 
-| Command | Description |
-|---------|-------------|
-| `./scripts/nextpresskit migrate-up` | Applies pending SQL migrations. |
-| `./scripts/nextpresskit migrate-down` | Rolls back the latest migration batch (use carefully). |
-| `./scripts/nextpresskit seed` | Runs idempotent seeders (RBAC defaults + deterministic dataset). |
-| `make migrate-up` / `make seed` | Same actions through Make wrappers. |
+Tables come from the Go models via GORM AutoMigrate, wired up in [`internal/platform/dbmigrate/migrate.go`](../internal/platform/dbmigrate/migrate.go). There is no separate SQL migration tree: change the models, then run migrate-up.
 
-For seeding details and credentials, see `SEEDING.md`.
+- migrate-up: sync the database schema with the code.
+- seed: add repeatable demo data (roles, sample posts, a superadmin, and more). Run this after migrate-up.
+- db-fresh: local development only. Drops every table in the `public` schema (you confirm first), runs migrate-up again, and stops. It does not run seed; run seed yourself if you want the demo dataset back.
+
+PostgreSQL must be running, with `DB_*` set in [`.env`](../.env.example) so migrate and seed can connect.
+
+| Situation | Commands |
+|-----------|----------|
+| New clone, full setup | `make setup` (build, migrate, seed), or `make migrate-up` then `make seed` |
+| Clean slate on your machine | `make db-fresh`, then `make seed` |
+| Pulled code with model changes | `make migrate-up` |
+| Refresh demo data only | `make seed` (safe to repeat) |
+
+Same names work as `./scripts/nextpresskit …` or `make …`. On Windows: `.\scripts\nextpresskit.ps1`. After `make build-all`, `./bin/migrate -command=up` and `./bin/seed` match migrate-up and seed.
+
+| Subcommand | Meaning |
+|------------|---------|
+| migrate-up | AutoMigrate from module [`persistence`](../internal/modules) models (FK-safe order). |
+| migrate-down | Removed (no versioned SQL downs). Locally use db-fresh or migrate-drop plus migrate-up. |
+| migrate-version | Prints a note: there is no `schema_migrations` table with AutoMigrate. |
+| migrate-drop | Drops all `public` tables after confirmation (`ALLOW_SCHEMA_DROP` is set for you). |
+| db-fresh | migrate-drop plus migrate-up only; no seed. |
+| seed | Upserts RBAC defaults and the full demo dataset ([SEEDING.md](SEEDING.md)). |
+
+On servers, releases usually run `bin/migrate -command=up` and sometimes `bin/seed` ([DEPLOYMENT.md](DEPLOYMENT.md)). Do not use db-fresh in production.
 
 ## API contract and quality checks
 

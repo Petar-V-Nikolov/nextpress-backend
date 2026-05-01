@@ -9,7 +9,7 @@ Use this as the source-of-truth checklist for work tracking.
 ## Platform & tooling
 
 - [x] Go API entrypoint (`cmd/api`)
-- [x] SQL migrations runner (`cmd/migrate`, `pkg/migrate`)
+- [x] Database schema (`cmd/migrate`, AutoMigrate in `internal/platform/dbmigrate`, models in `internal/modules/*/persistence`)
 - [x] Seed runner (`cmd/seed`)
 - [x] Makefile targets (`build`, `run`, `migrate-*`, `seed`, `graphql`, …)
 - [x] Environment loading (`.env` / `.env.example`)

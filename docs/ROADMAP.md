@@ -12,7 +12,7 @@ Use this page for direction and use [`TODO.md`](TODO.md) for execution details.
 
 ## Shipped
 
-- **Platform:** Gin, GORM, SQL migrations (`pkg/migrate`), config, structured logging, deployment docs ([`DEPLOYMENT.md`](DEPLOYMENT.md)).
+- **Platform:** Gin, GORM (AutoMigrate + `cmd/migrate` / `cmd/seed`), config, logging—see [`COMMANDS.md`](COMMANDS.md#database-and-seed-data) and [`DEPLOYMENT.md`](DEPLOYMENT.md).
 - **Auth:** Register/login/refresh, JWT access + refresh, bcrypt.
 - **RBAC:** Roles, permissions, middleware, admin APIs, seeded defaults, optional bootstrap.
 - **Content & admin APIs:** Posts, pages, taxonomy, media; public + admin HTTP APIs; rate limits, request ID, OpenAPI.

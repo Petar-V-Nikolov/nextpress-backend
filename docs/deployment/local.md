@@ -66,11 +66,15 @@ Configure `DB_*`, `JWT_SECRET`, `APP_ENV=local`. For auth, set `JWT_AUTH_SOURCE`
 
 ## Migrate, seed, run
 
+Create tables, load demo data, then start the API ([full command guide](../COMMANDS.md#database-and-seed-data)):
+
 ```bash
 make migrate-up
 make seed
 ./scripts/run_local.sh   # or: go run ./cmd/api
 ```
+
+Reset everything in the `public` schema on your laptop: `make db-fresh && make seed`.
 
 | | |
 |--|--|
@@ -190,7 +194,7 @@ Use this when you want the API as a managed service (restart on failure, start o
    journalctl -u nextpresskit-backend@local -f
    ```
 
-After code changes, rebuild and restart: `make build && sudo systemctl restart nextpresskit-backend@local`. Run migrations from the repo as usual (`make migrate-up`) before or after restarts as needed.
+After code changes: `make build && sudo systemctl restart nextpresskit-backend@local`. When models change, run `make migrate-up`. For a local data reset: `make db-fresh` then `make seed` ([COMMANDS.md](../COMMANDS.md#database-and-seed-data)).
 
 ## Optional: Nginx in front (local)
 

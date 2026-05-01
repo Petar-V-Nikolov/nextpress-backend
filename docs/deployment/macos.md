@@ -44,6 +44,8 @@ make seed
 make run
 ```
 
+Reset your local DB: `make db-fresh && make seed` ([details](../COMMANDS.md#database-and-seed-data)).
+
 Default URL: `http://localhost:9090` (or your `APP_PORT`). Background mode: `make start` / `make stop` from the root [README](../../README.md).
 
 ## Interactive Nginx config
