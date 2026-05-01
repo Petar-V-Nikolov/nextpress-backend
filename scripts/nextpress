@@ -21,7 +21,8 @@ Commands:
   deps              go mod download only
   build             Build bin/server only
   build-all         Build bin/server, bin/migrate, bin/seed
-  setup             install + build-all + migrate-up + seed (local bootstrap)
+  setup             install + build-all + migrate-up + seed; from a TTY also runs
+                    scripts/setup-local-https.sh (install mkcert if needed, SANs + Nginx on Linux). Skip: SKIP_SETUP_LOCAL_HTTPS=1
   migrate-up        Apply migrations
   migrate-down      Roll back one migration
   migrate-version   Show migration version
@@ -32,7 +33,8 @@ Commands:
   run               Foreground API (go run)
   start             Background API + .tmp/nextpress-api.pid
   stop              Stop background API + soft-clear same-repo listeners
-  deploy            Interactive Nginx/TLS wizard (bash scripts/deploy)
+  deploy              Interactive Nginx/TLS wizard (bash scripts/deploy)
+  deploy-apply-nginx  Non-interactive: write Nginx config + install on Linux (see scripts/deploy apply-nginx --help)
   checks            CI-style: test, vet, integration, OpenAPI, govulncheck
   test | test-coverage | test-integration
   security-check | graphql | clean
@@ -95,6 +97,16 @@ setup)
   "$0" build-all
   "$0" migrate-up
   "$0" seed
+  uname_s="$(uname -s 2>/dev/null || echo unknown)"
+  case "$uname_s" in
+    MINGW*|MSYS*|CYGWIN*)
+      ;;
+    *)
+      if [[ -t 0 ]] && [[ "${SKIP_SETUP_LOCAL_HTTPS:-}" != "1" ]]; then
+        bash "$ROOT/scripts/setup-local-https.sh" || true
+      fi
+      ;;
+  esac
   echo "Setup complete. Run: ./scripts/nextpress run   (or: make run)"
   ;;
 migrate-up)
@@ -143,6 +155,10 @@ stop)
   ;;
 deploy)
   exec bash "$ROOT/scripts/deploy"
+  ;;
+deploy-apply-nginx)
+  shift
+  exec bash "$ROOT/scripts/deploy" apply-nginx "$@"
   ;;
 checks)
   ensure_go

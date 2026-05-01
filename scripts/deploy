@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Interactive deploy wizard for NextPressKit: Nginx (+ optional TLS), systemd snippets,
+# Deploy wizard for NextPressKit: Nginx (+ optional TLS), systemd snippets,
 # and optional release (git pull, build, migrate, seed, service restart).
 #
-# Always interactive. From repo root:
-#   ./scripts/deploy
+# Interactive (from repo root):   ./scripts/deploy
+# Install Nginx from defaults:     ./scripts/deploy apply-nginx [--http-only] ...
+# Same via nextpress / make:       ./scripts/nextpress deploy-apply-nginx   /   make deploy-nginx
 #
-# Output: deploy/generated/<slug>/  (gitignored)
+# Generated output: deploy/generated/<slug>/
 
 set -euo pipefail
 
@@ -431,6 +432,444 @@ run_release_pipeline() {
   green "=== Release steps finished ===" >&2
 }
 
+apply_nginx_usage() {
+  cat <<'EOF'
+Usage: ./scripts/deploy apply-nginx [options]
+
+Regenerates the Nginx site from this repo and, on Linux, installs it under
+/etc/nginx/sites-available, symlinks sites-enabled, runs nginx -t, and reloads
+nginx (unless --dry-run or --no-reload). On macOS only the generated file is
+written; copy or include it into your Homebrew nginx layout manually.
+
+Options:
+  --http-only           HTTP only (no TLS). Skips the interactive TLS menu when used from a TTY.
+  --letsencrypt         Certbot / Let's Encrypt (same as interactive option 3). Skips the TLS
+                        menu. HTTP on port 80, installs certbot if missing (Linux: apt or dnf),
+                        then certbot --nginx. Prompts for ACME email and LE terms (unless
+                        CERTBOT_EMAIL is set). Needs a public DNS name (not typical for *.local).
+                        Incompatible with --http-only, file --cert/--key.
+  --tier T              local (default), dev, staging, production
+  --server-name HOST    Override server_name (defaults per tier, e.g. nextpresskit.local)
+  --app-port N          proxy_pass port (default: APP_PORT from .env, else 9090)
+  --listen-http PORT    HTTP port (default: 8080 for local|dev, 80 otherwise; forced to 80 with
+                        --letsencrypt)
+  --listen-ssl PORT     HTTPS port when using TLS (default: 443); ignored with --http-only
+  --cert PATH           PEM cert file, or the word letsencrypt|auto (same as --letsencrypt)
+  --key PATH            PEM key (default: $NEXTPRESS_SSL_KEY or ~/.local/share/nextpress-ssl/key.pem)
+  --no-reload           After nginx -t, do not systemctl reload nginx
+  --no-tls-menu         Skip the interactive TLS menu (used by ./scripts/setup-local-https.sh).
+                        If default PEM paths are missing, falls back to HTTP-only instead of erroring.
+  --dry-run             Print install commands only; still writes generated config
+
+From a terminal, with no --http-only / --letsencrypt / --cert / --key flags, you
+get a short menu: HTTPS (PEM paths), HTTP-only, or Let's Encrypt.
+
+If stdin is not a TTY and default PEM paths are missing, apply-nginx falls back
+to HTTP-only (see docs/deployment/local.md for mkcert / HTTPS in the browser).
+
+Examples:
+  ./scripts/deploy apply-nginx
+  ./scripts/deploy apply-nginx --http-only
+  ./scripts/deploy apply-nginx --letsencrypt --server-name api.example.com
+  make deploy-nginx
+EOF
+}
+
+# Install certbot + nginx plugin on Linux (apt or dnf) if certbot is not on PATH.
+ensure_certbot_linux() {
+  if command -v certbot >/dev/null 2>&1; then
+    green "certbot is already installed." >&2
+    return 0
+  fi
+  green "Installing certbot and python3-certbot-nginx (sudo)…" >&2
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y certbot python3-certbot-nginx
+    return 0
+  fi
+  if command -v dnf >/dev/null 2>&1; then
+    sudo dnf install -y certbot python3-certbot-nginx
+    return 0
+  fi
+  red "Neither apt-get nor dnf found. Install certbot and the nginx plugin for your OS, then re-run."
+  return 1
+}
+
+# Echo ACME contact email: use CERTBOT_EMAIL if set, else prompt (TTY required).
+apply_nginx_resolve_certbot_email() {
+  local val="${CERTBOT_EMAIL:-}"
+  val="${val#"${val%%[![:space:]]*}"}"
+  val="${val%"${val##*[![:space:]]}"}"
+  if [[ -n "$val" ]]; then
+    green "Using CERTBOT_EMAIL from the environment." >&2
+    printf '%s\n' "$val"
+    return 0
+  fi
+  if [[ ! -t 0 ]]; then
+    red "Let's Encrypt: stdin is not a TTY and CERTBOT_EMAIL is unset; cannot prompt for email." >&2
+    return 1
+  fi
+  cyan "Let's Encrypt needs an email for your ACME account (renewal notices, lost key recovery)." >&2
+  local line=""
+  while [[ -z "${line// }" ]]; do
+    read -r -p "Email for Let's Encrypt / ACME: " line || return 1
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    if [[ -z "$line" ]]; then
+      yellow "Email cannot be empty."
+    fi
+  done
+  printf '%s\n' "$line"
+  return 0
+}
+
+# When stdin is a TTY, ask before running Certbot.
+apply_nginx_prompt_letsencrypt_confirm() {
+  local sn="$1"
+  [[ -t 0 ]] || return 0
+  local ans
+  read -r -p "Request a Let's Encrypt certificate for Nginx server_name '${sn}'? (Y/n): " ans || return 1
+  ans="${ans:-Y}"
+  case "${ans:0:1}" in
+    y|Y) return 0 ;;
+    *)
+      red "Aborted."
+      return 1
+      ;;
+  esac
+}
+
+apply_nginx_prompt_letsencrypt_tos() {
+  [[ -t 0 ]] || return 0
+  local a
+  read -r -p "Agree to the Let's Encrypt Terms of Service (https://letsencrypt.org/repository/)? (y/N): " a || return 1
+  case "${a:0:1}" in
+    y|Y) return 0 ;;
+    *)
+      red "Aborted (certbot requires accepting the subscriber agreement)."
+      return 1
+      ;;
+  esac
+}
+
+# Loop until PEM files exist or user switches to HTTP-only / aborts. Updates ssl_cert, ssl_key,
+# and may set http_only=1 in caller scope.
+apply_nginx_prompt_pem_paths_until_ok() {
+  local pc pk again
+  while true; do
+    cyan "PEM paths (press Enter to keep the value in brackets):" >&2
+    read -r -p "Certificate PEM [${ssl_cert}]: " pc || return 1
+    pc="${pc#"${pc%%[![:space:]]*}"}"
+    pc="${pc%"${pc##*[![:space:]]}"}"
+    [[ -n "$pc" ]] && ssl_cert="$pc"
+    read -r -p "Private key PEM [${ssl_key}]: " pk || return 1
+    pk="${pk#"${pk%%[![:space:]]*}"}"
+    pk="${pk%"${pk##*[![:space:]]}"}"
+    [[ -n "$pk" ]] && ssl_key="$pk"
+
+    if [[ -f "$ssl_cert" && -r "$ssl_cert" && -f "$ssl_key" && -r "$ssl_key" ]]; then
+      green "Using certificate: ${ssl_cert}" >&2
+      green "Using private key:   ${ssl_key}" >&2
+      return 0
+    fi
+    yellow "Those files are missing or not readable." >&2
+    read -r -p "Try different paths? (Y/n): " again || return 1
+    again="${again:-Y}"
+    case "${again:0:1}" in
+      n|N)
+        read -r -p "Use HTTP-only instead (no TLS)? (y/N): " again || return 1
+        case "${again:0:1}" in
+          y|Y)
+            http_only=1
+            yellow "Continuing with HTTP-only." >&2
+            return 0
+            ;;
+          *)
+            red "Aborted."
+            return 1
+            ;;
+        esac
+        ;;
+    esac
+  done
+}
+
+# TTY + no SSL-related flags: choose HTTPS (PEM), HTTP-only, or Let's Encrypt.
+apply_nginx_prompt_tls_interactive_menu() {
+  [[ "${skip_tls_menu:-0}" -eq 1 ]] && return 0
+  [[ "${NEXTPRESS_SKIP_TLS_MENU:-}" == "1" ]] && return 0
+  [[ -t 0 ]] || return 0
+  [[ "$http_only" -eq 1 ]] && return 0
+  [[ "$use_letsencrypt" -eq 1 ]] && return 0
+  [[ "$cert_explicit" -eq 1 || "$key_explicit" -eq 1 ]] && return 0
+
+  local hint_def=2
+  if [[ -f "$ssl_cert" && -f "$ssl_key" ]]; then
+    hint_def=1
+  fi
+
+  cyan "TLS for this Nginx site (server_name: ${server_name})" >&2
+  echo "  1) HTTPS — PEM certificate + private key (e.g. mkcert)" >&2
+  echo "  2) HTTP only — no TLS" >&2
+  echo "  3) Let's Encrypt — Certbot (public DNS, port 80; automated on Linux)" >&2
+  local pick
+  read -r -p "Choose 1-3 [${hint_def}]: " pick || return 1
+  pick="${pick:-$hint_def}"
+  pick="$(echo "$pick" | tr -d '[:space:]')"
+  case "$pick" in
+    1)
+      if ! apply_nginx_prompt_pem_paths_until_ok; then
+        return 1
+      fi
+      ;;
+    2)
+      http_only=1
+      ;;
+    3)
+      use_letsencrypt=1
+      listen_http="80"
+      ;;
+    *)
+      red "Invalid choice (enter 1, 2, or 3)."
+      return 1
+      ;;
+  esac
+  return 0
+}
+
+# After CLI or menu may have enabled Let's Encrypt: OS check, listen 80, .local hint.
+apply_nginx_apply_letsencrypt_listen_and_warn() {
+  [[ "$use_letsencrypt" -eq 1 ]] || return 0
+  listen_http="80"
+  case "$server_name" in
+    *.local)
+      yellow "Note: Let's Encrypt cannot issue publicly trusted certs for most *.local names; use mkcert + option 1 for local dev." >&2
+      ;;
+  esac
+  return 0
+}
+
+# Non-interactive: write Nginx config and install on Linux (sudo).
+apply_nginx_cli() {
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    apply_nginx_usage
+    return 0
+  fi
+
+  local tier="local"
+  local http_only=0
+  local server_name=""
+  local app_port=""
+  local listen_http=""
+  local listen_ssl="443"
+  local ssl_cert="${NEXTPRESS_SSL_CERT:-$HOME/.local/share/nextpress-ssl/cert.pem}"
+  local ssl_key="${NEXTPRESS_SSL_KEY:-$HOME/.local/share/nextpress-ssl/key.pem}"
+  local no_reload=0
+  local dry_run=0
+  local cert_explicit=0
+  local key_explicit=0
+  local use_letsencrypt=0
+  local skip_tls_menu=0
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --http-only)       http_only=1; shift ;;
+      --letsencrypt)     use_letsencrypt=1; shift ;;
+      --no-tls-menu)     skip_tls_menu=1; shift ;;
+      --tier)            tier="$2"; shift 2 ;;
+      --server-name)     server_name="$2"; shift 2 ;;
+      --app-port)        app_port="$2"; shift 2 ;;
+      --listen-http)     listen_http="$2"; shift 2 ;;
+      --listen-ssl)      listen_ssl="$2"; shift 2 ;;
+      --cert)
+        case "$2" in
+          letsencrypt|auto)
+            use_letsencrypt=1
+            ;;
+          *)
+            ssl_cert="$2"
+            cert_explicit=1
+            ;;
+        esac
+        shift 2
+        ;;
+      --key)             ssl_key="$2"; key_explicit=1; shift 2 ;;
+      --no-reload)       no_reload=1; shift ;;
+      --dry-run)         dry_run=1; shift ;;
+      -h|--help)         apply_nginx_usage; return 0 ;;
+      *)
+        red "Unknown option: $1"
+        apply_nginx_usage
+        return 1
+        ;;
+    esac
+  done
+
+  case "$(echo "$tier" | tr '[:upper:]' '[:lower:]')" in
+    local)     tier="local" ;;
+    dev)       tier="dev" ;;
+    staging)   tier="staging" ;;
+    production) tier="production" ;;
+    *)
+      red "Invalid --tier: $tier"
+      return 1
+      ;;
+  esac
+
+  if [[ -z "$server_name" ]]; then
+    case "$tier" in
+      production) server_name="api.example.com" ;;
+      staging)    server_name="api-staging.example.com" ;;
+      dev)        server_name="api-dev.example.com" ;;
+      local)      server_name="nextpresskit.local" ;;
+    esac
+  fi
+
+  if [[ -f "$ROOT_DIR/.env" ]]; then
+    set -a
+    # shellcheck source=/dev/null
+    source "$ROOT_DIR/.env"
+    set +a
+  fi
+  if [[ "$cert_explicit" -eq 0 && "$key_explicit" -eq 0 ]]; then
+    ssl_cert="${NEXTPRESS_SSL_CERT:-$HOME/.local/share/nextpress-ssl/cert.pem}"
+    ssl_key="${NEXTPRESS_SSL_KEY:-$HOME/.local/share/nextpress-ssl/key.pem}"
+  fi
+  if [[ -z "$app_port" ]]; then
+    app_port="${APP_PORT:-9090}"
+  fi
+
+  local os_kind
+  os_kind="$(detect_os)"
+
+  if [[ -z "$listen_http" ]]; then
+    case "$tier" in
+      local|dev) listen_http="8080" ;;
+      *)         listen_http="80" ;;
+    esac
+  fi
+
+  if ! apply_nginx_prompt_tls_interactive_menu; then
+    return 1
+  fi
+
+  if [[ "$use_letsencrypt" -eq 1 ]]; then
+    if [[ "$http_only" -eq 1 ]]; then
+      red "Do not combine --letsencrypt (or --cert letsencrypt|auto) with --http-only."
+      return 1
+    fi
+    if [[ "$cert_explicit" -eq 1 ]]; then
+      red "Do not pass a PEM file path in --cert together with --letsencrypt; use --cert letsencrypt|auto or --letsencrypt alone."
+      return 1
+    fi
+    if [[ "$key_explicit" -eq 1 ]]; then
+      red "Do not pass --key with --letsencrypt; Certbot installs certificate and key."
+      return 1
+    fi
+    if [[ "$os_kind" != "linux" ]]; then
+      red "Let's Encrypt (Certbot) is only automated on Linux (apt/dnf). Use mkcert + HTTPS option 1, or install certbot manually."
+      return 1
+    fi
+  fi
+  apply_nginx_apply_letsencrypt_listen_and_warn
+
+  if [[ "$use_letsencrypt" -eq 0 && "$http_only" -eq 0 ]]; then
+    if [[ ! -f "$ssl_cert" || ! -f "$ssl_key" ]]; then
+      if [[ "$cert_explicit" -eq 1 || "$key_explicit" -eq 1 ]]; then
+        red "TLS files not found (cert: $ssl_cert, key: $ssl_key)."
+        yellow "Fix paths or use flags: --http-only / --letsencrypt / --cert / --key."
+        return 1
+      fi
+      if [[ -t 0 ]]; then
+        if [[ "$skip_tls_menu" -eq 1 ]] || [[ "${NEXTPRESS_SKIP_TLS_MENU:-}" == "1" ]]; then
+          yellow "TLS PEM files missing; using HTTP-only (--no-tls-menu)." >&2
+          http_only=1
+        else
+          red "TLS PEM files are still missing after the interactive prompts."
+          return 1
+        fi
+      fi
+      yellow "TLS files not found at default paths; using HTTP-only for this run." >&2
+      yellow "For HTTPS: mkcert (see docs/deployment/local.md), or run apply-nginx from a terminal for prompts." >&2
+      http_only=1
+    fi
+  fi
+
+  local slug
+  slug="$(slugify "${tier}-${server_name}")"
+  [[ -z "$slug" ]] && slug="${tier}-site"
+  local gen_dir="$ROOT_DIR/deploy/generated/${slug}"
+  mkdir -p "$gen_dir"
+  local nginx_out="$gen_dir/nginx-nextpress-${tier}.conf"
+
+  if [[ "$use_letsencrypt" -eq 1 ]]; then
+    write_nginx_http "$nginx_out" "$server_name" "80" "$app_port" "$ROOT_DIR" "$tier"
+    cyan "Wrote HTTP Nginx config for Certbot (listen 80): $nginx_out" >&2
+  elif [[ "$http_only" -eq 1 ]]; then
+    write_nginx_http "$nginx_out" "$server_name" "$listen_http" "$app_port" "$ROOT_DIR" "$tier"
+    cyan "Wrote HTTP-only Nginx config: $nginx_out" >&2
+  else
+    write_nginx_https "$nginx_out" "$server_name" "$listen_http" "$listen_ssl" "$app_port" "$ROOT_DIR" "$tier" "$ssl_cert" "$ssl_key" "y"
+    cyan "Wrote HTTPS Nginx config: $nginx_out" >&2
+  fi
+
+  if [[ "$os_kind" == "linux" ]]; then
+    local dest="/etc/nginx/sites-available/nextpress-backend-${tier}.conf"
+    local link="/etc/nginx/sites-enabled/nextpress-backend-${tier}.conf"
+    if [[ "$dry_run" -eq 1 ]]; then
+      yellow "Dry-run: would sudo cp $nginx_out $dest" >&2
+      yellow "Dry-run: would sudo ln -sf $dest $link" >&2
+      yellow "Dry-run: would sudo nginx -t && (reload unless --no-reload)" >&2
+      if [[ "$use_letsencrypt" -eq 1 ]]; then
+        yellow "Dry-run: would install certbot if missing, then: sudo certbot --nginx -d ${server_name} ..." >&2
+      fi
+      green "Generated file is at: $nginx_out" >&2
+      return 0
+    fi
+    green "Installing Nginx site (sudo)…" >&2
+    sudo cp "$nginx_out" "$dest"
+    sudo ln -sf "$dest" "$link"
+    if ! sudo nginx -t; then
+      red "nginx -t failed. Fix other sites or paths, then reload nginx manually."
+      return 1
+    fi
+    if [[ "$no_reload" -eq 0 ]]; then
+      sudo systemctl reload nginx
+      green "nginx reloaded." >&2
+    else
+      yellow "Skipped reload (--no-reload). Run: sudo systemctl reload nginx" >&2
+    fi
+
+    if [[ "$use_letsencrypt" -eq 1 ]]; then
+      if ! apply_nginx_prompt_letsencrypt_confirm "$server_name"; then
+        return 1
+      fi
+      local certbot_email
+      certbot_email="$(apply_nginx_resolve_certbot_email)" || return 1
+      if ! apply_nginx_prompt_letsencrypt_tos; then
+        return 1
+      fi
+      if ! ensure_certbot_linux; then
+        return 1
+      fi
+      yellow "Running certbot for ${server_name} …" >&2
+      if ! sudo certbot --nginx -d "$server_name" --email "$certbot_email" --agree-tos --non-interactive --redirect; then
+        red "certbot failed. Needs a public hostname, DNS pointing to this host, and port 80 reachable from the internet."
+        return 1
+      fi
+      green "certbot finished (nginx config may have been updated in place)." >&2
+    fi
+  elif [[ "$os_kind" == "darwin" ]]; then
+    yellow "macOS: install the file manually, for example:" >&2
+    echo "  sudo cp \"$nginx_out\" /opt/homebrew/etc/nginx/servers/nextpress-backend-${tier}.conf" >&2
+    echo "  # or include from nginx.conf, then: brew services restart nginx" >&2
+  else
+    yellow "Generated: $nginx_out — copy into your Nginx config (OS: $os_kind)." >&2
+  fi
+
+  green "Done. server_name=${server_name} → 127.0.0.1:${app_port}" >&2
+}
+
 main() {
   cyan "NextPressKit — interactive deploy"
   echo "" >&2
@@ -608,5 +1047,11 @@ main() {
 
   green "Done." >&2
 }
+
+if [[ "${1:-}" == "apply-nginx" ]]; then
+  shift
+  apply_nginx_cli "$@"
+  exit $?
+fi
 
 main "$@"

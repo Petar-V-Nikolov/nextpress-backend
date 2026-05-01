@@ -17,7 +17,7 @@ MIGRATE_CMD ?= up
 	test test-coverage test-integration tidy deps graphql \
 	seed seed-build \
 	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh \
-	security-check deploy deploy-ps checks
+	security-check deploy deploy-nginx deploy-ps checks
 
 ## help: List targets and short descriptions
 help:
@@ -27,7 +27,8 @@ help:
 	@echo "  make install   Go modules + .env from .env.example if missing"
 	@echo "  make setup     install + build-all + migrate-up + seed"
 	@echo "  make run       Foreground API"
-	@echo "  make deploy    Interactive Nginx/TLS wizard (Linux/macOS bash)"
+	@echo "  make deploy       Interactive Nginx/TLS wizard (Linux/macOS bash)"
+	@echo "  make deploy-nginx Non-interactive Nginx install (scripts/deploy apply-nginx)"
 	@echo "  make deploy-ps Interactive deploy (Windows PowerShell)"
 	@echo ""
 	@echo "Targets:"
@@ -37,8 +38,9 @@ help:
 install:
 	@bash scripts/nextpress install
 
-## setup: One-shot local bootstrap (install + build-all + migrate-up + seed)
+## setup: Bootstrap + local HTTPS helper when TTY (mkcert + nginx on Linux); SKIP_SETUP_LOCAL_HTTPS=1 to skip
 setup: install build-all migrate-up seed
+	@if [ -t 0 ] && [ "$$SKIP_SETUP_LOCAL_HTTPS" != "1" ]; then bash scripts/setup-local-https.sh || true; fi
 	@echo "Setup done."
 
 ## all: Alias of build
@@ -71,6 +73,10 @@ clean:
 ## deploy: Interactive deploy wizard (Nginx, TLS, systemd); Windows: make deploy-ps
 deploy:
 	@bash scripts/deploy
+
+## deploy-nginx: Non-interactive Nginx write + Linux install (sudo); ./scripts/deploy apply-nginx --help
+deploy-nginx:
+	@bash scripts/deploy apply-nginx
 
 ## deploy-ps: Interactive deploy wizard (PowerShell; run from repo root on Windows)
 deploy-ps:

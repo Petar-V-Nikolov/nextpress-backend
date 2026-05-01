@@ -105,6 +105,7 @@ switch ($cmd) {
         & $PSCommandPath build-all
         & $PSCommandPath migrate-up
         & $PSCommandPath seed
+        Write-Host "Local HTTPS + nginx automation runs on Linux/macOS (./scripts/nextpress setup in Git Bash/WSL). On native Windows use mkcert + proxy manually or WSL."
         Write-Host "Setup complete. Run: .\scripts\nextpress.ps1 run"
     }
     "migrate-up" { Ensure-Go; go run ./cmd/migrate -command=up }
