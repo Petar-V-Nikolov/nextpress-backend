@@ -121,20 +121,21 @@ switch ($cmd) {
         Write-Host "Setup complete. Run: .\scripts\nextpresskit.ps1 run"
     }
     "migrate-up" { Ensure-Go; go run ./cmd/migrate -command=up }
-    "migrate-down" { Ensure-Go; go run ./cmd/migrate -command=down -steps=1 }
-    "migrate-version" { Ensure-Go; go run ./cmd/migrate -command=version }
+    "migrate-down" {
+        Write-Error "migrate-down is removed (GORM AutoMigrate). For dev reset use: db-fresh"
+    }
+    "migrate-version" {
+        Write-Host "No migration version row: schema is internal/platform/dbmigrate + cmd/migrate up."
+    }
     "migrate-steps" {
-        Ensure-Go
-        if ($args.Count -lt 2) { Write-Error "usage: nextpresskit.ps1 migrate-steps <N>" }
-        $n = $args[1]
-        $mc = if ($env:MIGRATE_CMD) { $env:MIGRATE_CMD } else { "up" }
-        go run ./cmd/migrate -command=$mc -steps=$n
+        Write-Error "migrate-steps is removed (no numbered SQL migrations)."
     }
     "migrate-drop" {
         Ensure-Go
         Write-Warning "This drops all tables."
         $c = Read-Host "Type y to continue"
         if ($c -ne "y") { exit 1 }
+        $env:ALLOW_SCHEMA_DROP = "1"
         go run ./cmd/migrate -command=drop
     }
     "db-fresh" {

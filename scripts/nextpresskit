@@ -23,11 +23,11 @@ Commands:
   build-all         Build bin/server, bin/migrate, bin/seed
   setup             install + build-all + migrate-up + seed; from a TTY also runs
                     scripts/setup-local-https.sh (install mkcert if needed, SANs + Nginx on Linux). Skip: SKIP_SETUP_LOCAL_HTTPS=1
-  migrate-up        Apply migrations
-  migrate-down      Roll back one migration
-  migrate-version   Show migration version
-  migrate-steps N   Apply or roll back N steps (MIGRATE_CMD=up|down, default up)
-  migrate-drop      Drop all tables (interactive)
+  migrate-up        Apply GORM AutoMigrate (internal/platform/dbmigrate)
+  migrate-down      Removed (no SQL migration steps); use migrate-drop + migrate-up for dev reset
+  migrate-version   Prints notice (no version table with AutoMigrate)
+  migrate-steps     Removed (no stepped SQL migrations)
+  migrate-drop      Drop all public tables (interactive; sets ALLOW_SCHEMA_DROP=1)
   db-fresh            migrate-drop then migrate-up (destructive)
   seed              Run seeders
   run               Foreground API (go run)
@@ -43,7 +43,6 @@ Commands:
 Examples:
   ./scripts/nextpresskit setup
   ./scripts/nextpresskit run
-  MIGRATE_CMD=down ./scripts/nextpresskit migrate-steps 2
   ./scripts/nextpresskit postman-sync --dry-run
   POSTMAN_DEV_BASE_URL=https://api.dev.example ./scripts/nextpresskit postman-sync
 EOF
@@ -117,25 +116,24 @@ migrate-up)
   go run ./cmd/migrate -command=up
   ;;
 migrate-down)
-  ensure_go
-  go run ./cmd/migrate -command=down -steps=1
+  echo "migrate-down is removed: schema changes use GORM AutoMigrate (see docs/COMMANDS.md)." >&2
+  echo "For a dev reset: ./scripts/nextpresskit db-fresh" >&2
+  exit 1
   ;;
 migrate-version)
-  ensure_go
-  go run ./cmd/migrate -command=version
+  echo "No migration version row: schema is owned by internal/platform/dbmigrate + cmd/migrate up." >&2
+  exit 0
   ;;
 migrate-steps)
-  ensure_go
-  n="${2:?usage: nextpresskit migrate-steps <N>}"
-  mc="${MIGRATE_CMD:-up}"
-  go run ./cmd/migrate -command="$mc" -steps="$n"
+  echo "migrate-steps is removed: there are no numbered SQL migrations." >&2
+  exit 1
   ;;
 migrate-drop)
   ensure_go
   echo "WARNING: This drops all tables in the configured database."
   read -r -p "Type y to continue: " confirm
   [[ "${confirm:-N}" == "y" ]] || exit 1
-  go run ./cmd/migrate -command=drop
+  ALLOW_SCHEMA_DROP=1 go run ./cmd/migrate -command=drop
   ;;
 db-fresh)
   "$0" migrate-drop
