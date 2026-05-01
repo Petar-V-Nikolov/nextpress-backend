@@ -24,6 +24,15 @@ Use whichever family matches your environment. The behavior is intentionally ali
 | Generate deploy config | `./scripts/nextpresskit deploy` or `make deploy` |
 | Sync Postman env files | `./scripts/nextpresskit postman-sync` |
 
+## Commonly confused commands
+
+| Pair | Difference |
+|------|------------|
+| `setup` vs `deploy` | `setup` bootstraps local development (deps, env, migrate, seed). `deploy` runs deployment/config wizard flows (nginx/systemd/TLS/release steps). |
+| `setup` vs `install` | `setup` is fuller (includes migration/seed/build helpers). `install` is lighter (dependency and prerequisite initialization). |
+| `run` vs `start` | `run` keeps the API in the foreground. `start` runs it in the background (Unix) so your shell stays free. |
+| `checks` vs `test` | `checks` is CI-style multi-check flow. `make test` runs Go tests only. |
+
 ## Most-used commands
 
 | Command | What it does | When to use it |
@@ -35,6 +44,8 @@ Use whichever family matches your environment. The behavior is intentionally ali
 | `./scripts/nextpresskit checks` | CI-style local checks. | Before pushing or opening a PR. |
 | `./scripts/nextpresskit postman-sync` | Creates/updates gitignored `postman/` from templates + env values. | Before importing Postman collections/environments. |
 | `./scripts/nextpresskit deploy` | Interactive deployment/config generation wizard. | Generate nginx/systemd snippets or run release steps. |
+
+`setup` is for local development bootstrap. `deploy` is for deployment and release workflows.
 
 `make` equivalents:
 

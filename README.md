@@ -93,6 +93,8 @@ Background mode (Unix): `make start` / `make stop` or `./scripts/nextpresskit st
 
 Need command-by-command explanations? Open [docs/COMMANDS.md](docs/COMMANDS.md).
 
+Most common confusion: `setup` is for local bootstrap; `deploy` is for deployment/config and release flows.
+
 | Area | Unix CLI | Make | Windows PowerShell |
 |------|----------|------|----------------------|
 | Bootstrap | `./scripts/nextpresskit setup` | `make setup` | `.\scripts\nextpresskit.ps1 setup` |

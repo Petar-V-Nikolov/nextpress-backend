@@ -10,6 +10,8 @@ How to run **NextPressKit** on **Ubuntu** behind **Nginx** and **systemd**, usin
 - `make deploy`: convenience wrapper around the same deploy wizard.
 - `./scripts/nextpresskit deploy`: same deploy flow through the unified command runner.
 
+This deploy flow does **not** replace local bootstrap. For a fresh local clone, use `./scripts/nextpresskit setup` first.
+
 ## Already running the project?
 
 Existing clones keep working: HTTP Nginx configs, `APP_PORT`, and `scripts/deploy` are unchanged. **HTTPS is an optional upgrade** (Let’s Encrypt below). If you add TLS, update **`CORS_ORIGINS`** and client base URLs to `https://` where applicable. Local HTTPS with mkcert is in [deployment/local.md](deployment/local.md).
