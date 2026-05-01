@@ -32,7 +32,7 @@ var (
 	)
 	httpRequestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "nextpress_http_request_duration_seconds",
+			Name:    "nextpresskit_http_request_duration_seconds",
 			Help:    "HTTP request duration in seconds.",
 			Buckets: prometheus.DefBuckets,
 		},

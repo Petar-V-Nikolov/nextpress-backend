@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Best-effort local HTTPS: install mkcert if missing, SANs that match browser URLs + Nginx (Linux).
-# Invoked from ./scripts/nextpress setup / make setup when stdin is a TTY.
+# Invoked from ./scripts/nextpresskit setup / make setup when stdin is a TTY.
 # Skip: SKIP_SETUP_LOCAL_HTTPS=1  or  non-interactive (no TTY) setup.
 set -u
 
@@ -159,7 +159,7 @@ if [[ -n "$MKCERT" ]]; then
   fi
 else
   red "Could not install mkcert automatically (no apt/dnf/pacman/zypper package or Homebrew)." >&2
-  yellow "Install manually: https://github.com/FiloSottile/mkcert#installation then re-run: ./scripts/nextpress setup" >&2
+  yellow "Install manually: https://github.com/FiloSottile/mkcert#installation then re-run: ./scripts/nextpresskit setup" >&2
 fi
 
 _esc_host_dots() { printf '%s' "$1" | sed 's/\./\\./g'; }
@@ -175,11 +175,11 @@ if [[ "$os" == Linux ]] && command -v nginx >/dev/null 2>&1; then
     if bash "$ROOT/scripts/deploy" apply-nginx --no-tls-menu; then
       green "Nginx updated. Try: https://${LOCAL_HOST} (and/or https://localhost)" >&2
     else
-      yellow "Nginx step failed (fix: sudo nginx -t). Then: ./scripts/nextpress deploy-apply-nginx --no-tls-menu" >&2
+      yellow "Nginx step failed (fix: sudo nginx -t). Then: ./scripts/nextpresskit deploy-apply-nginx --no-tls-menu" >&2
     fi
   else
     yellow "No PEM files yet — skipping Nginx HTTPS. After mkcert works, run:" >&2
-    yellow "  ./scripts/nextpress deploy-apply-nginx --no-tls-menu" >&2
+    yellow "  ./scripts/nextpresskit deploy-apply-nginx --no-tls-menu" >&2
   fi
 elif [[ "$os" == Linux ]]; then
   yellow "nginx not installed — PEM files (if any) are under $SSL_DIR" >&2

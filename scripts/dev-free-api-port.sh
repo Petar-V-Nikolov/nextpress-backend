@@ -2,7 +2,7 @@
 # Free APP_PORT for local dev by stopping only this repo's API (go run ./cmd/api
 # or bin/server built here). Linux: systemd APP_SERVICE_UNIT@* (default nextpresskit-backend@*) is detected and
 # not killed. macOS: uses lsof/ps (no /proc). Git Bash on Windows: best-effort;
-# use scripts/nextpress.ps1 run for native Windows.
+# use scripts/nextpresskit.ps1 run for native Windows.
 #
 # Usage:
 #   dev-free-api-port.sh <port> <repo_root>        # strict: exit 1 if blocked
@@ -44,7 +44,7 @@ listener_pids_linux() {
   printf '%s\n%s\n' "$from_ss" "$from_lsof" | awk 'NF' | sort -u
 }
 
-is_nextpress_dev_api_linux() {
+is_nextpresskit_dev_api_linux() {
   local pid="$1"
   [[ "$pid" =~ ^[0-9]+$ ]] || return 1
   [[ -r "/proc/$pid/cmdline" ]] || return 1
@@ -75,7 +75,7 @@ listener_pids_darwin() {
   lsof -nP -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null | sort -u
 }
 
-is_nextpress_dev_api_darwin() {
+is_nextpresskit_dev_api_darwin() {
   local pid="$1"
   [[ "$pid" =~ ^[0-9]+$ ]] || return 1
   local args=""
@@ -125,15 +125,15 @@ listener_pids() {
   esac
 }
 
-is_nextpress_dev_api() {
+is_nextpresskit_dev_api() {
   case "$kernel" in
-  Linux*) is_nextpress_dev_api_linux "$1" ;;
-  Darwin*) is_nextpress_dev_api_darwin "$1" ;;
+  Linux*) is_nextpresskit_dev_api_linux "$1" ;;
+  Darwin*) is_nextpresskit_dev_api_darwin "$1" ;;
   *)
     if [[ -r "/proc/$1/cmdline" ]]; then
-      is_nextpress_dev_api_linux "$1"
+      is_nextpresskit_dev_api_linux "$1"
     else
-      is_nextpress_dev_api_darwin "$1"
+      is_nextpresskit_dev_api_darwin "$1"
     fi
     ;;
   esac
@@ -170,7 +170,7 @@ foreign=""
 for pid in $pids; do
   [[ -z "${pid// }" ]] && continue
   unit="$(systemd_unit_for_pid "$pid" || true)"
-  if [[ -n "$unit" ]] && is_repo_systemd_unit "$unit" && is_nextpress_dev_api "$pid"; then
+  if [[ -n "$unit" ]] && is_repo_systemd_unit "$unit" && is_nextpresskit_dev_api "$pid"; then
     echo "Port $port: API is managed by systemd ($unit), pid=$pid." >&2
     echo "Killing it would only respawn the service. Run:" >&2
     echo "  sudo systemctl stop $unit" >&2
@@ -179,7 +179,7 @@ for pid in $pids; do
     fi
     exit 1
   fi
-  if is_nextpress_dev_api "$pid"; then
+  if is_nextpresskit_dev_api "$pid"; then
     our="$our $pid"
   else
     foreign="$foreign $pid"

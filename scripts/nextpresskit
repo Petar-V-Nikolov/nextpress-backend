@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # NextPressKit — cross-platform dev entry (macOS / Linux / Git Bash on Windows).
-# Native Windows PowerShell: use scripts/nextpress.ps1
+# Native Windows PowerShell: use scripts/nextpresskit.ps1
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -12,7 +12,7 @@ VERSION="$(git describe --tags --always --dirty 2>/dev/null || echo dev)"
 
 usage() {
   cat <<'EOF'
-NextPressKit dev CLI (Linux / macOS / Git Bash). On Windows use: .\scripts\nextpress.ps1
+NextPressKit dev CLI (Linux / macOS / Git Bash). On Windows use: .\scripts\nextpresskit.ps1
 
 Commands:
   help              Show this help
@@ -31,18 +31,21 @@ Commands:
   db-fresh            migrate-drop then migrate-up (destructive)
   seed              Run seeders
   run               Foreground API (go run)
-  start             Background API + .tmp/nextpress-api.pid
+  start             Background API + .tmp/<APP_DEV_RUNTIME_BASENAME>-api.pid
   stop              Stop background API + soft-clear same-repo listeners
   deploy              Interactive Nginx/TLS wizard (bash scripts/deploy)
   deploy-apply-nginx  Non-interactive: write Nginx config + install on Linux (see scripts/deploy apply-nginx --help)
   checks            CI-style: test, vet, integration, OpenAPI, govulncheck
+  postman-sync      Refresh postman/*.postman_environment.json from .env.example + .env (Python 3)
   test | test-coverage | test-integration
   security-check | graphql | clean
 
 Examples:
-  ./scripts/nextpress setup
-  ./scripts/nextpress run
-  MIGRATE_CMD=down ./scripts/nextpress migrate-steps 2
+  ./scripts/nextpresskit setup
+  ./scripts/nextpresskit run
+  MIGRATE_CMD=down ./scripts/nextpresskit migrate-steps 2
+  ./scripts/nextpresskit postman-sync --dry-run
+  POSTMAN_DEV_BASE_URL=https://api.dev.example ./scripts/nextpresskit postman-sync
 EOF
 }
 
@@ -107,7 +110,7 @@ setup)
       fi
       ;;
   esac
-  echo "Setup complete. Run: ./scripts/nextpress run   (or: make run)"
+  echo "Setup complete. Run: ./scripts/nextpresskit run   (or: make run)"
   ;;
 migrate-up)
   ensure_go
@@ -123,7 +126,7 @@ migrate-version)
   ;;
 migrate-steps)
   ensure_go
-  n="${2:?usage: nextpress migrate-steps <N>}"
+  n="${2:?usage: nextpresskit migrate-steps <N>}"
   mc="${MIGRATE_CMD:-up}"
   go run ./cmd/migrate -command="$mc" -steps="$n"
   ;;
@@ -187,6 +190,13 @@ security-check)
 graphql)
   ensure_go
   exec go run github.com/99designs/gqlgen generate
+  ;;
+postman-sync)
+  command -v python3 >/dev/null 2>&1 || {
+    echo "python3 is required for postman-sync." >&2
+    exit 1
+  }
+  exec python3 "$ROOT/scripts/sync-postman.py" "${@:2}"
   ;;
 clean)
   rm -rf bin/

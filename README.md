@@ -34,8 +34,8 @@ You need **Go** (see `go.mod`) and **PostgreSQL** reachable with the credentials
 One-shot local bootstrap (modules, `.env` if missing, binaries, migrate, seed), then run the API:
 
 ```bash
-./scripts/nextpress setup
-./scripts/nextpress run
+./scripts/nextpresskit setup
+./scripts/nextpresskit run
 ```
 
 Or with **Make** (thin wrappers around the same scripts):
@@ -54,32 +54,35 @@ The API listens on **`APP_PORT`** (default **9090**). Foreground `run` frees the
 From the repo root:
 
 ```powershell
-.\scripts\nextpress.ps1 setup
-.\scripts\nextpress.ps1 run
+.\scripts\nextpresskit.ps1 setup
+.\scripts\nextpresskit.ps1 run
 ```
 
-Interactive Nginx snippet wizard: `make deploy-ps` or `.\scripts\nextpress.ps1 deploy`. Full Linux server flows remain in `make deploy` / `bash scripts/deploy`.
+Interactive Nginx snippet wizard: `make deploy-ps` or `.\scripts\nextpresskit.ps1 deploy`. Full Linux server flows remain in `make deploy` / `bash scripts/deploy`.
 
 ### HTTPS / Nginx locally
 
 For **HTTPS** (cookie auth in the browser) and reverse-proxy setup, see [docs/deployment/local.md](docs/deployment/local.md) and [docs/deployment/macos.md](docs/deployment/macos.md). Use **`make deploy`** (bash) or **`make deploy-ps`** (PowerShell) to generate configs under `deploy/generated/`.
 
-Background mode (Unix): `make start` / `make stop` or `./scripts/nextpress start` / `stop`.
+Background mode (Unix): `make start` / `make stop` or `./scripts/nextpresskit start` / `stop`.
 
 ## Commands (summary)
 
 | Area | Unix CLI | Make | Windows PowerShell |
 |------|----------|------|----------------------|
-| Bootstrap | `./scripts/nextpress setup` | `make setup` | `.\scripts\nextpress.ps1 setup` |
-| Modules + `.env` | `./scripts/nextpress install` | `make install` | `.\scripts\nextpress.ps1 install` |
-| Build API only | `./scripts/nextpress build` | `make build` | `.\scripts\nextpress.ps1 build` |
-| Build API + migrate + seed tools | `./scripts/nextpress build-all` | `make build-all` | `.\scripts\nextpress.ps1 build-all` |
-| Migrate / seed | `./scripts/nextpress migrate-up` / `seed` | `make migrate-up` / `make seed` | same subcommands on `nextpress.ps1` |
-| Run API | `./scripts/nextpress run` | `make run` | `.\scripts\nextpress.ps1 run` |
-| CI-style checks | `./scripts/nextpress checks` | `make checks` | `.\scripts\nextpress.ps1 checks` |
-| Deploy wizard | `./scripts/nextpress deploy` | `make deploy` | `make deploy-ps` or `nextpress.ps1 deploy` |
+| Bootstrap | `./scripts/nextpresskit setup` | `make setup` | `.\scripts\nextpresskit.ps1 setup` |
+| Modules + `.env` | `./scripts/nextpresskit install` | `make install` | `.\scripts\nextpresskit.ps1 install` |
+| Build API only | `./scripts/nextpresskit build` | `make build` | `.\scripts\nextpresskit.ps1 build` |
+| Build API + migrate + seed tools | `./scripts/nextpresskit build-all` | `make build-all` | `.\scripts\nextpresskit.ps1 build-all` |
+| Migrate / seed | `./scripts/nextpresskit migrate-up` / `seed` | `make migrate-up` / `make seed` | same subcommands on `nextpresskit.ps1` |
+| Run API | `./scripts/nextpresskit run` | `make run` | `.\scripts\nextpresskit.ps1 run` |
+| CI-style checks | `./scripts/nextpresskit checks` | `make checks` | `.\scripts\nextpresskit.ps1 checks` |
+| Deploy wizard | `./scripts/nextpresskit deploy` | `make deploy` | `make deploy-ps` or `nextpresskit.ps1 deploy` |
+| Postman env files | `./scripts/nextpresskit postman-sync` | `make postman-sync` | `.\scripts\nextpresskit.ps1 postman-sync` |
 
-Run **`./scripts/nextpress help`** or **`make help`** for the full list.
+Run **`./scripts/nextpresskit help`** or **`make help`** for the full list.
+
+Postman collections live under [`postman/`](postman/). Refresh checked-in environment JSON from `.env.example` / `.env` with **`./scripts/nextpresskit postman-sync`** (optional: `--dry-run`, or tier overrides like `POSTMAN_DEV_BASE_URL=…`). See [`postman/README.md`](postman/README.md).
 
 ## Frontend Integration
 

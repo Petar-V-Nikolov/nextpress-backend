@@ -1,8 +1,8 @@
 # NextPressKit backend — developer tasks
 #
-# Cross-platform CLI: ./scripts/nextpress (Linux/macOS/Git Bash) or .\scripts\nextpress.ps1 (Windows).
+# Cross-platform CLI: ./scripts/nextpresskit (Linux/macOS/Git Bash) or .\scripts\nextpresskit.ps1 (Windows).
 # Requires: Go (see go.mod), PostgreSQL for migrate/seed/run.
-# Config: copy .env.example to .env (or: make install / nextpress install).
+# Config: copy .env.example to .env (or: make install / nextpresskit install).
 
 BINARY_NAME   := server
 MIGRATE_BINARY := migrate
@@ -19,11 +19,11 @@ MIGRATE_CMD ?= up
 	test test-coverage test-integration tidy deps graphql \
 	seed seed-build \
 	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh \
-	security-check deploy deploy-nginx deploy-ps checks
+	security-check deploy deploy-nginx deploy-ps checks postman-sync
 
 ## help: List targets and short descriptions
 help:
-	@echo "Usage: make [target]   — or: ./scripts/nextpress <command>"
+	@echo "Usage: make [target]   — or: ./scripts/nextpresskit <command>"
 	@echo ""
 	@echo "Common:"
 	@echo "  make install   Go modules + .env from .env.example if missing"
@@ -38,7 +38,7 @@ help:
 
 ## install: go mod download; create .env from .env.example if missing
 install:
-	@bash scripts/nextpress install
+	@bash scripts/nextpresskit install
 
 ## setup: Bootstrap + local HTTPS helper when TTY (mkcert + nginx on Linux); SKIP_SETUP_LOCAL_HTTPS=1 to skip
 setup: install build-all migrate-up seed
@@ -50,11 +50,11 @@ all: build
 
 ## build: Produce bin/server from cmd/api
 build:
-	@bash scripts/nextpress build
+	@bash scripts/nextpresskit build
 
 ## build-all: Build bin/server, bin/migrate, bin/seed
 build-all:
-	@bash scripts/nextpress build-all
+	@bash scripts/nextpresskit build-all
 
 ## run: Start the API in the foreground (go run)
 run:
@@ -70,7 +70,7 @@ stop:
 
 ## clean: Remove bin/ and go clean
 clean:
-	@bash scripts/nextpress clean
+	@bash scripts/nextpresskit clean
 
 ## deploy: Interactive deploy wizard (Nginx, TLS, systemd); Windows: make deploy-ps
 deploy:
@@ -93,7 +93,7 @@ deploy-ps:
 
 ## seed: Run seeders
 seed:
-	@bash scripts/nextpress seed
+	@bash scripts/nextpresskit seed
 
 ## seed-build: Build bin/seed only
 seed-build:
@@ -104,44 +104,44 @@ seed-build:
 
 ## migrate-up: Apply all pending migrations
 migrate-up:
-	@bash scripts/nextpress migrate-up
+	@bash scripts/nextpresskit migrate-up
 
 ## migrate-down: Roll back one migration
 migrate-down:
-	@bash scripts/nextpress migrate-down
+	@bash scripts/nextpresskit migrate-down
 
 ## migrate-steps: Apply or roll back STEPS migrations (MIGRATE_CMD=up|down)
 migrate-steps:
 	@test -n "$(STEPS)" || (echo >&2 "Usage: make migrate-steps STEPS=n [MIGRATE_CMD=up|down]"; exit 1)
-	@bash scripts/nextpress migrate-steps "$(STEPS)"
+	@bash scripts/nextpresskit migrate-steps "$(STEPS)"
 
 ## migrate-version: Print current migration version
 migrate-version:
-	@bash scripts/nextpress migrate-version
+	@bash scripts/nextpresskit migrate-version
 
 ## migrate-drop: Drop all tables (interactive confirm)
 migrate-drop:
-	@bash scripts/nextpress migrate-drop
+	@bash scripts/nextpresskit migrate-drop
 
 ## db-fresh: migrate-drop then migrate-up (destructive)
 db-fresh:
-	@bash scripts/nextpress db-fresh
+	@bash scripts/nextpresskit db-fresh
 
 ## test: Run all tests (verbose)
 test:
-	@bash scripts/nextpress test
+	@bash scripts/nextpresskit test
 
 ## test-coverage: Run tests with coverage summary
 test-coverage:
-	@bash scripts/nextpress test-coverage
+	@bash scripts/nextpresskit test-coverage
 
 ## test-integration: Integration tests (Postgres; set DB_* or skipped)
 test-integration:
-	@bash scripts/nextpress test-integration
+	@bash scripts/nextpresskit test-integration
 
 ## tidy: go mod tidy
 tidy:
-	@bash scripts/nextpress tidy
+	@bash scripts/nextpresskit tidy
 
 ## deps: go mod download (modules only; no .env)
 deps:
@@ -150,12 +150,16 @@ deps:
 
 ## security-check: govulncheck
 security-check:
-	@bash scripts/nextpress security-check
+	@bash scripts/nextpresskit security-check
 
-## checks: CI-style suite (see scripts/nextpress checks)
+## checks: CI-style suite (see scripts/nextpresskit checks)
 checks:
-	@bash scripts/nextpress checks
+	@bash scripts/nextpresskit checks
 
 ## graphql: Regenerate gqlgen code
 graphql:
-	@bash scripts/nextpress graphql
+	@bash scripts/nextpresskit graphql
+
+## postman-sync: Refresh Postman environment JSON from .env.example + .env (optional POSTMAN_* URLs)
+postman-sync:
+	@bash scripts/nextpresskit postman-sync

@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "nextpress-public-api",
+    "_postman_id": "nextpresskit-public-api",
     "name": "NextPressKit Public API",
     "description": "Public and auth endpoints for the NextPressKit backend. Uses {{base_url}}.\n\nAuth: set environment `jwt_auth_source` to `cookie` (default, matches server `JWT_AUTH_SOURCE`) or `header`. Cookie mode uses Postman's cookie jar after `POST /auth/login` (no tokens in JSON). Header mode stores tokens from JSON and sends `Authorization: Bearer …` via the collection pre-request script.\n\n`POST /auth/login` defaults use `{{superadmin_email}}` and `{{superadmin_password}}` (seed defaults: see `SEED_SUPERADMIN_*` in `.env.example`).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"

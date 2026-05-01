@@ -4,7 +4,7 @@ How this folder is organised (aligned with [Diátaxis](https://diataxis.fr/): tu
 
 | Type | Document | Purpose |
 |------|----------|---------|
-| **Tutorial** | [Root `README.md`](../README.md) | Fast path: `./scripts/nextpress setup`, `make setup`, or `.\scripts\nextpress.ps1 setup`. |
+| **Tutorial** | [Root `README.md`](../README.md) | Fast path: `./scripts/nextpresskit setup`, `make setup`, or `.\scripts\nextpresskit.ps1 setup`. |
 | **How-to** | [Deployment (servers)](DEPLOYMENT.md) | Ubuntu, Nginx, systemd, HTTPS (Certbot), interactive `scripts/deploy`. |
 | **How-to** | [Local development](deployment/local.md) | Laptop setup, HTTPS with mkcert, optional Nginx/systemd, ES/GraphQL, tests. |
 | **How-to** | [Local development (macOS)](deployment/macos.md) | Homebrew, paths, mkcert, Nginx on Mac. |
@@ -47,7 +47,7 @@ docs/README.md  (this page) ─►  map of every doc
 
 Import [`openapi.yaml`](openapi.yaml) into Postman, Stoplight, or your gateway. It documents **Bearer** and **cookie** JWT security for protected routes. Regenerate GraphQL code after schema edits: `make graphql`.
 
-Ready-made collections: [`postman/`](../postman) (see [`postman/README.md`](../postman/README.md) for `jwt_auth_source` / cookie jar vs header mode).
+Ready-made collections: [`postman/`](../postman) (see [`postman/README.md`](../postman/README.md) for `jwt_auth_source` / cookie jar vs header mode). Refresh environment JSON from `.env.example` / `.env`: `./scripts/nextpresskit postman-sync` or `make postman-sync` (optional `--dry-run`; tier URLs: `POSTMAN_*_BASE_URL`).
 
 ## Config templates
 

@@ -1,6 +1,6 @@
 # NextPressKit dev CLI for Windows (PowerShell). From repo root:
-#   .\scripts\nextpress.ps1 setup
-#   .\scripts\nextpress.ps1 run
+#   .\scripts\nextpresskit.ps1 setup
+#   .\scripts\nextpresskit.ps1 run
 # Requires: Go on PATH, PostgreSQL for migrate/seed.
 
 $ErrorActionPreference = "Stop"
@@ -58,17 +58,17 @@ function Get-Version {
 
 function Show-Help {
     @"
-NextPressKit dev CLI (Windows PowerShell). On Linux/macOS use: ./scripts/nextpress
+NextPressKit dev CLI (Windows PowerShell). On Linux/macOS use: ./scripts/nextpresskit
 
 Commands:
   help install deps tidy build build-all setup
   migrate-up migrate-down migrate-version migrate-steps <N> seed
   run start stop deploy checks
-  test test-coverage test-integration security-check graphql clean
+  test test-coverage test-integration security-check graphql clean postman-sync
 
 Examples:
-  .\scripts\nextpress.ps1 setup
-  .\scripts\nextpress.ps1 run
+  .\scripts\nextpresskit.ps1 setup
+  .\scripts\nextpresskit.ps1 run
 "@
 }
 
@@ -117,15 +117,15 @@ switch ($cmd) {
         & $PSCommandPath build-all
         & $PSCommandPath migrate-up
         & $PSCommandPath seed
-        Write-Host "Local HTTPS + nginx automation runs on Linux/macOS (./scripts/nextpress setup in Git Bash/WSL). On native Windows use mkcert + proxy manually or WSL."
-        Write-Host "Setup complete. Run: .\scripts\nextpress.ps1 run"
+        Write-Host "Local HTTPS + nginx automation runs on Linux/macOS (./scripts/nextpresskit setup in Git Bash/WSL). On native Windows use mkcert + proxy manually or WSL."
+        Write-Host "Setup complete. Run: .\scripts\nextpresskit.ps1 run"
     }
     "migrate-up" { Ensure-Go; go run ./cmd/migrate -command=up }
     "migrate-down" { Ensure-Go; go run ./cmd/migrate -command=down -steps=1 }
     "migrate-version" { Ensure-Go; go run ./cmd/migrate -command=version }
     "migrate-steps" {
         Ensure-Go
-        if ($args.Count -lt 2) { Write-Error "usage: nextpress.ps1 migrate-steps <N>" }
+        if ($args.Count -lt 2) { Write-Error "usage: nextpresskit.ps1 migrate-steps <N>" }
         $n = $args[1]
         $mc = if ($env:MIGRATE_CMD) { $env:MIGRATE_CMD } else { "up" }
         go run ./cmd/migrate -command=$mc -steps=$n
@@ -145,7 +145,7 @@ switch ($cmd) {
     "run" {
         Ensure-Go
         if (-not (Test-Path (Join-Path $RootDir ".env"))) {
-            Write-Error ".env missing. Run: .\scripts\nextpress.ps1 install"
+            Write-Error ".env missing. Run: .\scripts\nextpresskit.ps1 install"
         }
         $port = [int](Get-AppPort)
         Assert-PortFree $port
@@ -214,6 +214,16 @@ switch ($cmd) {
     "test-integration" { Ensure-Go; go test -tags=integration -v ./internal/platform/database }
     "security-check" { Ensure-Go; go run golang.org/x/vuln/cmd/govulncheck@latest ./... }
     "graphql" { Ensure-Go; go run github.com/99designs/gqlgen generate }
+    "postman-sync" {
+        $py = Get-Command python3 -ErrorAction SilentlyContinue
+        if (-not $py) { $py = Get-Command python -ErrorAction SilentlyContinue }
+        if (-not $py) {
+            Write-Error "Python 3 is required for postman-sync (install Python or use Git Bash: ./scripts/nextpresskit postman-sync)."
+        }
+        $extra = @()
+        if ($args.Count -gt 1) { $extra = $args[1..($args.Count - 1)] }
+        & $py.Source (Join-Path $RootDir "scripts\sync-postman.py") @extra
+    }
     "clean" {
         Remove-Item -Recurse -Force (Join-Path $RootDir "bin") -ErrorAction SilentlyContinue
         go clean

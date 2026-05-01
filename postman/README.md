@@ -20,14 +20,14 @@ Matches server behavior controlled by `JWT_AUTH_SOURCE` in `.env`:
 | `cookie` (default) | After `POST /auth/login`, Postman stores HttpOnly cookies for `{{base_url}}`. Protected requests **do not** send `Authorization`; the collection pre-request script removes that header so the cookie jar is used. |
 | `header` | Login/refresh responses include `tokens` in JSON. The collection scripts set `Authorization: Bearer …` from `access_token` (Public) or `admin_access_token` (Admin). |
 
-Set this on each imported environment (`NextPress-*.postman_environment.json`).
+Set this on each imported environment (`NextPressKit-*.postman_environment.json`).
 
 ## Collections
 
 | Collection | File | Contents |
 |------------|------|----------|
-| **NextPressKit Public API** | `NextPress-Public-API.postman_collection.json` | Root/health/ready endpoints plus `/auth/*` and public content APIs. |
-| **NextPressKit Admin API** | `NextPress-Admin-API.postman_collection.json` | All `/admin/*` endpoints requiring admin token and permissions. |
+| **NextPressKit Public API** | `NextPressKit-Public-API.postman_collection.json` | Root/health/ready endpoints plus `/auth/*` and public content APIs. |
+| **NextPressKit Admin API** | `NextPressKit-Admin-API.postman_collection.json` | All `/admin/*` endpoints requiring admin token and permissions. |
 
 ## Environments
 
@@ -35,12 +35,29 @@ Use one environment per target. Both collections rely on `{{base_url}}`. **`POST
 
 | Environment | File | Use case | `base_url` |
 |-------------|------|----------|------------|
-| **NextPressKit - Local** | `NextPress-Local.postman_environment.json` | Local Nginx + TLS (`make deploy`, `nextpresskit.local` in `/etc/hosts`) | `https://nextpresskit.local` |
-| **NextPressKit - Dev** | `NextPress-Dev.postman_environment.json` | Dev deployment | `https://api-dev.example.com` |
-| **NextPressKit - Staging** | `NextPress-Staging.postman_environment.json` | Staging deployment | `https://api-staging.example.com` |
-| **NextPressKit - Production** | `NextPress-Production.postman_environment.json` | Production deployment | `https://api.example.com` |
+| **NextPressKit - Local** | `NextPressKit-Local.postman_environment.json` | Local Nginx + TLS (`make deploy`, `nextpresskit.local` in `/etc/hosts`) | `https://nextpresskit.local` |
+| **NextPressKit - Dev** | `NextPressKit-Dev.postman_environment.json` | Dev deployment | `https://api-dev.example.com` |
+| **NextPressKit - Staging** | `NextPressKit-Staging.postman_environment.json` | Staging deployment | `https://api-staging.example.com` |
+| **NextPressKit - Production** | `NextPressKit-Production.postman_environment.json` | Production deployment | `https://api.example.com` |
 
 > Replace the dev/staging/production `base_url` values with your actual domains. For **direct** `go run` / `make run` without Nginx, set local `base_url` to `http://127.0.0.1:9090` (or your `APP_PORT`).
+
+### Sync from repo env files
+
+Regenerate the checked-in environment JSON from `.env.example` and `.env` (and optional shell overrides):
+
+```bash
+./scripts/nextpresskit postman-sync
+# or
+make postman-sync
+```
+
+- Preview: `./scripts/nextpresskit postman-sync --dry-run`
+- Windows: `.\scripts\nextpresskit.ps1 postman-sync`
+- Tier URLs: `POSTMAN_LOCAL_BASE_URL`, `POSTMAN_DEV_BASE_URL`, `POSTMAN_STAGING_BASE_URL`, `POSTMAN_PRODUCTION_BASE_URL`, or set `NEXTPRESS_PUBLIC_HOST` for local `https://<host>`
+- Clear token placeholders in the JSON: `POSTMAN_CLEAR_TOKENS=1 ./scripts/nextpresskit postman-sync`
+
+Collections are not rewritten (requests use `{{base_url}}` only).
 
 ### Setup
 

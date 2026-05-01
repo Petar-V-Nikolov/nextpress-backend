@@ -4,7 +4,7 @@
 #
 # Interactive (from repo root):   ./scripts/deploy
 # Install Nginx from defaults:     ./scripts/deploy apply-nginx [--http-only] ...
-# Same via nextpress / make:       ./scripts/nextpress deploy-apply-nginx   /   make deploy-nginx
+# Same via nextpresskit / make:     ./scripts/nextpresskit deploy-apply-nginx   /   make deploy-nginx
 #
 # Generated output: deploy/generated/<slug>/
 
