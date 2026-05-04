@@ -5,7 +5,7 @@ import "time"
 // Role maps to roles.
 type Role struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey"`
-	Name      string    `gorm:"column:name;not null;uniqueIndex"`
+	Name      string    `gorm:"column:name;not null;unique"`
 	CreatedAt time.Time `gorm:"column:created_at;not null;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null;autoUpdateTime"`
 }
@@ -15,7 +15,7 @@ func (Role) TableName() string { return "roles" }
 // Permission maps to permissions.
 type Permission struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey"`
-	Code      string    `gorm:"column:code;not null;uniqueIndex"`
+	Code      string    `gorm:"column:code;not null;unique"`
 	CreatedAt time.Time `gorm:"column:created_at;not null;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null;autoUpdateTime"`
 }

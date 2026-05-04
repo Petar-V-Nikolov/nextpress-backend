@@ -8,8 +8,8 @@ import (
 // Plugin maps to plugins.
 type Plugin struct {
 	ID        string          `gorm:"column:id;type:uuid;primaryKey"`
-	Name      string          `gorm:"column:name;not null;uniqueIndex"`
-	Slug      string          `gorm:"column:slug;not null;uniqueIndex"`
+	Name      string          `gorm:"column:name;not null;unique"`
+	Slug      string          `gorm:"column:slug;not null;unique"`
 	Enabled   bool            `gorm:"column:enabled;not null"`
 	Version   string          `gorm:"column:version;not null"`
 	ConfigRaw json.RawMessage `gorm:"column:config;type:jsonb;not null"`

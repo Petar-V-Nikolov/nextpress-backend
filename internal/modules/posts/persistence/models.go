@@ -10,10 +10,10 @@ import (
 // Post maps to posts (author and editor IDs are users.public_id).
 type Post struct {
 	ID                   string          `gorm:"column:id;type:uuid;primaryKey"`
-	UUID                 *string         `gorm:"column:uuid;type:uuid;uniqueIndex"`
+	UUID                 *string         `gorm:"column:uuid;type:uuid;unique"`
 	AuthorID             int64           `gorm:"column:author_id;not null;index"`
 	Title                string          `gorm:"column:title;not null"`
-	Slug                 string          `gorm:"column:slug;not null;uniqueIndex"`
+	Slug                 string          `gorm:"column:slug;not null;unique"`
 	Subtitle             string          `gorm:"column:subtitle"`
 	Excerpt              string          `gorm:"column:excerpt"`
 	PostType             string          `gorm:"column:post_type"`
@@ -107,7 +107,7 @@ func (PostMetrics) TableName() string { return "post_metrics" }
 type Series struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey"`
 	Title     string    `gorm:"column:title;not null"`
-	Slug      string    `gorm:"column:slug;not null;uniqueIndex"`
+	Slug      string    `gorm:"column:slug;not null;unique"`
 	CreatedAt time.Time `gorm:"column:created_at;not null"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null"`
 }

@@ -11,7 +11,7 @@ type Page struct {
 	ID          string         `gorm:"column:id;type:uuid;primaryKey"`
 	AuthorID    int64          `gorm:"column:author_id;not null;index"`
 	Title       string         `gorm:"column:title;not null"`
-	Slug        string         `gorm:"column:slug;not null;uniqueIndex"`
+	Slug        string         `gorm:"column:slug;not null;unique"`
 	Content     string         `gorm:"column:content;not null"`
 	Status      string         `gorm:"column:status;not null"`
 	PublishedAt *time.Time     `gorm:"column:published_at"`

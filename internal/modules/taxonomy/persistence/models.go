@@ -6,7 +6,7 @@ import "time"
 type Category struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey"`
 	Name      string    `gorm:"column:name;not null"`
-	Slug      string    `gorm:"column:slug;not null;uniqueIndex"`
+	Slug      string    `gorm:"column:slug;not null;unique"`
 	CreatedAt time.Time `gorm:"column:created_at;not null"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null"`
 }
@@ -17,7 +17,7 @@ func (Category) TableName() string { return "categories" }
 type Tag struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey"`
 	Name      string    `gorm:"column:name;not null"`
-	Slug      string    `gorm:"column:slug;not null;uniqueIndex"`
+	Slug      string    `gorm:"column:slug;not null;unique"`
 	CreatedAt time.Time `gorm:"column:created_at;not null"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null"`
 }

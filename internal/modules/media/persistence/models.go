@@ -7,7 +7,7 @@ type Media struct {
 	ID           string    `gorm:"column:id;type:uuid;primaryKey"`
 	UploaderID   int64     `gorm:"column:uploader_id;not null;index"`
 	OriginalName string    `gorm:"column:original_name;not null"`
-	StorageName  string    `gorm:"column:storage_name;not null;uniqueIndex"`
+	StorageName  string    `gorm:"column:storage_name;not null;unique"`
 	MimeType     string    `gorm:"column:mime_type;not null"`
 	SizeBytes    int64     `gorm:"column:size_bytes;not null"`
 	StoragePath  string    `gorm:"column:storage_path;not null"`
