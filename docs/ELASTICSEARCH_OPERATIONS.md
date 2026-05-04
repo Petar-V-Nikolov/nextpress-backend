@@ -7,7 +7,7 @@ Operational guidance for running NextPressKit search in production-like environm
 ## Quick start (local/dev)
 
 1. Set `ELASTICSEARCH_ENABLED=true` and `ELASTICSEARCH_URLS=...` in `.env`.
-2. Run the API (`make run` or `./scripts/nextpresskit run`).
+2. Run the API (`make run` or `./scripts/nextpresskit run`; they are equivalent).
 3. Use `GET /posts/search` and admin reindex `POST /admin/posts/search/reindex` when needed.
 
 Scope:

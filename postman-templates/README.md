@@ -39,7 +39,7 @@ Use one environment per target. Both collections rely on `{{base_url}}`. **`POST
 
 | Environment | File | Use case | `base_url` |
 |-------------|------|----------|------------|
-| **NextPressKit - Local** | `NextPressKit-Local.postman_environment.json` | Local Nginx + TLS (`make deploy`, `nextpresskit.local` in `/etc/hosts`) | `https://nextpresskit.local` |
+| **NextPressKit - Local** | `NextPressKit-Local.postman_environment.json` | Local Nginx + TLS (`bash scripts/deploy` or `./scripts/nextpresskit deploy`, `nextpresskit.local` in `/etc/hosts`) | `https://nextpresskit.local` |
 | **NextPressKit - Dev** | `NextPressKit-Dev.postman_environment.json` | Dev deployment | `https://api-dev.example.com` |
 | **NextPressKit - Staging** | `NextPressKit-Staging.postman_environment.json` | Staging deployment | `https://api-staging.example.com` |
 | **NextPressKit - Production** | `NextPressKit-Production.postman_environment.json` | Production deployment | `https://api.example.com` |

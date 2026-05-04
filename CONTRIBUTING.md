@@ -12,9 +12,11 @@ This guide is the shortest path to preparing a clean PR.
 ## Before you open a PR
 
 ```bash
-make test
+./scripts/nextpresskit test
 go vet ./...
 ```
+
+Or run the full CI-style suite: `./scripts/nextpresskit checks`.
 
 Fix or explain any failures.
 

@@ -20,7 +20,7 @@ The compile-time default list (order matters for migrations and HTTP wiring) liv
 
 ## Choosing modules at runtime
 
-Set **`MODULES`** in `.env` to a comma-separated list of ids (case-insensitive). Empty or unset = full default registry.
+Set **`MODULES`** in `.env` to a comma-separated list of ids (case-insensitive). Empty or unset = full default registry. From an interactive terminal, **`make setup` → Add kit module / Remove kit module** can edit this line for you (then run `migrate-up` / `seed` as needed).
 
 Implicit dependencies are applied so migrations and typical admin stacks stay consistent:
 

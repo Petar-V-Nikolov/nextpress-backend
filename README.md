@@ -45,12 +45,12 @@ Use this table if you're not sure which doc to open first.
 
 You need Go (see `go.mod`) and PostgreSQL. Start the server, then create an empty database (and user if needed) that match `DB_*` in [.env.example](./.env.example), for example database `nextpresskit` and user `postgres` on `localhost:5432`.
 
-Running `./scripts/nextpresskit setup` (or `make setup`) first runs `install`, which copies `.env.example` to `.env` if `.env` is missing. Edit at least `JWT_SECRET` and double-check `DB_*` before the migrate step runs.
+On an **interactive terminal**, `./scripts/nextpresskit setup` (or `make setup`) prints a **text menu**: pick a profile (full first-time, database-only, build, CI checks), **Custom** to run other `nextpresskit` steps by number, **Add kit module** / **Remove kit module** to edit `MODULES` in `.env` (see [docs/MODULES.md](./docs/MODULES.md)). Destructive steps ask `y/N` first. For **CI or scripts** with no prompts, use `NP_SETUP_NONINTERACTIVE=1 make setup` — that runs only the linear path: `install` → `build-all` → `migrate-up` → `seed` (and optional `scripts/setup-local-https.sh` on a TTY unless `SKIP_SETUP_LOCAL_HTTPS=1`). Edit at least `JWT_SECRET` and double-check `DB_*` before migrate runs.
 
 Quick path:
 
-1. `./scripts/nextpresskit setup` (or `make setup`) — modules, `.env` if needed, build, migrate, seed
-2. `./scripts/nextpresskit run` (or `make run`)
+1. `make setup` or `./scripts/nextpresskit setup` (choose **1** for full first-time, or set `NP_SETUP_NONINTERACTIVE=1` to skip the menu)
+2. `make run` or `./scripts/nextpresskit run`
 3. Open `http://localhost:9090/health` (replace `9090` with `APP_PORT` from `.env` if you changed it). Use `/ready` if you want to confirm PostgreSQL is wired up.
 
 More database commands (`migrate-up`, `seed`, `db-fresh`): [docs/COMMANDS.md](./docs/COMMANDS.md#database-and-seed-data) and [docs/SEEDING.md](./docs/SEEDING.md).
@@ -64,14 +64,15 @@ Copy-paste:
 ./scripts/nextpresskit run
 ```
 
-Or with Make (thin wrappers around the same scripts):
+Make exposes three targets; they call the same scripts as `nextpresskit`:
 
 ```bash
 make setup
 make run
+make postman-sync
 ```
 
-From an interactive terminal, `setup` may also run `scripts/setup-local-https.sh`: it tries to install mkcert (apt, dnf, pacman, zypper, or Homebrew), generates certs under `~/.local/share/nextpresskit-ssl/`, can print a `/etc/hosts` hint, and on Linux with nginx may run `deploy apply-nginx --no-tls-menu`. Set `SKIP_SETUP_LOCAL_HTTPS=1` to skip (CI and headless).
+Full setup (menu **1** or `NP_SETUP_NONINTERACTIVE=1`) may run `scripts/setup-local-https.sh` on a TTY (unless `SKIP_SETUP_LOCAL_HTTPS=1`): mkcert, certs under `~/.local/share/nextpresskit-ssl/`, optional `/etc/hosts` hint, and on Linux with nginx may run `deploy apply-nginx --no-tls-menu`.
 
 The API listens on `APP_PORT` (default 9090). Foreground `run` frees the port if another same-repo `bin/server` or `go run ./cmd/api` is still listening; systemd units named `nextpresskit-backend@*` are left alone (stop with `systemctl`).
 
@@ -84,13 +85,13 @@ From the repo root:
 .\scripts\nextpresskit.ps1 run
 ```
 
-Interactive Nginx snippet wizard: `make deploy-ps` or `.\scripts\nextpresskit.ps1 deploy`. Full Linux server flows are still in `make deploy` / `bash scripts/deploy`.
+Deploy wizards: `.\scripts\nextpresskit.ps1 deploy` (PowerShell) or `bash scripts/deploy` / `./scripts/nextpresskit deploy` (Unix).
 
 ### HTTPS / Nginx locally
 
-For HTTPS (browser cookie auth) and reverse-proxy setup, see [docs/deployment/local.md](./docs/deployment/local.md) and [docs/deployment/macos.md](./docs/deployment/macos.md). Use `make deploy` (bash) or `make deploy-ps` (PowerShell) to generate configs under `deploy/generated/`.
+For HTTPS (browser cookie auth) and reverse-proxy setup, see [docs/deployment/local.md](./docs/deployment/local.md) and [docs/deployment/macos.md](./docs/deployment/macos.md). Run the deploy wizard to write snippets under `deploy/generated/`: on Linux/macOS/Git Bash use `bash scripts/deploy` (or `./scripts/nextpresskit deploy`); on Windows PowerShell use `.\scripts\deploy.ps1`.
 
-Background mode (Unix): `make start` / `make stop` or `./scripts/nextpresskit start` / `stop`.
+Background mode (Unix): `./scripts/nextpresskit start` / `stop`.
 
 ## Commands (summary)
 
@@ -98,19 +99,15 @@ Need command-by-command explanations? Open [docs/COMMANDS.md](./docs/COMMANDS.md
 
 Most common confusion: `setup` is for local bootstrap; `deploy` is for deployment/config and release flows.
 
-| Area | Unix CLI | Make | Windows PowerShell |
-|------|----------|------|----------------------|
-| Bootstrap | `./scripts/nextpresskit setup` | `make setup` | `.\scripts\nextpresskit.ps1 setup` |
-| Modules + `.env` | `./scripts/nextpresskit install` | `make install` | `.\scripts\nextpresskit.ps1 install` |
-| Build API only | `./scripts/nextpresskit build` | `make build` | `.\scripts\nextpresskit.ps1 build` |
-| Build API + migrate + seed tools | `./scripts/nextpresskit build-all` | `make build-all` | `.\scripts\nextpresskit.ps1 build-all` |
-| Database | `./scripts/nextpresskit migrate-up`, `seed`, `db-fresh` | `make migrate-up`, `make seed`, `make db-fresh` | same on `nextpresskit.ps1` (after `db-fresh`, run `seed` for demo data) |
-| Run API | `./scripts/nextpresskit run` | `make run` | `.\scripts\nextpresskit.ps1 run` |
-| CI-style checks | `./scripts/nextpresskit checks` | `make checks` | `.\scripts\nextpresskit.ps1 checks` |
-| Deploy wizard | `./scripts/nextpresskit deploy` | `make deploy` | `make deploy-ps` or `nextpresskit.ps1 deploy` |
-| Postman env files | `./scripts/nextpresskit postman-sync` | `make postman-sync` | `.\scripts\nextpresskit.ps1 postman-sync` |
+| Make (3 targets) | What it does |
+|------------------|--------------|
+| `make setup` | Text menu (profiles + custom steps) on a TTY; `NP_SETUP_NONINTERACTIVE=1` = linear install → build-all → migrate-up → seed only. |
+| `make run` | API in the foreground. |
+| `make postman-sync` | Refresh gitignored `postman/` from templates. |
 
-Run `./scripts/nextpresskit help` or `make help` for the full list.
+Everything else — `install`, `build`, `migrate-up`, `seed`, `db-fresh`, `checks`, `deploy`, `start`, `stop`, and more — is available from **setup → Custom** (by step number) or directly: `./scripts/nextpresskit help`.
+
+Running bare **`make`** prints the three targets and points to `nextpresskit help`.
 
 Postman templates live under [postman-templates/](./postman-templates/). Run `./scripts/nextpresskit postman-sync` to create a gitignored [postman/](./postman/) workspace. Options: `--dry-run`, tier URLs such as `POSTMAN_DEV_BASE_URL`. Details: [postman-templates/README.md](./postman-templates/README.md).
 

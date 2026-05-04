@@ -7,12 +7,12 @@ Seeding adds predictable demo content so you can try the API without entering ev
 **`MODULES`** in `.env` filters which modules run their `Seed` step (same resolution as `cmd/api` and `cmd/migrate`). Empty = full default registry in [`internal/appregistry`](../internal/appregistry/registry.go).
 
 ```bash
-make migrate-up && make seed          # usual path
-make db-fresh && make seed            # wipe public schema, recreate tables, then seed (dev only)
-make seed                             # run again anytime; upserts, not duplicates
+./scripts/nextpresskit migrate-up && ./scripts/nextpresskit seed   # usual path
+./scripts/nextpresskit db-fresh && ./scripts/nextpresskit seed      # wipe public schema, recreate tables, then seed (dev only)
+./scripts/nextpresskit seed                                         # run again anytime; upserts, not duplicates
 ```
 
-You can also run `go run ./cmd/seed`, `./bin/seed` after `make seed-build`, or the nextpresskit script; behavior is the same.
+You can also run `go run ./cmd/seed`, `./bin/seed` after `./scripts/nextpresskit build-all`, or `./scripts/nextpresskit seed`; behavior is the same.
 
 ## What gets seeded
 

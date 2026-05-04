@@ -21,8 +21,9 @@ Commands:
   deps              go mod download only
   build             Build bin/server only
   build-all         Build bin/server, bin/migrate, bin/seed
-  setup             install + build-all + migrate-up + seed; from a TTY also runs
-                    scripts/setup-local-https.sh (install mkcert if needed, SANs + Nginx on Linux). Skip: SKIP_SETUP_LOCAL_HTTPS=1
+  setup             TTY: text menu (profiles, custom steps, add/remove MODULES in .env). Else or
+                    NP_SETUP_NONINTERACTIVE=1: install + build-all + migrate-up + seed; optional
+                    setup-local-https.sh. Skip: SKIP_SETUP_LOCAL_HTTPS=1
   migrate-up        Apply GORM AutoMigrate for enabled kit modules (MODULES in .env; see docs/MODULES.md)
   migrate-down      Removed (no SQL migration steps); use migrate-drop + migrate-up for dev reset
   migrate-version   Prints notice (no version table with AutoMigrate)
@@ -95,21 +96,7 @@ build-all)
   echo "Built bin/server, bin/migrate, bin/seed"
   ;;
 setup)
-  "$0" install
-  "$0" build-all
-  "$0" migrate-up
-  "$0" seed
-  uname_s="$(uname -s 2>/dev/null || echo unknown)"
-  case "$uname_s" in
-    MINGW*|MSYS*|CYGWIN*)
-      ;;
-    *)
-      if [[ -t 0 ]] && [[ "${SKIP_SETUP_LOCAL_HTTPS:-}" != "1" ]]; then
-        bash "$ROOT/scripts/setup-local-https.sh" || true
-      fi
-      ;;
-  esac
-  echo "Setup complete. Run: ./scripts/nextpresskit run   (or: make run)"
+  exec bash "$ROOT/scripts/setup-menu.sh"
   ;;
 migrate-up)
   ensure_go

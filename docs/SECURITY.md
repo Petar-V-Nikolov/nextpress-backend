@@ -11,11 +11,11 @@ For a local-first setup flow, start with [`deployment/local.md`](deployment/loca
 Run regularly (for example weekly and before release):
 
 ```bash
-make security-check
+./scripts/nextpresskit security-check
 go list -m -u all
 ```
 
-- `make security-check` runs `govulncheck` against project packages.
+- `./scripts/nextpresskit security-check` runs `govulncheck` against project packages.
 - Review actionable findings and upgrade affected modules.
 
 ## CORS policy by deployment

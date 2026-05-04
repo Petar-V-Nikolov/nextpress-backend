@@ -2,9 +2,9 @@
 
 [← Documentation index](../README.md) · [Server deployment (Ubuntu)](../DEPLOYMENT.md) · [Command reference](../COMMANDS.md)
 
-**Tutorial / how-to** - run the API on your machine. The default path is `go run` / `make run` with no reverse proxy. Optionally use **systemd** and **Nginx** on the same box to mirror how [server deployment](../DEPLOYMENT.md) runs the binary behind a proxy.
+**Tutorial / how-to** - run the API on your machine. The default path is `go run` / `make run` (or `./scripts/nextpresskit run`) with no reverse proxy. Optionally use **systemd** and **Nginx** on the same box to mirror how [server deployment](../DEPLOYMENT.md) runs the binary behind a proxy.
 
-Platform-specific setup: **[macOS](macos.md)** (Homebrew, paths) · **Ubuntu laptop** (below, [Ubuntu on servers](../DEPLOYMENT.md)). Interactive Nginx/TLS/setup: [§ Interactive deploy](../DEPLOYMENT.md#interactive-deploy-scriptsdeploy) (`make deploy` or `scripts/deploy.ps1` on Windows).
+Platform-specific setup: **[macOS](macos.md)** (Homebrew, paths) · **Ubuntu laptop** (below, [Ubuntu on servers](../DEPLOYMENT.md)). Interactive Nginx/TLS/setup: [§ Interactive deploy](../DEPLOYMENT.md#interactive-deploy-scriptsdeploy) (`bash scripts/deploy` or `scripts/deploy.ps1` on Windows).
 
 ## Fast local path (recommended)
 
@@ -24,7 +24,7 @@ make run
 
 ## Already running the project?
 
-Nothing in this guide **requires** you to change a working setup. If you already use `make run`, a local Nginx reverse proxy, or a server install from [DEPLOYMENT.md](../DEPLOYMENT.md), you can keep doing that.
+Nothing in this guide **requires** you to change a working setup. If you already use `./scripts/nextpresskit run` or `make run`, a local Nginx reverse proxy, or a server install from [DEPLOYMENT.md](../DEPLOYMENT.md), you can keep doing that.
 
 **Optional upgrade:** add **HTTPS** locally (recommended for browser cookie auth that matches production defaults) or on the server (Let’s Encrypt). See [HTTPS locally (recommended)](#https-locally-recommended) and [DEPLOYMENT.md § TLS](../DEPLOYMENT.md#4-tls-https).
 
@@ -69,12 +69,12 @@ Configure `DB_*`, `JWT_SECRET`, `APP_ENV=local`. For auth, set `JWT_AUTH_SOURCE`
 Create tables, load demo data, then start the API ([full command guide](../COMMANDS.md#database-and-seed-data)):
 
 ```bash
-make migrate-up
-make seed
+./scripts/nextpresskit migrate-up
+./scripts/nextpresskit seed
 ./scripts/run_local.sh   # or: go run ./cmd/api
 ```
 
-Reset everything in the `public` schema on your laptop: `make db-fresh && make seed`.
+Reset everything in the `public` schema on your laptop: `./scripts/nextpresskit db-fresh && ./scripts/nextpresskit seed`.
 
 | | |
 |--|--|
@@ -158,7 +158,7 @@ Use this when you want the API as a managed service (restart on failure, start o
 1. **Build a release-style binary** from the repo root (same layout as servers):
 
    ```bash
-   make build
+   ./scripts/nextpresskit build
    ```
 
 2. **Choose how paths map to the unit file**
@@ -173,7 +173,7 @@ Use this when you want the API as a managed service (restart on failure, start o
 
    ```bash
    cd /var/www/nextpresskit-backend-local
-   make build
+   ./scripts/nextpresskit build
    sudo cp deploy/systemd/nextpresskit-backend@.service /etc/systemd/system/
    sudo chown -R www-data:www-data /var/www/nextpresskit-backend-local
    ```
@@ -194,13 +194,13 @@ Use this when you want the API as a managed service (restart on failure, start o
    journalctl -u nextpresskit-backend@local -f
    ```
 
-After code changes: `make build && sudo systemctl restart nextpresskit-backend@local`. When models change, run `make migrate-up`. For a local data reset: `make db-fresh` then `make seed` ([COMMANDS.md](../COMMANDS.md#database-and-seed-data)).
+After code changes: `./scripts/nextpresskit build && sudo systemctl restart nextpresskit-backend@local`. When models change, run `./scripts/nextpresskit migrate-up`. For a local data reset: `./scripts/nextpresskit db-fresh` then `./scripts/nextpresskit seed` ([COMMANDS.md](../COMMANDS.md#database-and-seed-data)).
 
 ## Optional: Nginx in front (local)
 
 Use this to terminate HTTP or HTTPS on a chosen port, serve `/uploads/` from disk, and reverse-proxy to the Go process (`APP_PORT`, default **9090**). Pair with [HTTPS locally (recommended)](#https-locally-recommended) for TLS.
 
-1. **Backend must be listening** (foreground `./scripts/run_local.sh`, `make run`, or systemd above).
+1. **Backend must be listening** (foreground `./scripts/run_local.sh`, `make run` / `./scripts/nextpresskit run`, or systemd above).
 
 2. **Start from the dev site config** [`deploy/nginx/dev.conf`](../../deploy/nginx/dev.conf). Copy it and edit paths and ports, for example:
 
