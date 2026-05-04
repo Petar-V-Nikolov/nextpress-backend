@@ -5,32 +5,14 @@ import (
 
 	"gorm.io/gorm"
 
-	mediap "github.com/nextpresskit/backend/internal/modules/media/persistence"
-	pagesp "github.com/nextpresskit/backend/internal/modules/pages/persistence"
-	pluginsp "github.com/nextpresskit/backend/internal/modules/plugins/persistence"
-	postsp "github.com/nextpresskit/backend/internal/modules/posts/persistence"
-	rbacp "github.com/nextpresskit/backend/internal/modules/rbac/persistence"
-	taxp "github.com/nextpresskit/backend/internal/modules/taxonomy/persistence"
-	userp "github.com/nextpresskit/backend/internal/modules/user/persistence"
+	"github.com/nextpresskit/backend/internal/kit"
 )
 
-// AutoMigrate runs module persistence AutoMigrate hooks in FK-safe order.
-func AutoMigrate(db *gorm.DB) error {
-	steps := []struct {
-		name string
-		fn   func(*gorm.DB) error
-	}{
-		{"user", userp.AutoMigrate},
-		{"rbac", rbacp.AutoMigrate},
-		{"taxonomy", taxp.AutoMigrate},
-		{"media", mediap.AutoMigrate},
-		{"posts", postsp.AutoMigrate},
-		{"pages", pagesp.AutoMigrate},
-		{"plugins", pluginsp.AutoMigrate},
-	}
-	for _, s := range steps {
-		if err := s.fn(db); err != nil {
-			return fmt.Errorf("%s: %w", s.name, err)
+// AutoMigrateAll runs module AutoMigrate hooks in invocation order (caller must pass FK-safe order).
+func AutoMigrateAll(db *gorm.DB, modules []kit.Module) error {
+	for _, m := range modules {
+		if err := m.AutoMigrate(db); err != nil {
+			return fmt.Errorf("%s: %w", m.ID(), err)
 		}
 	}
 	ensureUserPublicIDDefault(db)

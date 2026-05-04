@@ -41,8 +41,7 @@ var (
 )
 
 // ConfigureEngine applies global middleware and registers all top-level routes.
-// Feature modules will later plug into the provided router via dedicated
-// registration functions to keep boundaries clear.
+// Feature HTTP routes are registered by kit modules from internal/app (see docs/MODULES.md).
 func ConfigureEngine(engine *gin.Engine, log *zap.SugaredLogger, db *gorm.DB, appVersion string, checks ...ReadinessCheck) {
 	// In production you typically want to disable Gin's debug output and rely
 	// on structured logging instead.

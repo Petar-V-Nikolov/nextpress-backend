@@ -23,13 +23,13 @@ Commands:
   build-all         Build bin/server, bin/migrate, bin/seed
   setup             install + build-all + migrate-up + seed; from a TTY also runs
                     scripts/setup-local-https.sh (install mkcert if needed, SANs + Nginx on Linux). Skip: SKIP_SETUP_LOCAL_HTTPS=1
-  migrate-up        Apply GORM AutoMigrate (internal/platform/dbmigrate)
+  migrate-up        Apply GORM AutoMigrate for enabled kit modules (MODULES in .env; see docs/MODULES.md)
   migrate-down      Removed (no SQL migration steps); use migrate-drop + migrate-up for dev reset
   migrate-version   Prints notice (no version table with AutoMigrate)
   migrate-steps     Removed (no stepped SQL migrations)
   migrate-drop      Drop all public tables (interactive; sets ALLOW_SCHEMA_DROP=1)
   db-fresh            migrate-drop then migrate-up (destructive)
-  seed              Run seeders
+  seed              Run seeders (same MODULES filter as migrate-up / API)
   run               Foreground API (go run)
   start             Background API + .tmp/<APP_DEV_RUNTIME_BASENAME>-api.pid
   stop              Stop background API + soft-clear same-repo listeners

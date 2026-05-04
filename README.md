@@ -25,6 +25,7 @@ Use this table if you're not sure which doc to open first.
 
 ## Project Concepts
 
+* Modular kit: enable slices via `MODULES` or edit [`internal/appregistry`](./internal/appregistry/registry.go); see [docs/MODULES.md](./docs/MODULES.md).
 * Starter-first architecture for bootstrapping and customization.
 * Auth-ready foundations (patterns and services for sign-in and tokens).
 * Content-oriented workflows (creation and publishing APIs).
@@ -141,4 +142,4 @@ Cross-site browser apps must set **`CORS_ORIGINS`** to the real frontend origin 
 
 The single map of all docs is [docs/README.md](./docs/README.md). Skim that page whenever you feel lost.
 
-Common links: [API versioning](./docs/API_VERSIONING.md) · [Seeding](./docs/SEEDING.md) · [Elasticsearch runbook](./docs/ELASTICSEARCH_OPERATIONS.md) · [Roadmap](./docs/ROADMAP.md) · [Task checklist](./docs/TODO.md) · [Changelog](./CHANGELOG.md)
+Common links: [Module kit](./docs/MODULES.md) · [API versioning](./docs/API_VERSIONING.md) · [Seeding](./docs/SEEDING.md) · [Elasticsearch runbook](./docs/ELASTICSEARCH_OPERATIONS.md) · [Roadmap](./docs/ROADMAP.md) · [Task checklist](./docs/TODO.md) · [Changelog](./CHANGELOG.md)

@@ -22,55 +22,48 @@ const (
 	PermissionTagsWriteID       = "00000000-0000-0000-0000-000000000208"
 	PermissionMediaReadID       = "00000000-0000-0000-0000-000000000209"
 	PermissionMediaWriteID      = "00000000-0000-0000-0000-000000000210"
-	PermissionPluginsManageID   = "00000000-0000-0000-0000-000000000213"
 )
 
-func SeedRBACDefaults(db *gorm.DB) error {
+func knownPermissionID(code string) (string, bool) {
+	m := map[string]string{
+		"admin:ping":         PermissionAdminPingID,
+		"rbac:manage":        PermissionRBACManageID,
+		"posts:read":         PermissionPostsReadID,
+		"posts:write":        PermissionPostsWriteID,
+		"pages:read":         PermissionPagesReadID,
+		"pages:write":        PermissionPagesWriteID,
+		"categories:read":    PermissionCategoriesReadID,
+		"categories:write":   PermissionCategoriesWriteID,
+		"tags:read":          PermissionTagsReadID,
+		"tags:write":         PermissionTagsWriteID,
+		"media:read":         PermissionMediaReadID,
+		"media:write":        PermissionMediaWriteID,
+	}
+	id, ok := m[code]
+	return id, ok
+}
+
+// SeedRBACDefaults upserts the admin role, permission rows for known codes, and admin role links.
+func SeedRBACDefaults(db *gorm.DB, permissionCodes []string) error {
 	roles := []rbacp.Role{
 		{ID: RoleAdminID, Name: "admin"},
-	}
-	perms := []rbacp.Permission{
-		{ID: PermissionAdminPingID, Code: "admin:ping"},
-		{ID: PermissionRBACManageID, Code: "rbac:manage"},
-		{ID: PermissionPostsReadID, Code: "posts:read"},
-		{ID: PermissionPostsWriteID, Code: "posts:write"},
-		{ID: PermissionPagesReadID, Code: "pages:read"},
-		{ID: PermissionPagesWriteID, Code: "pages:write"},
-		{ID: PermissionCategoriesReadID, Code: "categories:read"},
-		{ID: PermissionCategoriesWriteID, Code: "categories:write"},
-		{ID: PermissionTagsReadID, Code: "tags:read"},
-		{ID: PermissionTagsWriteID, Code: "tags:write"},
-		{ID: PermissionMediaReadID, Code: "media:read"},
-		{ID: PermissionMediaWriteID, Code: "media:write"},
-		{ID: PermissionPluginsManageID, Code: "plugins:manage"},
 	}
 	for i := range roles {
 		if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&roles[i]).Error; err != nil {
 			return err
 		}
 	}
-	for i := range perms {
-		if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&perms[i]).Error; err != nil {
+	for _, code := range permissionCodes {
+		id, ok := knownPermissionID(code)
+		if !ok {
+			continue
+		}
+		p := rbacp.Permission{ID: id, Code: code}
+		if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&p).Error; err != nil {
 			return err
 		}
-	}
-	links := []rbacp.RolePermission{
-		{RoleID: RoleAdminID, PermissionID: PermissionAdminPingID},
-		{RoleID: RoleAdminID, PermissionID: PermissionRBACManageID},
-		{RoleID: RoleAdminID, PermissionID: PermissionPostsReadID},
-		{RoleID: RoleAdminID, PermissionID: PermissionPostsWriteID},
-		{RoleID: RoleAdminID, PermissionID: PermissionPagesReadID},
-		{RoleID: RoleAdminID, PermissionID: PermissionPagesWriteID},
-		{RoleID: RoleAdminID, PermissionID: PermissionCategoriesReadID},
-		{RoleID: RoleAdminID, PermissionID: PermissionCategoriesWriteID},
-		{RoleID: RoleAdminID, PermissionID: PermissionTagsReadID},
-		{RoleID: RoleAdminID, PermissionID: PermissionTagsWriteID},
-		{RoleID: RoleAdminID, PermissionID: PermissionMediaReadID},
-		{RoleID: RoleAdminID, PermissionID: PermissionMediaWriteID},
-		{RoleID: RoleAdminID, PermissionID: PermissionPluginsManageID},
-	}
-	for i := range links {
-		if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&links[i]).Error; err != nil {
+		link := rbacp.RolePermission{RoleID: RoleAdminID, PermissionID: id}
+		if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&link).Error; err != nil {
 			return err
 		}
 	}

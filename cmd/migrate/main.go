@@ -6,10 +6,13 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 
+	"github.com/nextpresskit/backend/internal/appregistry"
 	"github.com/nextpresskit/backend/internal/config"
 	platformdb "github.com/nextpresskit/backend/internal/platform/database"
 	"github.com/nextpresskit/backend/internal/platform/dbmigrate"
+	"github.com/nextpresskit/backend/internal/kit"
 )
 
 func main() {
@@ -17,6 +20,13 @@ func main() {
 
 	command := flag.String("command", "up", "up: apply GORM AutoMigrate; drop: remove all public tables (dev only)")
 	flag.Parse()
+
+	zl, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("logger: %v", err)
+	}
+	logger := zl.Sugar()
+	defer func() { _ = zl.Sync() }()
 
 	dbCfg := config.LoadDBConfig()
 	db, err := platformdb.New(platformdb.Config{
@@ -34,7 +44,8 @@ func main() {
 
 	switch *command {
 	case "up":
-		if err := dbmigrate.AutoMigrate(db); err != nil {
+		mods := kit.ResolveModulesFromRegistry(logger, appregistry.ModuleRegistry())
+		if err := dbmigrate.AutoMigrateAll(db, mods); err != nil {
 			log.Fatalf("migrate up: %v", err)
 		}
 		log.Println("migrate up ok (GORM AutoMigrate)")

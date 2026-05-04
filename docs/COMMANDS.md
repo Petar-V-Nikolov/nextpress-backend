@@ -71,7 +71,7 @@ Windows equivalents:
 
 ## Database and seed data
 
-Tables come from the Go models via GORM AutoMigrate, wired up in [`internal/platform/dbmigrate/migrate.go`](../internal/platform/dbmigrate/migrate.go). There is no separate SQL migration tree: change the models, then run migrate-up.
+Tables come from the Go models via GORM AutoMigrate. `migrate-up` runs **only the persistence models for modules in the active kit list** (same rules as the API: see [`MODULES`](../.env.example) and [MODULES.md](MODULES.md)). Implementation: [`internal/platform/dbmigrate/migrate.go`](../internal/platform/dbmigrate/migrate.go) + each module’s `AutoMigrate`. There is no separate SQL migration tree: change the models, then run migrate-up.
 
 - migrate-up: sync the database schema with the code.
 - seed: add repeatable demo data (roles, sample posts, a superadmin, and more). Run this after migrate-up.
@@ -95,7 +95,7 @@ Same names work as `./scripts/nextpresskit …` or `make …`. On Windows: `.\sc
 | migrate-version | Prints a note: there is no `schema_migrations` table with AutoMigrate. |
 | migrate-drop | Drops all `public` tables after confirmation (`ALLOW_SCHEMA_DROP` is set for you). |
 | db-fresh | migrate-drop plus migrate-up only; no seed. |
-| seed | Upserts RBAC defaults and the full demo dataset ([SEEDING.md](SEEDING.md)). |
+| seed | Upserts RBAC defaults (permissions from enabled modules) and demo data per module ([SEEDING.md](SEEDING.md)). Respects `MODULES` like migrate-up. |
 
 On servers, releases usually run `bin/migrate -command=up` and sometimes `bin/seed` ([DEPLOYMENT.md](DEPLOYMENT.md)). Do not use db-fresh in production.
 

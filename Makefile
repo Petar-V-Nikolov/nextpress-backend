@@ -28,7 +28,7 @@ help:
 	@echo "Common:"
 	@echo "  make install   Go modules + .env from .env.example if missing"
 	@echo "  make setup     install + build-all + migrate-up + seed"
-	@echo "  make migrate-up / seed   Sync DB schema, then demo data"
+	@echo "  make migrate-up / seed   Sync DB schema + demo data (honours MODULES; see docs/MODULES.md)"
 	@echo "  make db-fresh  Dev reset: empty public + migrate-up (add make seed after if you want data)"
 	@echo "  make run       Foreground API"
 	@echo "  make deploy       Interactive Nginx/TLS wizard (Linux/macOS bash)"
@@ -104,7 +104,7 @@ seed-build:
 	go build -o bin/$(SEED_BINARY) ./cmd/seed
 	@echo "Done."
 
-## migrate-up: GORM AutoMigrate via internal/platform/dbmigrate (module persistence)
+## migrate-up: GORM AutoMigrate for enabled kit modules (MODULES; internal/platform/dbmigrate)
 migrate-up:
 	@bash scripts/nextpresskit migrate-up
 

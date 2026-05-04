@@ -10,6 +10,10 @@ Suggested file naming:
 - `0001-short-title.md`
 - `0002-short-title.md`
 
+## Index
+
+- [0001 — Module composition for the kit](0001-module-composition.md)
+
 Suggested structure:
 1. **Context**
 2. **Decision**

@@ -13,7 +13,7 @@ The API is split into two major groups:
 | Type | Base URL | Auth | Use case |
 |------|----------|------|----------|
 | **Public/Auth** | `{{base_url}}` | Public routes: none. Auth routes: none. | Health/readiness checks, auth (`/auth/*`), and public content routes (`/posts/*`, `/pages/*`). |
-| **Admin** | `{{base_url}}` | JWT via **cookie jar** (default) or **`Authorization: Bearer`** (see `jwt_auth_source`) | Management routes under `/admin/*`: posts, pages, taxonomy, media, RBAC, plugin management, and bootstrap/admin checks. |
+| **Admin** | `{{base_url}}` | JWT via **cookie jar** (default) or **`Authorization: Bearer`** (see `jwt_auth_source`) | Management routes under `/admin/*`: posts, pages, taxonomy, media, RBAC, and bootstrap/admin checks (depends on enabled kit modules). |
 
 ### `jwt_auth_source` (environment variable)
 

@@ -1,8 +1,10 @@
 # Database seeding
 
-[← Documentation index](README.md) · [Commands: migrate and seed](COMMANDS.md#database-and-seed-data)
+[← Documentation index](README.md) · [Commands: migrate and seed](COMMANDS.md#database-and-seed-data) · [Module kit](MODULES.md)
 
 Seeding adds predictable demo content so you can try the API without entering everything by hand. Tables must already exist: run migrate-up first, or use setup, which does migrate and seed. All command options (including db-fresh) are in [COMMANDS.md](COMMANDS.md#database-and-seed-data).
+
+**`MODULES`** in `.env` filters which modules run their `Seed` step (same resolution as `cmd/api` and `cmd/migrate`). Empty = full default registry in [`internal/appregistry`](../internal/appregistry/registry.go).
 
 ```bash
 make migrate-up && make seed          # usual path
@@ -14,9 +16,9 @@ You can also run `go run ./cmd/seed`, `./bin/seed` after `make seed-build`, or t
 
 ## What gets seeded
 
-1. RBAC baseline (`pkg/seed/rbac_defaults.go`): admin role and core permission codes.
-2. Full demo dataset (`pkg/seed/full_dataset.go`): about 100 rows per table for local use.
-3. Superadmin: one privileged user tied to both superadmin and admin roles.
+1. **RBAC defaults** (`pkg/seed/rbac_defaults.go`): admin role, permission rows for codes returned by each enabled module’s `Permissions()`, and admin↔permission links for those codes only.
+2. **Per-module demo data** (`internal/modules/*/persistence/seed_demo.go`): users, RBAC demo roles/extra permissions, taxonomy, media, posts (+ relations), pages — each module seeds only when enabled.
+3. **Superadmin:** one privileged user tied to both superadmin and admin roles (from user + RBAC seed steps).
 
 Reruns are safe: seeders use upserts so you do not pile up duplicate keys.
 
@@ -31,17 +33,16 @@ SEED_SUPERADMIN_PASSWORD=SuperAdmin123!
 
 The seeded superadmin user is deterministic and updated on reruns (same identity, latest configured credentials).
 
-## Tables seeded with 100 rows
+## Tables seeded with ~100 rows (full default modules)
 
 - `users` (includes `superadmin` as one of the 100)
 - `roles`
-- `permissions` (100 total with RBAC defaults + generated permissions)
+- `permissions` (RBAC defaults for enabled modules + generated seed permissions)
 - `role_permissions`
 - `user_roles`
 - `posts`, `pages`
 - `categories`, `tags`
 - `media`
-- `plugins`
 - `post_categories`, `post_tags`
 - `post_seo`, `post_metrics`
 - `series`, `post_series`

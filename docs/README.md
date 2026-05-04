@@ -36,8 +36,10 @@ Docs follow [Diátaxis](https://diataxis.fr/) ideas: tutorials, how-tos, referen
 | Reference | [openapi.yaml](openapi.yaml) | REST paths, request/response schemas. |
 | Reference | [CHANGELOG](../CHANGELOG.md) | Release notes process and unreleased entries. |
 | Explanation | [ADR folder](adr/README.md) | Architecture decision records process and conventions. |
+| Explanation | [ADR 0001 — module composition](adr/0001-module-composition.md) | How the kit composes `cmd/api`, migrate, and seed. |
 | Reference | [.env.example](../.env.example) | All environment variables. |
 | Explanation | [Roadmap](ROADMAP.md) | What is shipped, current themes, future direction. |
+| Explanation | [Module kit](MODULES.md) | Enable/disable features (`MODULES`), registry, adding a module. |
 | Task list | [TODO](TODO.md) | Full checklist; keep in sync with code. |
 
 Contributors: [Contributing guide](../CONTRIBUTING.md).
