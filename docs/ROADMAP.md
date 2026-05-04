@@ -22,7 +22,7 @@ Use this page for direction and use [`TODO.md`](TODO.md) for execution details.
 
 ## In progress
 
-Typical focus: **plugin hook implementations**, **test/CI coverage**, **GraphQL parity** (if desired). Details: unchecked lines in [`TODO.md`](TODO.md).
+Typical focus: **plugin hook implementations**, **test/CI coverage**. Details: unchecked lines in [`TODO.md`](TODO.md).
 
 ---
 

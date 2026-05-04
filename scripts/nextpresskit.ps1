@@ -64,7 +64,7 @@ Commands:
   help install deps tidy build build-all setup
   migrate-up migrate-down migrate-version migrate-steps <N> seed
   run start stop deploy checks
-  test test-coverage test-integration security-check graphql clean postman-sync
+  test test-coverage test-integration security-check clean postman-sync
 
 Examples:
   .\scripts\nextpresskit.ps1 setup
@@ -214,7 +214,6 @@ switch ($cmd) {
     "test-coverage" { Ensure-Go; go test -cover ./... }
     "test-integration" { Ensure-Go; go test -tags=integration -v ./internal/platform/database }
     "security-check" { Ensure-Go; go run golang.org/x/vuln/cmd/govulncheck@latest ./... }
-    "graphql" { Ensure-Go; go run github.com/99designs/gqlgen generate }
     "postman-sync" {
         $py = Get-Command python3 -ErrorAction SilentlyContinue
         if (-not $py) { $py = Get-Command python -ErrorAction SilentlyContinue }

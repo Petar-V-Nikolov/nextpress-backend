@@ -62,7 +62,7 @@ go mod download
 cp .env.example .env
 ```
 
-Configure `DB_*`, `JWT_SECRET`, `APP_ENV=local`. For auth, set `JWT_AUTH_SOURCE` (`cookie` default vs `header`) and `JWT_COOKIE_*` / cookie names as needed; use `CORS_ORIGINS` when testing cookie auth from a separate frontend origin. Optional flags: Elasticsearch, GraphQL - [`.env.example`](../../.env.example).
+Configure `DB_*`, `JWT_SECRET`, `APP_ENV=local`. For auth, set `JWT_AUTH_SOURCE` (`cookie` default vs `header`) and `JWT_COOKIE_*` / cookie names as needed; use `CORS_ORIGINS` when testing cookie auth from a separate frontend origin. Optional flags: Elasticsearch — [`.env.example`](../../.env.example).
 
 ## Migrate, seed, run
 
@@ -231,10 +231,6 @@ For **HTTPS**, add a `listen 443 ssl` server (or let Certbot modify the site on 
 
 `ELASTICSEARCH_ENABLED=true`, `ELASTICSEARCH_URLS`. With `APP_ENV` `local` or `dev`, index auto-create defaults on. `GET /posts/search` → 501 if disabled. Reindex: `POST /admin/posts/search/reindex` (`posts:write`).
 
-## Optional: GraphQL
-
-`GRAPHQL_ENABLED=true`; playground only for `APP_ENV` `local` or `dev`. After editing `internal/graphql/schema.graphqls`: `make graphql`.
-
 ## Tests
 
 ```bash
@@ -244,4 +240,4 @@ go vet ./...
 
 ---
 
-**See also:** [Documentation index](../README.md) · [macOS](macos.md) · [Server deployment](../DEPLOYMENT.md) · [Seeding](../SEEDING.md) · [Roadmap](../ROADMAP.md) · [TODO](../TODO.md) (optional ES / GraphQL / tests **`[x]`** / **`[ ]`**)
+**See also:** [Documentation index](../README.md) · [macOS](macos.md) · [Server deployment](../DEPLOYMENT.md) · [Seeding](../SEEDING.md) · [Roadmap](../ROADMAP.md) · [TODO](../TODO.md) (optional ES / tests **`[x]`** / **`[ ]`**)

@@ -14,6 +14,7 @@ Format:
 - OpenAPI: `cookieAuth` security scheme, auth response and cookie documentation, optional refresh/logout bodies.
 
 ### Changed
+- Removed the optional GraphQL API (gqlgen), `GRAPHQL_*` settings, and `make graphql` / CLI `graphql` generation. The HTTP surface is REST per OpenAPI only.
 - Documentation: root `README`, `docs/README`, `docs/SECURITY`, `docs/DEPLOYMENT`, `docs/deployment/local`, and `postman-templates/README` updated for HttpOnly JWT cookies and `JWT_AUTH_SOURCE`.
 - Documentation: added `docs/COMMANDS.md` and cross-links across docs for faster navigation and plain-language command explanations.
 

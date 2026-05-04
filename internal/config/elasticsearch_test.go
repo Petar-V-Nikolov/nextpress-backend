@@ -4,31 +4,6 @@ import (
 	"testing"
 )
 
-func TestLoadGraphQLConfig(t *testing.T) {
-	t.Setenv("GRAPHQL_ENABLED", "true")
-	t.Setenv("GRAPHQL_PATH", "/custom/graphql")
-	t.Setenv("GRAPHQL_PLAYGROUND_ENABLED", "1")
-	c := LoadGraphQLConfig()
-	if !c.Enabled {
-		t.Fatal("expected Enabled true")
-	}
-	if c.Path != "/custom/graphql" {
-		t.Fatalf("path: got %q", c.Path)
-	}
-	if !c.PlaygroundEnabled {
-		t.Fatal("expected PlaygroundEnabled true")
-	}
-}
-
-func TestLoadGraphQLConfig_DefaultPathFromAPIBasePath(t *testing.T) {
-	t.Setenv("GRAPHQL_PATH", "")
-	t.Setenv("API_BASE_PATH", "/v1/")
-	c := LoadGraphQLConfig()
-	if c.Path != "/v1/graphql" {
-		t.Fatalf("path: got %q", c.Path)
-	}
-}
-
 func TestLoadAppConfig_NormalizesAPIBasePath(t *testing.T) {
 	t.Setenv("API_BASE_PATH", "v2/")
 	c := LoadAppConfig()

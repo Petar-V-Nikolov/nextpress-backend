@@ -21,7 +21,6 @@ Fix or explain any failures.
 ## API changes
 
 - Update [`docs/openapi.yaml`](docs/openapi.yaml) for REST.
-- GraphQL-only changes: edit `internal/graphql/schema.graphqls`, then `make graphql`.
 
 ## Documentation (living docs)
 

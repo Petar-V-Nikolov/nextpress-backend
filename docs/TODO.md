@@ -11,7 +11,7 @@ Use this as the source-of-truth checklist for work tracking.
 - [x] Go API entrypoint (`cmd/api`)
 - [x] Database schema (`cmd/migrate`, AutoMigrate in `internal/platform/dbmigrate`, models in `internal/modules/*/persistence`)
 - [x] Seed runner (`cmd/seed`)
-- [x] Makefile targets (`build`, `run`, `migrate-*`, `seed`, `graphql`, …)
+- [x] Makefile targets (`build`, `run`, `migrate-*`, `seed`, …)
 - [x] Environment loading (`.env` / `.env.example`)
 - [x] Structured logging (zap)
 - [x] Request ID middleware
@@ -109,24 +109,13 @@ Use this as the source-of-truth checklist for work tracking.
 
 ---
 
-## GraphQL (optional)
-
-- [x] gqlgen wiring; `post`, `posts`, `page(slug)` queries
-- [x] Playground when `APP_ENV` local/dev and flag on
-- [x] Public read parity slice: `categories`, `tags`, `searchPosts(q)` queries
-- [x] Auth mutation parity slice: `register`, `login`, `refresh`
-- [x] **Parity (defined scope)** with REST for public/auth slices: categories, tags, search, `register/login/refresh`, taxonomy mutations (`create/update/delete` category/tag); admin GraphQL types remain out-of-scope (REST-first)
-- [x] Document intended GraphQL vs REST split in [`README.md`](README.md) (docs index) or an ADR
-
----
-
 ## Testing & CI
 
 - [x] Middleware tests (auth, authorization, rate limit)
 - [x] Posts public routes tests (with stubs)
 - [x] Plugins hooks unit test
 - [x] Posts derived-fields hook test
-- [x] Config tests (GraphQL / ES-related)
+- [x] Config tests (Elasticsearch-related)
 - [x] Auth application service unit tests (register/login/refresh paths)
 - [x] RBAC application service unit tests (roles/permissions/assignments)
 - [x] Pages application service unit tests (create/update validation paths)

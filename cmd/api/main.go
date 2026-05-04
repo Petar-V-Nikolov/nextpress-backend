@@ -11,15 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	gqlhandler "github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 
 	"github.com/nextpresskit/backend/internal/config"
-	gqlapi "github.com/nextpresskit/backend/internal/graphql"
-	"github.com/nextpresskit/backend/internal/graphql/generated"
 	platformDatabase "github.com/nextpresskit/backend/internal/platform/database"
 	platformES "github.com/nextpresskit/backend/internal/platform/elasticsearch"
 	platformLogger "github.com/nextpresskit/backend/internal/platform/logger"
@@ -82,7 +78,6 @@ func main() {
 	rbacCfg := config.LoadRBACConfig()
 	mediaCfg := config.LoadMediaConfig()
 	rateCfg := config.LoadRateLimitConfig()
-	graphqlCfg := config.LoadGraphQLConfig()
 	esCfg := config.LoadElasticsearchConfig(appCfg.Env)
 
 	// Initialize a single database connection for the lifetime of the process.
@@ -378,45 +373,6 @@ UPDATE posts
 
 			c.JSON(200, gin.H{"ok": true})
 		})
-	}
-
-	if graphqlCfg.Enabled {
-		gqlSrv := gqlhandler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
-			Resolvers: &gqlapi.Resolver{
-				Auth:      authService,
-				PostsCore: postsService.CorePostsService,
-				Pages:     pagesService,
-				Taxonomy:  taxService,
-				Search:    postsIdx,
-				JWT:       jwtCfg,
-			},
-		}))
-		path := strings.TrimSpace(graphqlCfg.Path)
-		if path == "" {
-			path = appCfg.APIBasePath + "/graphql"
-		}
-		engine.POST(path, publicLimiter.Middleware("public"), func(c *gin.Context) {
-			c.Request = c.Request.WithContext(gqlapi.WithGinContext(c.Request.Context(), c))
-			gqlSrv.ServeHTTP(c.Writer, c.Request)
-		})
-		engine.GET(path, publicLimiter.Middleware("public"), func(c *gin.Context) {
-			c.Request = c.Request.WithContext(gqlapi.WithGinContext(c.Request.Context(), c))
-			gqlSrv.ServeHTTP(c.Writer, c.Request)
-		})
-		envLower := strings.ToLower(strings.TrimSpace(appCfg.Env))
-		playgroundOK := graphqlCfg.PlaygroundEnabled && (envLower == "local" || envLower == "dev")
-		if graphqlCfg.PlaygroundEnabled && !playgroundOK {
-			logger.Warnw("GRAPHQL_PLAYGROUND_ENABLED ignored outside local/dev app environments",
-				"app_env", appCfg.Env,
-			)
-		}
-		if playgroundOK {
-			engine.GET(path+"/playground", gin.WrapH(playground.Handler("GraphQL playground", path)))
-		}
-		logger.Infow("graphql endpoint enabled",
-			"path", path,
-			"playground", playgroundOK,
-		)
 	}
 
 	// The Server holds the application configuration and shared dependencies

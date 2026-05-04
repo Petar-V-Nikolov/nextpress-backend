@@ -27,15 +27,13 @@ Docs follow [Diátaxis](https://diataxis.fr/) ideas: tutorials, how-tos, referen
 | Tutorial | [Root README](../README.md) | Fast path: `./scripts/nextpresskit setup`, `make setup`, or PowerShell `nextpresskit.ps1 setup`. |
 | How-to | [Deployment (servers)](DEPLOYMENT.md) | Ubuntu, Nginx, systemd, HTTPS (Certbot), interactive scripts/deploy. |
 | Reference | [Command reference](COMMANDS.md) | What each command does and when to use it. |
-| How-to | [Local development](deployment/local.md) | Laptop setup, HTTPS with mkcert, optional Nginx/systemd, ES/GraphQL, tests. |
+| How-to | [Local development](deployment/local.md) | Laptop setup, HTTPS with mkcert, optional Nginx/systemd, Elasticsearch, tests. |
 | How-to | [Local development (macOS)](deployment/macos.md) | Homebrew, paths, mkcert, Nginx on Mac. |
 | How-to | [Elasticsearch operations runbook](ELASTICSEARCH_OPERATIONS.md) | Index templates, upgrades/reindex, multi-cluster operations. |
 | Explanation | [API versioning strategy](API_VERSIONING.md) | Current decision (`API_BASE_PATH`) and migration paths (URL/header versioning). |
 | How-to | [Database seeding](SEEDING.md) | What demo data looks like; superadmin env vars. Commands: [COMMANDS.md](COMMANDS.md#database-and-seed-data). |
 | How-to | [Security and hardening](SECURITY.md) | CVE review, CORS policy, rate-limit tuning, JWT rotation guidance. |
 | Reference | [openapi.yaml](openapi.yaml) | REST paths, request/response schemas. |
-| Reference | [internal/graphql/schema.graphqls](../internal/graphql/schema.graphqls) | GraphQL schema (not in OpenAPI). |
-| Explanation | [GraphQL vs REST](../README.md#graphql-vs-rest) | Contract boundary: REST-first, GraphQL optional/read-focused. |
 | Reference | [CHANGELOG](../CHANGELOG.md) | Release notes process and unreleased entries. |
 | Explanation | [ADR folder](adr/README.md) | Architecture decision records process and conventions. |
 | Reference | [.env.example](../.env.example) | All environment variables. |
@@ -56,7 +54,7 @@ Track work in [TODO.md](TODO.md) with the code; refresh [ROADMAP.md](ROADMAP.md)
 
 ## Machine-readable API
 
-Import [`openapi.yaml`](openapi.yaml) into Postman, Stoplight, or your gateway. It documents Bearer and cookie JWT security for protected routes. Regenerate GraphQL code after schema edits: `make graphql`.
+Import [`openapi.yaml`](openapi.yaml) into Postman, Stoplight, or your gateway. It documents Bearer and cookie JWT security for protected routes.
 
 Ready-made collections: [`postman-templates/`](../postman-templates) (see [`postman-templates/README.md`](../postman-templates/README.md) for jwt_auth_source and cookie jar vs header mode). Local gitignored `postman/`: `./scripts/nextpresskit postman-sync` or `make postman-sync` (optional `--dry-run`; tier URLs such as `POSTMAN_*_BASE_URL`).
 

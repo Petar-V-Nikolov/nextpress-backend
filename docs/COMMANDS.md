@@ -103,7 +103,6 @@ On servers, releases usually run `bin/migrate -command=up` and sometimes `bin/se
 
 | Command | Description |
 |---------|-------------|
-| `make graphql` | Regenerates GraphQL code after schema changes. |
 | `./scripts/nextpresskit checks` | Runs project checks used in CI-style validation. |
 | `make test` | Runs Go test suites. |
 | `go vet ./...` | Static analysis for suspicious constructs. |

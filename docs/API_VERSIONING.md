@@ -30,14 +30,7 @@ This keeps the API simple now while making URL-path versioning a no-refactor con
 
 ## Runtime Behavior
 
-- All REST groups are mounted under `API_BASE_PATH`.
-- GraphQL default path is derived from the same base:
-  - `<API_BASE_PATH>/graphql`
-  - So defaults become:
-    - `/graphql` when base path is empty
-    - `/v1/graphql` when `API_BASE_PATH=/v1`
-
-You can still override GraphQL explicitly with `GRAPHQL_PATH`.
+- All REST route groups are mounted under `API_BASE_PATH`.
 
 ## Configuration
 

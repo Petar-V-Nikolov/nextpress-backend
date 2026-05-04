@@ -16,7 +16,7 @@ API_LOG_FILE ?= .tmp/$(DEV_RUNTIME_BASENAME)-api.log
 MIGRATE_CMD ?= up
 
 .PHONY: help all build build-all install setup run start stop clean \
-	test test-coverage test-integration tidy deps graphql \
+	test test-coverage test-integration tidy deps \
 	seed seed-build \
 	migrate-up migrate-down migrate-steps migrate-drop migrate-version db-fresh \
 	security-check deploy deploy-nginx deploy-ps checks postman-sync
@@ -157,10 +157,6 @@ security-check:
 ## checks: CI-style suite (see scripts/nextpresskit checks)
 checks:
 	@bash scripts/nextpresskit checks
-
-## graphql: Regenerate gqlgen code
-graphql:
-	@bash scripts/nextpresskit graphql
 
 ## postman-sync: Seed postman/ from postman-templates/; refresh env JSON from .env.example + .env (optional POSTMAN_* URLs)
 postman-sync:

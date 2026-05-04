@@ -38,7 +38,6 @@ Use this table if you're not sure which doc to open first.
 * PostgreSQL
 * GORM
 * JWT
-* gqlgen
 * Prometheus
 
 ## Quick start
@@ -125,15 +124,11 @@ The NextPressKit backend is designed to work with the frontend web project:
 
 ## API contract
 
-This project includes an OpenAPI-first API contract and optional GraphQL support.
+This project includes an OpenAPI-first REST API contract.
 
 * OpenAPI spec: [docs/openapi.yaml](./docs/openapi.yaml).
 * REST endpoints cover auth, public content, and admin operations.
 * API base path is configurable with `API_BASE_PATH` (see [.env.example](./.env.example)).
-
-### GraphQL vs REST
-
-**REST** (OpenAPI) is the primary contract for writes and most product flows. **GraphQL** is optional and intended for read-focused use when you enable it in configuration. Regenerate GraphQL code after schema changes: `make graphql`. Details: [docs/README.md](./docs/README.md).
 
 ### Authentication (JWT)
 

@@ -38,7 +38,7 @@ Commands:
   checks            CI-style: test, vet, integration, OpenAPI, govulncheck
   postman-sync      Seed gitignored postman/ from postman-templates/ if needed; refresh env JSON from .env (Python 3)
   test | test-coverage | test-integration
-  security-check | graphql | clean
+  security-check | clean
 
 Examples:
   ./scripts/nextpresskit setup
@@ -184,10 +184,6 @@ test-integration)
 security-check)
   ensure_go
   exec go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-  ;;
-graphql)
-  ensure_go
-  exec go run github.com/99designs/gqlgen generate
   ;;
 postman-sync)
   command -v python3 >/dev/null 2>&1 || {

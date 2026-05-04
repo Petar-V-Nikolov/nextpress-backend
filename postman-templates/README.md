@@ -77,4 +77,3 @@ Collections are not rewritten (requests use `{{base_url}}` only).
 
 - `POST /admin/bootstrap/claim-admin` is only available when `RBAC_BOOTSTRAP_ENABLED=true`.
 - `GET /posts/search` and `POST /admin/posts/search/reindex` require Elasticsearch to be enabled.
-- GraphQL (`/graphql`) is optional and controlled by `GRAPHQL_ENABLED`; it is not part of these REST collections. GraphQL `login` / `refresh` use the same cookie behavior when `JWT_AUTH_SOURCE=cookie`.
