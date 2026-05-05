@@ -2,47 +2,39 @@
 
 [Docs index](docs/README.md) · [Commands](docs/COMMANDS.md)
 
-This guide is the shortest path to preparing a clean PR.
+Keep changes small, tested, and documented.
 
-## Prerequisites
+## Before Opening A PR
 
-- Go version in [`go.mod`](go.mod)
-- PostgreSQL for integration-style checks (optional for some packages)
+Run:
 
-## Before you open a PR
+```bash
+./scripts/nextpresskit checks
+```
+
+If needed, run only the basics:
 
 ```bash
 ./scripts/nextpresskit test
 go vet ./...
 ```
 
-Or run the full CI-style suite: `./scripts/nextpresskit checks`.
+Fix failures or explain them in the PR description.
 
-Fix or explain any failures.
+## Keep Docs Updated
 
-## API changes
+Update docs in the same PR as code changes.
 
-- Update [`docs/openapi.yaml`](docs/openapi.yaml) for REST.
+- API route or payload changed: update `docs/openapi.yaml`
+- Command behavior changed: update `docs/COMMANDS.md`
+- Seed/demo data changed: update `docs/SEEDING.md`
+- Deploy flow changed: update `docs/DEPLOYMENT.md`
+- Scope or priorities changed: update `docs/TODO.md` and `docs/ROADMAP.md`
 
-## Documentation (living docs)
+## Branch And Environment Model
 
-Keep narrative and tasks honest when behavior or priorities change — **prefer the same PR** as the code.
+See `docs/DEPLOYMENT.md` for `dev -> staging -> main` flow and server layout.
 
-Markdown uses UTF-8 and LF line endings ([`.gitattributes`](.gitattributes)); [`.editorconfig`](.editorconfig) matches that and avoids stripping trailing spaces in `.md` (they can be meaningful). If you suddenly see whole-file diffs from line endings after a pull, run `git add --renormalize .` once, review, and commit.
+## Need Help?
 
-| When you… | Update… |
-|-----------|---------|
-| Ship or cancel a scoped feature | [`docs/TODO.md`](docs/TODO.md) - set **`[x]`** / **`[ ]`** for the lines you touch (full checklist) |
-| Change product direction or major capability | [`docs/ROADMAP.md`](docs/ROADMAP.md) (**Shipped** / **In progress** / **Later**) |
-| Touch migrate, seed, or demo data | [`docs/COMMANDS.md`](docs/COMMANDS.md#database-and-seed-data), [`docs/SEEDING.md`](docs/SEEDING.md), `pkg/seed` |
-| Change deploy steps or branches | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
-
-See also: [docs/README.md](docs/README.md) — **Pick your path** and the full doc table. Full checklist: [docs/TODO.md](docs/TODO.md).
-
-## Branches and servers
-
-Promotion model and server layout: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) (Git branches section).
-
-## Questions
-
-Open a discussion or issue on the repository.
+Open an issue or discussion in the repository.

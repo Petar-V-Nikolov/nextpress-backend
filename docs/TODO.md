@@ -1,6 +1,6 @@
-# TODO (kit maintenance)
+# TODO (maintenance checklist)
 
-**`[x]`** = done · **`[ ]`** = open. [Documentation index](README.md) · [Module kit](MODULES.md) · [`ROADMAP.md`](ROADMAP.md)
+`[x]` done · `[ ]` open.
 
 ---
 
@@ -29,6 +29,7 @@
 - [x] [`MODULES.md`](MODULES.md) — how to enable/disable and add modules
 - [x] [ADR 0001](adr/0001-module-composition.md)
 - [ ] Keep [openapi.yaml](openapi.yaml) in sync whenever REST changes
+- [x] Add troubleshooting guide for common setup/run issues
 
 ---
 

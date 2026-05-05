@@ -1,10 +1,8 @@
 # ADRs (Architecture Decision Records)
 
-[← Documentation index](../README.md)
+[← Docs index](../README.md)
 
-Use this folder for significant technical decisions that have long-term impact.
-
-Keep ADRs short and decision-focused so future contributors can understand trade-offs quickly.
+Use this folder for important architecture decisions.
 
 Suggested file naming:
 - `0001-short-title.md`
@@ -14,14 +12,11 @@ Suggested file naming:
 
 - [0001 — Module composition for the kit](0001-module-composition.md)
 
-Suggested structure:
+Suggested sections:
 1. **Context**
 2. **Decision**
 3. **Consequences**
 4. **Alternatives considered**
 
-When to create an ADR:
-- New architectural pattern or subsystem
-- Data model or API contract decisions with trade-offs
-- Operational decisions affecting reliability, scaling, or security
+Create an ADR when a technical decision has long-term impact.
 

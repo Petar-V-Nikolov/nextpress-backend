@@ -1,10 +1,7 @@
 # Roadmap
 
-**Explanation** — product scope and direction. **Every checkbox** (shipped vs open): [`TODO.md`](TODO.md) — use **`[ ]`** lines as the backlog; this page stays short.
-
-**Related:** [Documentation index](README.md) · [Contributing](../CONTRIBUTING.md) · [Commands](COMMANDS.md) · **REST contract** [`openapi.yaml`](openapi.yaml) · [Module kit](MODULES.md)
-
-Keep this file short: shipped capabilities, what you are actively improving, and rough future themes. Owners and threading: your issue tracker + [`TODO.md`](TODO.md).
+High-level product direction.
+Detailed engineering checklist is in [`TODO.md`](TODO.md).
 
 ---
 
@@ -21,13 +18,18 @@ Keep this file short: shipped capabilities, what you are actively improving, and
 
 ## In progress
 
-Typical focus: **test coverage** for transport/application layers, **smoke tests** for minimal `MODULES` sets. Details: [`TODO.md`](TODO.md).
+Current focus:
+- better test coverage
+- module-combination smoke tests
 
 ---
 
 ## Later
 
-See unchecked items under **Future**, **Testing**, and **Security** in [`TODO.md`](TODO.md). Dynamic **plugins** as a separate kit or service (not in this core repo).
+Main later themes:
+- optional object storage backend
+- preset product profiles
+- plugin model as separate service/kit
 
 ---
 

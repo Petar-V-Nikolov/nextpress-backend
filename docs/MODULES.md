@@ -1,8 +1,9 @@
 # Kit modules
 
-[← Documentation index](README.md)
+[← Docs index](README.md)
 
-NextPressKit is a **modular monolith**: each vertical slice lives under `internal/modules/<name>/` and is registered through a small `module` package plus the shared contract in [`internal/kit`](../internal/kit/module.go).
+NextPressKit is modular.
+Each feature is a module under `internal/modules/<name>`.
 
 ## Default registry
 
@@ -18,17 +19,18 @@ The compile-time default list (order matters for migrations and HTTP wiring) liv
 | 6 | `posts` | Posts + public routes + Elasticsearch hooks + scheduled publish loop |
 | 7 | `pages` | Pages + public routes |
 
-## Choosing modules at runtime
+## Choose modules at runtime
 
-Set **`MODULES`** in `.env` to a comma-separated list of ids (case-insensitive). Empty or unset = full default registry. From an interactive terminal, **`make setup` → Add kit module / Remove kit module** can edit this line for you (then run `migrate-up` / `seed` as needed).
+Set `MODULES` in `.env` as comma-separated module ids.
+If empty, all default modules are enabled.
 
-Implicit dependencies are applied so migrations and typical admin stacks stay consistent:
+Some dependencies are auto-added:
 
 - `auth` → also enables `user`, `rbac`
 - Any of `posts`, `pages`, `taxonomy`, `media` → also enables `user`, `rbac`, `auth`
 - `posts` → also enables `taxonomy`, `media` (FKs / featured media)
 
-Unknown ids are logged and ignored.
+Unknown module ids are ignored.
 
 Examples:
 
@@ -40,15 +42,15 @@ MODULES=auth,user,rbac
 MODULES=user,rbac,auth,taxonomy,media,posts,pages
 ```
 
-## Choosing modules at compile time
+## Change default registry
 
-To change the default product permanently, edit [`internal/appregistry/registry.go`](../internal/appregistry/registry.go): add/remove entries from `ModuleRegistry()` or reorder (keep FK-safe migrate order: `user` before `rbac` before content tables, etc.).
+Edit `internal/appregistry/registry.go`.
 
-## What runs per command
+## What commands use modules
 
-- **`cmd/api`** — resolves modules, runs `Prepare` / `Register*` / `Start` for each.
-- **`cmd/migrate`** — runs `AutoMigrate` only for resolved modules (same `MODULES` rules).
-- **`cmd/seed`** — runs `SeedRBACDefaults` with merged permission codes from enabled modules, then each module’s `Seed` inside one transaction.
+- `cmd/api` for HTTP routes/services
+- `cmd/migrate` for schema migration
+- `cmd/seed` for demo/RBAC seed data
 
 ## Adding a new module
 
@@ -58,6 +60,6 @@ To change the default product permanently, edit [`internal/appregistry/registry.
 4. Return permission codes from `Permissions()` if the module introduces RBAC codes seeded for the admin role.
 5. Update [`docs/openapi.yaml`](openapi.yaml) and Postman templates when you add HTTP surface.
 
-## Plugins
+## Plugin note
 
-Dynamic WordPress-style plugins are **not** part of this core kit. Post-save extensibility is limited to hooks composed in the posts module (e.g. derived fields + optional Elasticsearch). A separate kit or service can reintroduce plugin discovery later.
+Dynamic plugin loading is not part of this core kit.

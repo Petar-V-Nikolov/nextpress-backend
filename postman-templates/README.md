@@ -1,21 +1,24 @@
 # Postman - NextPressKit API
 
-[Documentation index](../docs/README.md) · [Command reference](../docs/COMMANDS.md)
+[Docs index](../docs/README.md) · [Commands](../docs/COMMANDS.md)
 
-Canonical collection and environment JSON lives in this **`postman-templates/`** folder (tracked in git). The **`postman/`** directory at the repo root is **gitignored**: run **`postman-sync`** to copy any missing files from here into `postman/`, then apply values from `.env.example` / `.env`.
+Templates are versioned in `postman-templates/`.
+Generated local files go to gitignored `postman/`.
 
-If you only need a quick path: run `./scripts/nextpresskit postman-sync`, then import files from `postman/`.
+## Quick Start
 
-## Route groups (Public/Auth and Admin)
+```bash
+./scripts/nextpresskit postman-sync
+```
 
-The API is split into two major groups:
+Then import JSON files from `postman/` into Postman.
 
-| Type | Base URL | Auth | Use case |
-|------|----------|------|----------|
-| **Public/Auth** | `{{base_url}}` | Public routes: none. Auth routes: none. | Health/readiness checks, auth (`/auth/*`), and public content routes (`/posts/*`, `/pages/*`). |
-| **Admin** | `{{base_url}}` | JWT via **cookie jar** (default) or **`Authorization: Bearer`** (see `jwt_auth_source`) | Management routes under `/admin/*`: posts, pages, taxonomy, media, RBAC, and bootstrap/admin checks (depends on enabled kit modules). |
+## Collections
 
-### `jwt_auth_source` (environment variable)
+- Public collection: health/auth/public content routes
+- Admin collection: `/admin/*` routes
+
+### `jwt_auth_source`
 
 Matches server behavior controlled by `JWT_AUTH_SOURCE` in `.env`:
 
@@ -24,7 +27,7 @@ Matches server behavior controlled by `JWT_AUTH_SOURCE` in `.env`:
 | `cookie` (default) | After `POST /auth/login`, Postman stores HttpOnly cookies for `{{base_url}}`. Protected requests **do not** send `Authorization`; the collection pre-request script removes that header so the cookie jar is used. |
 | `header` | Login/refresh responses include `tokens` in JSON. The collection scripts set `Authorization: Bearer …` from `access_token` (Public) or `admin_access_token` (Admin). |
 
-Set this on each imported environment (`NextPressKit-*.postman_environment.json`).
+Set this variable in each imported environment.
 
 ## Collections
 
@@ -63,15 +66,15 @@ make postman-sync
 
 Collections are not rewritten (requests use `{{base_url}}` only).
 
-### Setup
+### Usage
 
 1. Run **`postman-sync`** once so **`postman/`** contains the JSON (then import from that folder).
 2. Import the two collections and the four environment files into Postman.
-3. Select one environment. (Browser apps: set **`CORS_ORIGINS`** on the API to your frontend origin and use `credentials: 'include'`. Postman itself ignores CORS but still stores response cookies per host.)
+3. Select one environment.
 4. Run **`POST /auth/login`** from the Public collection.
    - **`jwt_auth_source=cookie`:** cookies are stored automatically; response body is `{ "user": … }` only. Then run Admin requests against the same `base_url`.
    - **`jwt_auth_source=header`:** the login tests store `access_token`, `refresh_token`, and **`admin_access_token`** (copy of access) for the Admin collection script.
-5. For **cookie mode**, no manual copy step is required. For **header mode**, use `admin_access_token` (already synced after login from the updated collection tests).
+5. Cookie mode uses cookie jar automatically. Header mode uses bearer tokens.
 
 ### Notes
 

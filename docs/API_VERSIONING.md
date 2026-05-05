@@ -1,12 +1,13 @@
 # API Versioning Strategy
 
-[← Documentation index](README.md) · [OpenAPI contract](openapi.yaml)
+[← Docs index](README.md) · [OpenAPI](openapi.yaml)
 
 This document records the current API versioning decision for NextPressKit and how to evolve it safely.
 
-## One-line summary
+## Summary
 
-The API is unversioned by default, and you can switch to path versioning later by setting `API_BASE_PATH=/v1` without refactoring handlers.
+API routes are unversioned by default.
+When needed, set `API_BASE_PATH=/v1`.
 
 ## Current Decision
 
@@ -21,12 +22,11 @@ Examples:
 
 This keeps the API simple now while making URL-path versioning a no-refactor config change later.
 
-## Why This Approach
+## Why
 
-- Keeps early development friction low (no forced version policy yet).
-- Avoids hardcoding `/v1` across handlers and docs.
-- Gives a reversible, low-risk bridge to path versioning when needed.
-- Fits current architecture where routes are centralized in `cmd/api`.
+- Simple now
+- Easy to move to `/v1` later
+- No handler refactor required
 
 ## Runtime Behavior
 
@@ -47,7 +47,7 @@ Rules:
 - Missing leading slash is normalized (`v1` -> `/v1`).
 - Trailing slash is trimmed (`/v1/` -> `/v1`).
 
-## If We Choose URL Path Versioning Later
+## Move To URL Versioning Later
 
 1. Set `API_BASE_PATH=/v1`.
 2. Update external clients to call `/v1/*`.
@@ -56,19 +56,9 @@ Rules:
 
 No handler-level route refactor is required.
 
-## If We Choose Header Versioning Later
+## Header Versioning Option
 
-Recommended transition:
-
-1. Keep canonical server routes under one internal base path.
-2. Add middleware that maps version header (for example `X-API-Version: 1`) to the chosen route group or contract behavior.
-3. Maintain explicit OpenAPI docs for supported header versions.
-4. Add version usage metrics before deprecating any behavior.
-
-Notes:
-
-- Header versioning keeps URLs clean but is harder to test and cache correctly.
-- Path versioning is usually easier for CDN/proxy visibility and debugging.
+Possible, but path versioning is usually easier to debug and cache.
 
 ## Compatibility Policy (Baseline)
 
