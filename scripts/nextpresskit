@@ -21,15 +21,16 @@ Commands:
   deps              go mod download only
   build             Build bin/server only
   build-all         Build bin/server, bin/migrate, bin/seed
-  setup             install + build-all + migrate-up + seed; from a TTY also runs
-                    scripts/setup-local-https.sh (install mkcert if needed, SANs + Nginx on Linux). Skip: SKIP_SETUP_LOCAL_HTTPS=1
-  migrate-up        Apply GORM AutoMigrate (internal/platform/dbmigrate)
+  setup             TTY: text menu (profiles, custom steps, add/remove MODULES in .env). Else or
+                    NP_SETUP_NONINTERACTIVE=1: install + build-all + migrate-up + seed; optional
+                    setup-local-https.sh. Skip: SKIP_SETUP_LOCAL_HTTPS=1
+  migrate-up        Apply GORM AutoMigrate for enabled kit modules (MODULES in .env; see docs/MODULES.md)
   migrate-down      Removed (no SQL migration steps); use migrate-drop + migrate-up for dev reset
   migrate-version   Prints notice (no version table with AutoMigrate)
   migrate-steps     Removed (no stepped SQL migrations)
   migrate-drop      Drop all public tables (interactive; sets ALLOW_SCHEMA_DROP=1)
   db-fresh            migrate-drop then migrate-up (destructive)
-  seed              Run seeders
+  seed              Run seeders (same MODULES filter as migrate-up / API)
   run               Foreground API (go run)
   start             Background API + .tmp/<APP_DEV_RUNTIME_BASENAME>-api.pid
   stop              Stop background API + soft-clear same-repo listeners
@@ -38,7 +39,7 @@ Commands:
   checks            CI-style: test, vet, integration, OpenAPI, govulncheck
   postman-sync      Seed gitignored postman/ from postman-templates/ if needed; refresh env JSON from .env (Python 3)
   test | test-coverage | test-integration
-  security-check | graphql | clean
+  security-check | clean
 
 Examples:
   ./scripts/nextpresskit setup
@@ -95,21 +96,7 @@ build-all)
   echo "Built bin/server, bin/migrate, bin/seed"
   ;;
 setup)
-  "$0" install
-  "$0" build-all
-  "$0" migrate-up
-  "$0" seed
-  uname_s="$(uname -s 2>/dev/null || echo unknown)"
-  case "$uname_s" in
-    MINGW*|MSYS*|CYGWIN*)
-      ;;
-    *)
-      if [[ -t 0 ]] && [[ "${SKIP_SETUP_LOCAL_HTTPS:-}" != "1" ]]; then
-        bash "$ROOT/scripts/setup-local-https.sh" || true
-      fi
-      ;;
-  esac
-  echo "Setup complete. Run: ./scripts/nextpresskit run   (or: make run)"
+  exec bash "$ROOT/scripts/setup-menu.sh"
   ;;
 migrate-up)
   ensure_go
@@ -131,7 +118,11 @@ migrate-steps)
 migrate-drop)
   ensure_go
   echo "WARNING: This drops all tables in the configured database."
-  read -r -p "Type y to continue: " confirm
+  if [[ -r /dev/tty ]]; then
+    read -r -p "Type y to continue: " confirm </dev/tty
+  else
+    read -r -p "Type y to continue: " confirm
+  fi
   [[ "${confirm:-N}" == "y" ]] || exit 1
   ALLOW_SCHEMA_DROP=1 go run ./cmd/migrate -command=drop
   ;;
@@ -184,10 +175,6 @@ test-integration)
 security-check)
   ensure_go
   exec go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-  ;;
-graphql)
-  ensure_go
-  exec go run github.com/99designs/gqlgen generate
   ;;
 postman-sync)
   command -v python3 >/dev/null 2>&1 || {

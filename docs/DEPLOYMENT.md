@@ -2,12 +2,11 @@
 
 [← Documentation index](README.md) · [Quick start (run locally)](../README.md#quick-start) · [Command reference](COMMANDS.md)
 
-How to run NextPressKit on Ubuntu behind Nginx and systemd, using `scripts/deploy`. For development on your own machine (foreground `make run` or optional local Nginx/systemd), see [Local development](deployment/local.md) and [macOS](deployment/macos.md).
+How to run NextPressKit on Ubuntu behind Nginx and systemd, using `scripts/deploy`. For development on your own machine (foreground `make run` / `./scripts/nextpresskit run` or optional local Nginx/systemd), see [Local development](deployment/local.md) and [macOS](deployment/macos.md).
 
 ## Quick command meanings
 
 - `./scripts/deploy`: interactive wizard that asks questions and writes ready-to-install nginx/systemd snippets.
-- `make deploy`: convenience wrapper around the same deploy wizard.
 - `./scripts/nextpresskit deploy`: same deploy flow through the unified command runner.
 
 This deploy flow does not replace local bootstrap. For a fresh local clone, use `./scripts/nextpresskit setup` first.
@@ -36,7 +35,7 @@ Existing clones keep working: HTTP Nginx configs, `APP_PORT`, and `scripts/deplo
 
 | Platform | Command |
 |----------|---------|
-| Linux / macOS / Git Bash | `./scripts/deploy` or `make deploy` |
+| Linux / macOS / Git Bash | `./scripts/deploy` or `./scripts/nextpresskit deploy` |
 | Windows (PowerShell) | `.\scripts\deploy.ps1` |
 
 The wizard asks for **tier** (production / staging / dev / local), whether to **generate Nginx** (+ optional **systemd** on Linux), **server_name**, **paths**, **APP_PORT**, **Nginx listen port**, and **TLS mode** (HTTP only, Let’s Encrypt with optional `certbot --nginx`, or HTTPS with PEM paths). It writes **`deploy/generated/<slug>/`** (gitignored) with `nginx-nextpresskit-backend-<tier>.conf`, optional `nextpresskit-backend@<tier>.service`, and a **README** with install commands.
