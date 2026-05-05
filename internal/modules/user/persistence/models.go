@@ -6,13 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// User maps to the users table (UUID primary key id + bigint public_id).
+// User maps to the users table (bigint primary key id + public uuid).
 type User struct {
-	PublicID  int64          `gorm:"column:public_id;autoIncrement;uniqueIndex;not null"`
-	UUID      string         `gorm:"column:id;type:uuid;primaryKey"`
+	ID        int64          `gorm:"column:id;primaryKey;autoIncrement"`
+	UUID      string         `gorm:"column:uuid;type:uuid;uniqueIndex;not null"`
 	FirstName string         `gorm:"not null"`
 	LastName  string         `gorm:"not null"`
-	Email     string         `gorm:"not null;uniqueIndex"`
+	Email     string         `gorm:"not null;unique"`
 	Password  string         `gorm:"not null"`
 	Active    bool           `gorm:"not null;default:true"`
 	CreatedAt time.Time      `gorm:"not null;autoCreateTime"`

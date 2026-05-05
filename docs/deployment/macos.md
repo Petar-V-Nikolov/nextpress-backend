@@ -9,7 +9,7 @@
 From the repo root, use:
 
 ```bash
-make setup   # first run: modules + env bootstrap + migrate + seed
+make setup   # text menu; option 1 = full first-time, or NP_SETUP_NONINTERACTIVE=1 for linear only
 make run     # run API
 ```
 
@@ -39,18 +39,18 @@ Same as the shared tutorial in [local.md § Setup](local.md#setup): clone, `go m
 Run the API:
 
 ```bash
-make migrate-up
-make seed
+./scripts/nextpresskit migrate-up
+./scripts/nextpresskit seed
 make run
 ```
 
-Reset your local DB: `make db-fresh && make seed` ([details](../COMMANDS.md#database-and-seed-data)).
+Reset your local DB: `./scripts/nextpresskit db-fresh && ./scripts/nextpresskit seed` ([details](../COMMANDS.md#database-and-seed-data)).
 
-Default URL: `http://localhost:9090` (or your `APP_PORT`). Background mode: `make start` / `make stop` from the root [README](../../README.md).
+Default URL: `http://localhost:9090` (or your `APP_PORT`). Background mode: `./scripts/nextpresskit start` / `stop` (see root [README](../../README.md)).
 
 ## Interactive Nginx config
 
-From the repo root, `make deploy` (or `./scripts/deploy`) asks for your hostname, TLS mode, and ports, then writes snippets under `deploy/generated/` with Homebrew-oriented **README** steps. systemd is not used on macOS.
+From the repo root, `./scripts/deploy` (or `./scripts/nextpresskit deploy`) asks for your hostname, TLS mode, and ports, then writes snippets under `deploy/generated/` with Homebrew-oriented **README** steps. systemd is not used on macOS.
 
 ## Nginx paths on Apple Silicon vs Intel
 
@@ -92,7 +92,7 @@ If `nginx` is on your `PATH`, `nginx -t` is enough. Use the prefix that matches 
 
 ## systemd
 
-macOS does not use systemd. Use **`make run`** in the foreground, **`make start`** for background mode, or define a **LaunchAgent** if you need login-level autostart (out of scope here; mirror the working directory and `ExecStart` from [`deploy/systemd/nextpresskit-backend@.service`](../../deploy/systemd/nextpresskit-backend@.service) conceptually).
+macOS does not use systemd. Use **`make run`** or **`./scripts/nextpresskit run`** in the foreground, **`./scripts/nextpresskit start`** for background mode, or define a **LaunchAgent** if you need login-level autostart (out of scope here; mirror the working directory and `ExecStart` from [`deploy/systemd/nextpresskit-backend@.service`](../../deploy/systemd/nextpresskit-backend@.service) conceptually).
 
 ## Server deployment
 
