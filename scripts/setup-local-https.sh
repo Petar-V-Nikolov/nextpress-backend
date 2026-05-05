@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Best-effort local HTTPS: install mkcert if missing, SANs that match browser URLs + Nginx (Linux).
-# Invoked from ./scripts/nextpresskit setup / make setup when stdin is a TTY.
+# Invoked from setup menu profile "full" (option 1) or linear setup when stdin is a TTY (unless SKIP_SETUP_LOCAL_HTTPS=1).
 # Skip: SKIP_SETUP_LOCAL_HTTPS=1  or  non-interactive (no TTY) setup.
 set -u
 

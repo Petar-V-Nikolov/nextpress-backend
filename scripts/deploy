@@ -4,7 +4,7 @@
 #
 # Interactive (from repo root):   ./scripts/deploy
 # Install Nginx from defaults:     ./scripts/deploy apply-nginx [--http-only] ...
-# Same via nextpresskit / make:     ./scripts/nextpresskit deploy-apply-nginx   /   make deploy-nginx
+# Same via nextpresskit:           ./scripts/nextpresskit deploy-apply-nginx
 #
 # Generated output: deploy/generated/<slug>/
 
@@ -334,7 +334,7 @@ EOF
 ## App setup
 
 1. \`.env\` in \`${deploy_dir}\` with \`APP_PORT\`, \`DB_*\`, \`JWT_SECRET\`, and \`APP_ENV\` (systemd sets \`APP_ENV=${tier}\` when enabled).
-2. \`make build\` in \`${deploy_dir}\`.
+2. \`./scripts/nextpresskit build\` in \`${deploy_dir}\` (or \`go build -ldflags "-X main.version=..." -o bin/server ./cmd/api\`).
 
 EOF
 
@@ -442,7 +442,7 @@ run_release_pipeline() {
       yellow "systemd unit '${svc}' not active. Start manually: sudo systemctl enable --now ${svc}" >&2
     fi
   elif [[ "$tier" == "local" ]]; then
-    yellow "Local tier: restart the API yourself (make run / make start)." >&2
+    yellow "Local tier: restart the API yourself (./scripts/nextpresskit run or start)." >&2
   fi
 
   green "=== Release steps finished ===" >&2
@@ -487,7 +487,7 @@ Examples:
   ./scripts/deploy apply-nginx
   ./scripts/deploy apply-nginx --http-only
   ./scripts/deploy apply-nginx --letsencrypt --server-name api.example.com
-  make deploy-nginx
+  ./scripts/nextpresskit deploy-apply-nginx
 EOF
 }
 

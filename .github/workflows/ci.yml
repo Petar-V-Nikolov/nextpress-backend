@@ -65,7 +65,7 @@ jobs:
           DB_PASSWORD: postgres
           DB_NAME: nextpresskit_test
           DB_SSLMODE: disable
-        run: make test-integration
+        run: ./scripts/nextpresskit test-integration
 
       - name: Validate OpenAPI spec
         run: go run github.com/getkin/kin-openapi/cmd/validate@latest ./docs/openapi.yaml

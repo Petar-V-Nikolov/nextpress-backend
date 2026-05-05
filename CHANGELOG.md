@@ -10,10 +10,15 @@ Format:
 ## Unreleased
 
 ### Added
+- Modular kit: `internal/kit` (`Module`, `Deps`), `internal/app.Run`, `internal/appregistry` default registry, `MODULES` env to filter modules; `cmd/migrate` and `cmd/seed` use the same list. Docs: `docs/MODULES.md`, ADR `docs/adr/0001-module-composition.md`.
+- `pkg/seed/helpers` for shared demo seed helpers.
 - Postman: `jwt_auth_source` on all environments; collection pre-request scripts for cookie vs Bearer JWT; Auth folder script for cookie-mode refresh/logout bodies.
 - OpenAPI: `cookieAuth` security scheme, auth response and cookie documentation, optional refresh/logout bodies.
 
 ### Changed
+- **Breaking:** Removed the in-tree `plugins` module (`/admin/plugins`, `plugins:manage`, DB-driven post hooks). Post-save hooks are derived fields + optional Elasticsearch only.
+- RBAC default seed now inserts only permission codes declared by enabled modules (`Permissions()`), via `SeedRBACDefaults(db, codes)`.
+- Removed the optional GraphQL API (gqlgen), `GRAPHQL_*` settings, and `make graphql` / CLI `graphql` generation. The HTTP surface is REST per OpenAPI only.
 - Documentation: root `README`, `docs/README`, `docs/SECURITY`, `docs/DEPLOYMENT`, `docs/deployment/local`, and `postman-templates/README` updated for HttpOnly JWT cookies and `JWT_AUTH_SOURCE`.
 - Documentation: added `docs/COMMANDS.md` and cross-links across docs for faster navigation and plain-language command explanations.
 

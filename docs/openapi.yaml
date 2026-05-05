@@ -226,19 +226,6 @@ components:
         createdAt: { type: string }
       required: [id, uploaderId, originalName, mimeType, sizeBytes, publicUrl, createdAt]
 
-    plugin:
-      type: object
-      properties:
-        id: { type: string }
-        name: { type: string }
-        slug: { type: string }
-        enabled: { type: boolean }
-        version: { type: string }
-        config: { type: object, additionalProperties: true }
-        createdAt: { type: string }
-        updatedAt: { type: string }
-      required: [id, name, slug, enabled, version, config, createdAt, updatedAt]
-
 paths:
   /health:
     get:
@@ -541,7 +528,7 @@ paths:
           schema: { type: string }
       responses:
         "200":
-          description: Plugins list
+          description: Published post by slug
           content:
             application/json:
               schema:
@@ -2023,84 +2010,3 @@ paths:
       responses:
         "200":
           description: Roles assigned to user
-
-  /admin/plugins:
-    get:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-        - cookieAuth: []
-      description: Requires `plugins:manage`
-      responses:
-        "200":
-          description: Plugins list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  plugins:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/plugin"
-                required: [plugins]
-    post:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-        - cookieAuth: []
-      description: Requires `plugins:manage`
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name: { type: string }
-                slug: { type: string }
-                enabled: { type: boolean }
-                version: { type: string }
-                config:
-                  type: object
-                  additionalProperties: true
-              required: [name, slug]
-      responses:
-        "201":
-          description: Plugin created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/plugin"
-
-  /admin/plugins/{id}:
-    put:
-      tags: [admin]
-      security:
-        - bearerAuth: []
-        - cookieAuth: []
-      description: Requires `plugins:manage`
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                enabled: { type: boolean }
-                version: { type: string }
-                config:
-                  type: object
-                  additionalProperties: true
-      responses:
-        "200":
-          description: Plugin updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/plugin"

@@ -1,25 +1,21 @@
 # Elasticsearch operations runbook
 
-[← Documentation index](README.md) · [Command reference](COMMANDS.md)
+[← Docs index](README.md) · [Commands](COMMANDS.md)
 
-Operational guidance for running NextPressKit search in production-like environments.
+Operations guide for search in dev/staging/production.
 
-## Quick start (local/dev)
+## Quick Start
 
 1. Set `ELASTICSEARCH_ENABLED=true` and `ELASTICSEARCH_URLS=...` in `.env`.
-2. Run the API (`make run` or `./scripts/nextpresskit run`).
-3. Use `GET /posts/search` and admin reindex `POST /admin/posts/search/reindex` when needed.
+2. Run the API (`make run` or `./scripts/nextpresskit run`; they are equivalent).
+3. Use `GET /posts/search`.
+4. Reindex with `POST /admin/posts/search/reindex`.
 
-Scope:
-- Index templates and mappings strategy
-- Upgrade and reindex workflow
-- Multi-cluster patterns
-
-Related docs: [Local development](deployment/local.md) · [Deployment](DEPLOYMENT.md) · [TODO](TODO.md)
+Related docs: [Local development](deployment/local.md) · [Deployment](DEPLOYMENT.md)
 
 ---
 
-## Current behavior (as implemented)
+## Current Behavior
 
 - Elasticsearch is optional; PostgreSQL remains source of truth.
 - The posts index name is `<ELASTICSEARCH_INDEX_PREFIX>_posts` (default prefix `nextpresskit`; see `.env.example`).
@@ -31,7 +27,7 @@ Related docs: [Local development](deployment/local.md) · [Deployment](DEPLOYMEN
 
 ---
 
-## Config checklist
+## Config Checklist
 
 Minimum:
 - `ELASTICSEARCH_ENABLED=true`
@@ -48,7 +44,7 @@ TLS:
 
 ---
 
-## Index template and mapping policy
+## Mapping Policy
 
 The app currently creates index mappings directly when auto-create is enabled. For production, prefer explicit templates:
 
@@ -61,11 +57,11 @@ The app currently creates index mappings directly when auto-create is enabled. F
 3. Version template changes with semantic names (example: `nextpresskit-posts-v1`, `v2`).
 4. Roll template updates in staging first, then production.
 
-Rule: do not deploy mapping changes without a reindex plan.
+Do not ship mapping changes without a reindex plan.
 
 ---
 
-## Upgrade and reindex workflow
+## Upgrade And Reindex
 
 Use this when upgrading Elasticsearch major versions, changing analyzers, or changing mapping semantics.
 
@@ -86,12 +82,13 @@ Use this when upgrading Elasticsearch major versions, changing analyzers, or cha
    - Remove old index only after validation completes
 
 Rollback:
-- Restore previous alias/prefix and restart API if needed.
-- Re-run admin reindex endpoint if recovery is partial.
+- Restore old alias/prefix
+- Restart API if needed
+- Re-run reindex endpoint
 
 ---
 
-## Multi-cluster strategy
+## Multi-cluster Strategy
 
 Recommended baseline:
 - One write/read cluster per environment (`dev`, `staging`, `prod`)
@@ -108,7 +105,7 @@ Application note:
 
 ---
 
-## Observability and operations checks
+## Monitoring Checklist
 
 At startup:
 - Confirm app logs include Elasticsearch integration active and index name.
