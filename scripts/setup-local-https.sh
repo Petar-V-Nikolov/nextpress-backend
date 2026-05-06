@@ -163,10 +163,33 @@ else
 fi
 
 _esc_host_dots() { printf '%s' "$1" | sed 's/\./\\./g'; }
-if [[ -r /etc/hosts ]] && ! grep -qE "^[0-9.]+\s+$(_esc_host_dots "$LOCAL_HOST")(\s|$)" /etc/hosts 2>/dev/null; then
+ensure_hosts_entry() {
+  # Only handle simple IPv4 host mappings; avoid touching hosts on non-Linux platforms.
+  [[ "$(uname -s 2>/dev/null || echo "")" == Linux ]] || return 0
+
+  local host_esc
+  host_esc="$(_esc_host_dots "$LOCAL_HOST")"
+
+  # Already mapped (any IPv4) → nothing to do.
+  if [[ -r /etc/hosts ]] && grep -qE "^[0-9.]+\s+${host_esc}(\s|$)" /etc/hosts 2>/dev/null; then
+    return 0
+  fi
+
+  # Best-effort: add entry via sudo when available.
+  if command -v sudo >/dev/null 2>&1; then
+    yellow "Adding /etc/hosts entry for ${LOCAL_HOST} (sudo)..." >&2
+    if sudo sh -c "printf '\n127.0.0.1    ${LOCAL_HOST}\n' >> /etc/hosts"; then
+      green "Added: 127.0.0.1    ${LOCAL_HOST} (in /etc/hosts)" >&2
+      return 0
+    fi
+  fi
+
+  # Fallback: print instruction.
   yellow "Add this line to /etc/hosts if you use https://${LOCAL_HOST} :" >&2
   yellow "  127.0.0.1    ${LOCAL_HOST}" >&2
-fi
+}
+
+ensure_hosts_entry || true
 
 os="$(uname -s 2>/dev/null || echo unknown)"
 if [[ "$os" == Linux ]] && command -v nginx >/dev/null 2>&1; then
